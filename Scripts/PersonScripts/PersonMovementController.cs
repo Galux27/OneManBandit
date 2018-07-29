@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class that Controls the movement&rotation speed of a human
+/// </summary>
 public class PersonMovementController : MonoBehaviour {
 	HeadController hc;
 	PersonWeaponController pwc;
@@ -11,7 +14,7 @@ public class PersonMovementController : MonoBehaviour {
 	public float rotationSpeed = 2.5f,rotationMod = 1.0f;
 	public bool movedThisFrame = false, calledThisFrame = false;
 	public bool frozen = false,slowedMovement=false;
-
+	GameObject obstacle;
 	PathFollower pl;
 	void Awake()
 	{
@@ -34,19 +37,7 @@ public class PersonMovementController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		/*GameObject g = 	WorldBuilder.me.findNearestWorldTile (this.transform.position).gameObject;
-
-		if (nearestTile == null) {
-			nearestTile = g;
-			g.GetComponent<SpriteRenderer> ().color = Color.cyan;
-		} else if (nearestTile != g) {
-			g.GetComponent<SpriteRenderer> ().color = Color.cyan;
-			g.GetComponent<SpriteRenderer> ().sortingOrder = 20;
-			nearestTile.GetComponent<SpriteRenderer> ().color = Color.white;
-			nearestTile.GetComponent<SpriteRenderer> ().sortingOrder = 1;
-			nearestTile = g;
-		}*/
-		//throttleRigidbodyVelocity ();
+	
 		shouldWeKillVelocity ();
 
 		if (stopped == true) {
@@ -61,9 +52,7 @@ public class PersonMovementController : MonoBehaviour {
 		} else {
 			movedThisFrame = false;
 		}
-		//if (this.gameObject.tag != "Player") {
-		//	timeSinceLastMoveCall += Time.deltaTime;
-		//}
+
 	}
 
 	void throttleRigidbodyVelocity()
@@ -115,16 +104,9 @@ public class PersonMovementController : MonoBehaviour {
 	}
 
 	Vector3 dirToMove = Vector3.zero;
-	//void FixedUpdate()
-	//{
-	//	if (movedThisFrame == true) {
-	//		transform.Translate (dirToMove.normalized * getMovementSpeed() * Time.deltaTime,Space.World);
-	//		movedThisFrame = false;
-	//		dirToMove = Vector3.zero;
-	//	}
-	//}
 
-	public void checkForMovementMods()//check for things that would affect movement speed and calculates the new value
+
+	public void checkForMovementMods()
 	{
 		float startVal = 1.0f;
 
@@ -199,34 +181,15 @@ public class PersonMovementController : MonoBehaviour {
 					
 					return;
 				}
-
-
-				//if (pl.currentPath==null || pl.askedForNewPath==true) {
-				//	return;
-				//}
-
-				//if (pl.currentPath.Count > 0) {
-				//	if(pl.counter >= pl.currentPath.Count - 1 && Vector2.Distance(this.transform.position,pl.currentPath[pl.currentPath.Count-1])<1.0f ){
-				//		return;
-				//	}
-				//}
 			}
-
 		}
-
-		//if (pl == null) {
 			hc.rotateToFacePosition (pos);
-		///} else {
-			//hc.rotateToFacePosition (pos+pl.dirMod);
 
-
-
-		//}
 		if (pl == null) {
 			Vector3 rot = new Vector3(0, 0, Mathf.Atan2((pos.y - (transform.position.y)),pos.x - (transform.position.x))) * Mathf.Rad2Deg;
 			rot = new Vector3(rot.x, rot.y, rot.z-90);//add 90 to make the player face the right way (yaxis = up)
 			//rid.transform.eulerAngles = rot;
-			rid.transform.rotation =Quaternion.Euler(rot);//Quaternion.Slerp(this.transform.rotation,Quaternion.Euler(rot),getRotationSpeed()*Time.deltaTime);// Quaternion.Euler(rot); //(INSTA ROTATION)
+			rid.transform.rotation =Quaternion.Euler(rot);//Quaternion.Slerp(this.transform.rotation,Quaternion.Euler(rot),getRotationSpeed()*Time.deltaTime);
 		} else {
 			if (pl.obstacle == true) {
 				return;
@@ -235,8 +198,7 @@ public class PersonMovementController : MonoBehaviour {
 			else{
 				Vector3 rot = new Vector3(0, 0, Mathf.Atan2((pos.y - (transform.position.y)),pos.x - (transform.position.x))) * Mathf.Rad2Deg;
 				rot = new Vector3(rot.x, rot.y, rot.z-90);//add 90 to make the player face the right way (yaxis = up)
-				//rid.transform.eulerAngles = rot;
-				rid.transform.rotation =Quaternion.Euler(rot);//Quaternion.Slerp(this.transform.rotation,Quaternion.Euler(rot),getRotationSpeed()*Time.deltaTime);// Quaternion.Euler(rot); //(INSTA ROTATION)
+				rid.transform.rotation =Quaternion.Euler(rot);//Quaternion.Slerp(this.transform.rotation,Quaternion.Euler(rot),getRotationSpeed()*Time.deltaTime);
 			}
 		}
 			
@@ -247,44 +209,18 @@ public class PersonMovementController : MonoBehaviour {
 	Vector3 posAIisGoingTo;
 	public void moveToDirection(Vector3 pos)
 	{
-		//if (pl == null) {
-
-		//} else {
-			//if (pl.currentPath==null || pl.askedForNewPath==true) {
-			//	xMove = Vector3.zero;
-			//	yMove = Vector3.zero;
-
-			//	return;
-			//}
-
-			//if (pl.currentPath.Count > 0) {
-				//if(pl.counter >= pl.currentPath.Count - 1 && Vector2.Distance(this.transform.position,pl.currentPath[pl.currentPath.Count-1])<1.0f ){
-				//	xMove = Vector3.zero;
-				//	yMove = Vector3.zero;
-				//	movedThisFrame = false;
-				//	calledThisFrame = false;
-				//	return;
-				//}
-			//}
-		//}
-
-
-
+		
 		if (pos == null || pos == Vector3.zero || frozen==true || pl.waitingForPath==true) {
 			movedThisFrame = false;
 			calledThisFrame = false;
 			return;
 		}
 		posAIisGoingTo = pos;
-		//////Debug.Log (this.gameObject.name + " is moving at " + getMovementSpeed ().ToString());
 		Vector3 dir = pos - transform.position;
 
-		//if (pl == null) {
-			dirToMove = dir;
-		//} else {
-			//dirToMove = dir + pl.dirMod;
-		//}
-		//transform.Translate (dir.normalized * getMovementSpeed() * Time.deltaTime,Space.World);
+
+		dirToMove = dir;
+
 
 		timeSinceLastMoveCall = 0.0f;
 		xMove = (dir.normalized);
@@ -295,7 +231,6 @@ public class PersonMovementController : MonoBehaviour {
 
 	public void moveUp()
 	{
-		//transform.Translate (Vector3.up * getMovementSpeed() * Time.deltaTime ,Space.World);
 		if (Input.GetAxis ("Vertical") > 0.0f) {
 
 			rid.AddForce (Vector3.up * getMovementSpeed ());
@@ -307,6 +242,8 @@ public class PersonMovementController : MonoBehaviour {
 		}
 	}
 	bool doWeResetVelocity = false;
+
+
 	void shouldWeKillVelocity()
 	{
 		if (this.gameObject.tag == "Player") {
@@ -356,7 +293,6 @@ public class PersonMovementController : MonoBehaviour {
 	public void moveLeft()
 	{
 
-		//transform.Translate (Vector3.left * getMovementSpeed() * Time.deltaTime,Space.World);
 		if (Input.GetAxis ("Horizontal") < 0.0f) {
 			timeSinceLastMoveCall = 0.0f;
 
@@ -371,7 +307,6 @@ public class PersonMovementController : MonoBehaviour {
 	public void moveRight()
 	{
 
-		//transform.Translate (Vector3.right * getMovementSpeed() * Time.deltaTime ,Space.World);
 		if (Input.GetAxis ("Horizontal") > 0.0f) {
 			timeSinceLastMoveCall = 0.0f;
 
@@ -402,19 +337,13 @@ public class PersonMovementController : MonoBehaviour {
 	}
 	public void physicsMoveTest()
 	{
-	//	rid.AddForce ();
-		//rid.AddForce ();
 
-		//rid.AddForce (new Vector2 (xMove.x, yMove.y));
-
-		//rid.velocity = new Vector2 (xMove.x, yMove.y);
 		if (this.gameObject.tag == "Player") {
 			rid.velocity = new Vector2 (xMove.x, yMove.y);
 		} else {
 			if (closeEnough()) {
 
 			}else{
-				//rid.MovePosition (this.transform.position + (new Vector3(xMove.x,yMove.y,0) * getMovementSpeed() * Time.deltaTime));
 				if (pl == null) {
 					rid.MovePosition ((this.transform.position + (new Vector3 (xMove.x, yMove.y, 0)) * getMovementSpeed () * Time.deltaTime));
 
@@ -424,13 +353,9 @@ public class PersonMovementController : MonoBehaviour {
 						rid.velocity = new Vector2 (0, 0);
 					}
 
-					//rid.MovePosition (this.transform.position + ((new Vector3 (xMove.x, yMove.y, 0) + (pl.dirMod)) * getMovementSpeed () * Time.deltaTime));
-					//rid.MovePosition ((this.transform.position + (new Vector3 (xMove.x, yMove.y, 0)) * getMovementSpeed () * Time.deltaTime));
 
 					if (pl.obstacle == true) {
-						//rid.MovePosition ((this.transform.position + pl.dirMod) * getMovementSpeed() * Time.deltaTime);
-						//rid.AddForce(pl.dirMod * getMovementSpeed());
-						//rid.velocity = new Vector2(pl.dirMod.x * getMovementSpeed()/2,pl.dirMod.y *getMovementSpeed()/2);
+						
 						rid.MovePosition ((this.transform.position + (pl.dirMod) * (getMovementSpeed ()/4) * Time.deltaTime));
 
 					} else {

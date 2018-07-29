@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
+
+/// <summary>
+///  Multithreaded A* implementation
+/// </summary>
 public class ThreadedPathfind  {
 	private object myLock = new object();
 	bool isDone = false;
@@ -90,25 +94,10 @@ public class ThreadedPathfind  {
 	public void findPath(int sX,int sY,int eX,int eY, ref List<ThreadedWorldTile> store)
 	{
 
-		//try{
 		ThreadedWorldTile startNode =  Pathfinding.me.pathNodes[sX,sY]; //had a bug where the method would go through all the tiles in the grid causing a lag spike, just added a condititon to check for a nearby walkable tile, if its null after this it just abandons the path
-
-		/*	if (startPos.GetComponent<ThreadedWorldTile> () == true) {
-			startNode = startPos.GetComponent<ThreadedWorldTile> ();
-		} else {
-			startNode = WorldBuilder.me.findNearestThreadedWorldTile (startPos.transform.position);
-		}*/
-
-		//= WorldBuilder.me.findNearestThreadedWorldTile (startPos.transform.position); //WorldBuilder.me.tileFromWorldPos (WorldBuilder.me.findNearestThreadedWorldTile( startPos.transform.position));
-		////////Debug.Log(startNode.name);
 
 		ThreadedWorldTile endNode = Pathfinding.me.pathNodes[eX,eY];
 
-		/*if (endPos.GetComponent<ThreadedWorldTile> () == true) {
-			endNode = endPos.GetComponent<ThreadedWorldTile> ();
-		} else {
-			endNode = WorldBuilder.me.findNearestThreadedWorldTile (endPos.transform.position);
-		}*/
 
 
 		if (startNode.walkable == false) {
@@ -120,13 +109,8 @@ public class ThreadedPathfind  {
 		}
 
 		if (startNode == null || endNode == null) {
-			////////Debug.LogError ("One of the nodes was null, can't get path");
 			return;
 		}
-
-		// =WorldBuilder.me.findNearestThreadedWorldTile( endPos.transform.position);// WorldBuilder.me.tileFromWorldPos (endPos.transform.position);
-		//ThreadedWorldTile startNode = .NodeFromWorldPoint(startPos);
-		//Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
 
 		List<ThreadedWorldTile> openSet = new List<ThreadedWorldTile>();
@@ -135,7 +119,6 @@ public class ThreadedPathfind  {
 
 		while (openSet.Count > 0) {
 			ThreadedWorldTile node = openSet[0];
-			////////Debug.Log ("Using thread to try and find path " + node.worldPos.ToString());
 
 			for (int i = 1; i < openSet.Count; i ++) {
 				if (openSet[i].fCost < node.fCost || openSet[i].fCost == node.fCost) {
@@ -169,9 +152,7 @@ public class ThreadedPathfind  {
 				}
 			}
 		}
-		//catch{
-		//	//////Debug.LogError ("Something Went Wrong with the pathfinding");
-		//}
+
 	}
 
 
@@ -195,15 +176,12 @@ public class ThreadedPathfind  {
 
 	void threaded_RetracePath(ThreadedWorldTile startNode,ThreadedWorldTile targetNode,ref List<ThreadedWorldTile> store)
 	{
-		//////Debug.Log ("Retracing threaded path length: " + store.Count);
 		List<ThreadedWorldTile> path = new List<ThreadedWorldTile>();
 		ThreadedWorldTile currentNode = targetNode;
 
 		while (currentNode != startNode) {
 			path.Add(currentNode);
-			//if (highlightPathFound == true) {
-				//currentNode.gameObject.GetComponent<SpriteRenderer>().color = Color.blue;
-			//}
+
 			currentNode = currentNode.parent;
 		}
 		path.Reverse();

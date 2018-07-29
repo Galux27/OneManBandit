@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelController : MonoBehaviour {
+
+	/// <summary>
+	/// Class that controls misc date about the level, all police related stuff has been moved to the "PoliceController" class so its not used here and needs to be removed at some point.
+	/// </summary>
+
+
 	public static LevelController me;
 	public List<PatrolRoute> patrolRoutesInLevel;
 	public RoomScript[] roomsInLevel;
@@ -50,23 +56,6 @@ public class LevelController : MonoBehaviour {
 	void Update () {
 		workOutPlayerRoom ();
 		workOutPlayerFloor ();
-	/*	if (Input.GetKeyDown (KeyCode.T)) {
-			suspects.Add (GameObject.FindGameObjectWithTag("Player"));
-			copSpawnTimer = 0;
-			swatSpawnTimer = 0;
-			countDownCopTimer ();
-			countDownSwatTimer ();
-			//CommonObjectsStore.player.GetComponent<PersonWeaponController>().bulletFire();
-		}*/
-
-		//if (NPCBehaviourDecider.globalAlarm == true && spawnedCops==false) {
-		//	countDownCopTimer ();
-		//}
-
-		//if (NPCBehaviourDecider.copAlarm == true&&spawnedSwat==false) {
-		//	countDownSwatTimer ();
-		//}
-
 	}
 
 	void countDownCopTimer()

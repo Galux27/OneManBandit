@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PoliceController : MonoBehaviour {
+
+	/// <summary>
+	/// Class that controls the police ingame. 
+	/// </summary>
+
+
 	public static PoliceController me;
 
 	public bool knowArmed, knowSuspect, knowHostage, knowDead,copsCalled,backupCalled,swatCalled,copsHere,backupHere,swatHere,copsLeave;
@@ -252,30 +258,9 @@ public class PoliceController : MonoBehaviour {
 			foreach (CivilianAction p in cas) {
 				Transform t = p.positionForAction;
 				WorldTile nearestPoint = WorldBuilder.me.findNearestWorldTile (t.position);
-				/*bool pointAdded = false;
-				for (int x = nearestPoint.gridX - 5; x < nearestPoint.gridX + 5; x++) {
-					for (int y = nearestPoint.gridY - 5; y < nearestPoint.gridY + 5; y++) {
-						WorldTile wt;
+				pointsToSecure.Add (t);
 
-						wt = WorldBuilder.me.worldTiles [x, y].GetComponent<WorldTile> ();
-						if (wt == null) {
-						} else {
-							if (pointAdded==false && Vector3.Distance (wt.transform.position, t.position) > 3 && wt.walkable == true) {
-								pointsToSecure.Add (wt.transform);
-								pointAdded=true;
-							}
-						}
-
-					}
-				}*/
-
-				//if (pointAdded == false) {
-					pointsToSecure.Add (t);
-				//}
 			}
-
-
-
 		} else {
 			pointsToSecure = new List<Transform> ();
 			Debug.Log ("Points set for indoors");
@@ -285,9 +270,6 @@ public class PoliceController : MonoBehaviour {
 				for (int x = nearestPoint.gridX - 5; x < nearestPoint.gridX + 5; x++) {
 					for (int y = nearestPoint.gridY - 5; y < nearestPoint.gridY + 5; y++) {
 						WorldTile wt;
-
-
-
 						wt = WorldBuilder.me.worldTiles [x, y].GetComponent<WorldTile> ();
 						if (wt == null) {
 						} else {
@@ -309,18 +291,6 @@ public class PoliceController : MonoBehaviour {
 			return;
 		}
 		copsHere = true;
-
-		/*for (int x = 0; x < 4; x++) {
-			if (NPCManager.me.patrolCops.Count > 0) {
-				GameObject cop = NPCManager.me.patrolCops [0];
-				NPCManager.me.patrolCops.RemoveAt (0);
-				cop.transform.position = LevelController.me.levelEntry.transform.position;
-				cop.SetActive (true);
-			} else {
-				GameObject cop = (GameObject)Instantiate (CommonObjectsStore.me.cop, LevelController.me.levelEntry.transform.position, Quaternion.Euler (0, 0, 0));
-				copsInLevel.Add (cop);
-			}
-		}*/
 		CarSpawner.me.destroyCars ();
 		int copsSpawned = 0;
 		while (copsSpawned < 4) {
@@ -350,19 +320,6 @@ public class PoliceController : MonoBehaviour {
 			copCarsAvailable.Remove (policeCar);
 			copsSpawned+=4;
 		}
-		/*for (int x = 0; x < 12; x++) {
-			if (NPCManager.me.patrolCops.Count > 0) {
-				GameObject cop = NPCManager.me.patrolCops [0];
-				NPCManager.me.patrolCops.RemoveAt (0);
-				cop.transform.position = LevelController.me.levelEntry.transform.position;
-				cop.SetActive (true);
-				copsInLevel.Add (cop);
-
-			} else {
-				GameObject cop = (GameObject)Instantiate (CommonObjectsStore.me.cop, LevelController.me.levelEntry.transform.position, Quaternion.Euler (0, 0, 0));
-				copsInLevel.Add (cop);
-			}
-		}*/
 	}
 
 	void _spawnSwat()
@@ -384,20 +341,6 @@ public class PoliceController : MonoBehaviour {
 			copCarsAvailable.Remove (policeCar);
 			copsSpawned+=4;
 		}
-
-		/*for (int x = 0; x < 6; x++) {
-			if (NPCManager.me.swat.Count > 0) {
-				GameObject cop = NPCManager.me.swat [0];
-				NPCManager.me.swat.RemoveAt (0);
-				cop.transform.position = LevelController.me.levelEntry.transform.position;
-				cop.SetActive (true);
-				swatInLevel.Add (cop);
-
-			} else {
-				GameObject swat = (GameObject)Instantiate (CommonObjectsStore.me.swat, LevelController.me.transform.position, Quaternion.Euler (0, 0, 0));
-				swatInLevel.Add (swat);
-			}
-		}*/
 	}
 
 	float buildingSurroundTimer = 40.0f;
@@ -559,259 +502,10 @@ public class PoliceController : MonoBehaviour {
 	}
 	GameObject swatCivilPoint;
 	bool setCivilPoints=false;
-	public void swatManager() //TODO need to find a way to sort the points to secure by the distance from the entrance
-	{
-		if (buildingUnderSiege == null) {
-
-		} else {
-			if (roomsToGoTo == null || roomsToGoTo.Count == 0) {
-				getRoomsToGoTo ();
-			}
-		}
-		if (seenHostile == false) {
-			swatHostileMoniter ();
-		}
-
-		if (investigatePoint == false && seenHostile == false) {
-			if (buildingUnderSiege == null) {
-				if (setCivilPoints == false) {
-					swatCivilPoint = LevelController.me.getCivilianAction ().gameObject;
-					foreach (GameObject g in swatInLevel) {
-						NPCController npcc = g.GetComponent<NPCController> ();
-						if (npcc.inv.doWeHaveAWeaponWeCanUse () == true) {
-							Weapon w = npcc.inv.getWeaponWeCanUse ();
-							w.equipItem ();
-						}
-						if (npcc.currentBehaviour == null) {
-
-						} else {
-							Destroy (npcc.currentBehaviour);
-						}
-						NPCBehaviour_SwatGoToPoint beh = g.AddComponent<NPCBehaviour_SwatGoToPoint> ();
-						beh.point = swatCivilPoint;
-						npcc.currentBehaviour = beh;
-					}
-					setCivilPoints = true;
-				}
-
-				foreach (GameObject g in swatInLevel) {
-					NPCController npcc = g.GetComponent<NPCController> ();
-					if (npcc.GetComponent<NPCBehaviour_SwatGoToPoint> () == false) {
-						if (npcc.inv.doWeHaveAWeaponWeCanUse () == true) {
-							Weapon w = npcc.inv.getWeaponWeCanUse ();
-							w.equipItem ();
-						}
-						if (npcc.currentBehaviour == null) {
-
-						} else {
-							Destroy (npcc.currentBehaviour);
-						}
-						NPCBehaviour_SwatGoToPoint beh = g.AddComponent<NPCBehaviour_SwatGoToPoint> ();
-						beh.point = swatCivilPoint;
-						npcc.currentBehaviour = beh;
-					}
-				}
-
-				bool shouldWeReset = true;
-				foreach (GameObject g in swatInLevel) {
-					if (Vector2.Distance (g.transform.position, swatCivilPoint.transform.position) > 5.0f) {
-						shouldWeReset = false;
-					}
-				}
-
-				if (shouldWeReset == true) {
-					setCivilPoints = false;
-				}
-			}else{
-				if (currentRoomSwat == null) {
-					swatGoingIn = new List<GameObject> ();
-					goToEntrance = new List<NPCBehaviour_SwatGoToRoomEntrance> ();
-
-					if (roomsToGoTo == null || roomsToGoTo.Count == 0) {
-						getRoomsToGoTo ();
-					}
-
-					if (lastRoom == null) {
-						currentRoomSwat = roomsGoingTo [0];
-					} else {
-						currentRoomSwat = lastRoom;
-						lastRoom = null;
-					}
-					roomsGoingTo.RemoveAt (0);
-					goingToRoom = true;
-
-					if (roomsGoingTo.Count == 0) {
-						roomsGoingTo = roomsToGoTo;
-					}
-
-					setPointsToGoTo ();
-				}
-
-				if (goingToRoom == false) { //add a method to get the nearest swat to the point?
-					if (nb == null) {
-						currentPoint = pointsToGoTo [0];
-						if (swatGoingToCurrentPoint == null || swatGoingIn.Count == 0) {
-							swatGoingToCurrentPoint = getFreeSwatNearPoint (currentPoint.transform.position);
-							swatGoingIn.Add (swatGoingToCurrentPoint);
-
-						} else {
-							foreach (GameObject g in swatInLevel) {
-								if (swatGoingIn.Contains (g) == false) {//TODO add checks for if they are dead/going for target etc...
-									swatGoingToCurrentPoint = g;
-									swatGoingIn.Add (g);
-
-									break;
-								}
-							}
-						}
-						if (swatGoingIn.Count == swatInLevel.Count) {
-							swatGoingIn.Clear ();
-						}
-
-						if (swatGoingToCurrentPoint == null) {
-							
-						} else {
-
-							NPCController npc = swatGoingToCurrentPoint.GetComponent<NPCController> ();
-							if (npc.currentBehaviour == null) {
-
-							} else {
-								Destroy (npc.currentBehaviour);
-							}
-							nb = swatGoingToCurrentPoint.AddComponent<NPCBehaviour_SwatGoToPoint> ();
-							npc.currentBehaviour = nb;
-						}
-					} else if (nb.areWeAtPosition () == true) {
-						
-						pointsBeenTo.Add (pointsToGoTo [0]);
-						pointsToGoTo.RemoveAt (0);
-						if (pointsToGoTo.Count == 0) {
-							PhoneTab_RadioHack.me.setNewText (currentRoomSwat.roomName + "Has been secured, moving to " + roomsGoingTo [0].roomName, radioHackBand.swat);
-
-							currentRoomSwat = null;
-							pointsBeenTo.Clear ();
-							swatGoingIn.Clear ();
-							goToEntrance.Clear ();
-						}
-						nb = null;
-					} else {
-						if (goToEntrance == null || goToEntrance.Count == 0) {
-							foreach (GameObject g in swatInLevel) {
-								NPCController n = g.GetComponent<NPCController> ();
-								if (n.currentBehaviour == null) {
-
-								} else {
-									Destroy (n.currentBehaviour);
-								}
-
-								NPCBehaviour_SwatGoToRoomEntrance nb = n.gameObject.AddComponent<NPCBehaviour_SwatGoToRoomEntrance> ();
-								n.currentBehaviour = nb;
-								goToEntrance.Add (nb);
-							}
-						}
-
-						if (areSwatAtEntrance () == true) {
-							PhoneTab_RadioHack.me.setNewText ("SWAT Team secutring " + currentRoomSwat.roomName,radioHackBand.swat);
-
-							goingToRoom = false;
-						}
-					}
-				}
-			} 
-		} else if (seenHostile == true) {
-			if (setSwatToAttack == false) {
-				PhoneTab_RadioHack.me.setNewText ("Target spotted, moving to engage.",radioHackBand.swat);
-
-				attacking = new List<NPCBehaviour_SWATAttackTarget> ();
-				foreach (GameObject g in swatInLevel) {
-					NPCController npc = g.GetComponent<NPCController> ();
-					if (npc.currentBehaviour == null) {
-						
-					} else {
-						Destroy (npc.currentBehaviour);
-					}
-					NPCBehaviour_SWATAttackTarget nb = g.AddComponent<NPCBehaviour_SWATAttackTarget> ();
-					npc.currentBehaviour = nb;
-					attacking.Add (nb);
-				}
-				setSwatToAttack = true;
-			} else {
-				//add some condition to  check if they have lost the target
-				if (doSwatStillHaveTarget () == true) {
-						lastRoom = LevelController.me.roomPlayerIsIn;
-				} else {
-					swatLoseTargetTimer -= Time.deltaTime;
-					if (swatLoseTargetTimer <= 0) {
-						if (lastRoom == null) {
-
-						} else {
-							PhoneTab_RadioHack.me.setNewText ("Target lost, moving to " + lastRoom.roomName, radioHackBand.swat);
-						}
-						seenHostile = false;
-						investigatePoint = false;
-						currentRoomSwat = null;
-						goingToRoom = true;
-						swatLoseTargetTimer = 10.0f;
-						setSwatToAttack = false;
-					}
 
 
-				}
-			}
 
-		} else if (investigatePoint == true) {
-			if (investigate.areWeAtPosition () == false) {
-				swatTarget = investigate.haveWeSeenSuspiciousObject ();
-				if (swatTarget == null) {
-					seenHostile = false;
-				} else {
-					seenHostile = true;
-				}
-			} else {
-				if (seenHostile == false) {
 
-					NPCController npc = swatInvestigating.GetComponent < NPCController> ();
-
-					if (npc.currentBehaviour == null) {
-
-					} else {
-						Destroy (npc.currentBehaviour);
-					}
-
-					NPCBehaviour nb = swatGoingToCurrentPoint.AddComponent<NPCBehaviour_SwatGoToPoint> ();
-					npc.currentBehaviour = nb;
-
-				}
-			}
-		}
-	}
-
-	void swatBugFix()
-	{
-		foreach (GameObject g in swatInLevel) {
-			if(buildingSurrounded==true && g.GetComponent<NPCBehaviour_SwatFormUp>()==true)
-			{
-
-			}
-		}
-	}
-
-	void swatHostileMoniter()
-	{
-		foreach (GameObject g in swatInLevel) {
-			NPCController npc = g.GetComponent<NPCController> ();
-			GameObject target = npc.npcB.isHostileTargetNearby();
-			if(target==null)
-			{
-
-			}
-			else{
-				npc.memory.objectThatMadeMeSuspisious = target;
-				PoliceController.me.swatTarget = target;
-				seenHostile = true;
-			}
-		}
-	}
 
 
 	bool doSwatStillHaveTarget()
@@ -835,6 +529,9 @@ public class PoliceController : MonoBehaviour {
 		return true;
 	}
 
+	/// <summary>
+	///  Checks for if any swat are dead and will remove them from active swat + fix any behaviours if they were the swat member currently going to the point.
+	/// </summary>
 	void shouldWeRefreshSWAT()
 	{
 		bool refresh = false;
@@ -929,6 +626,7 @@ public class PoliceController : MonoBehaviour {
 		}
 	}
 
+
 	void disableActionsInBuildingUnderSiege()
 	{
 		CivilianAction[] actions = FindObjectsOfType<CivilianAction> ();
@@ -958,6 +656,13 @@ public class PoliceController : MonoBehaviour {
 
 	bool swatFormedUp=false;
 	bool pointsAssigned=false;
+
+	/// <summary>
+	/// Swat AI
+	/// if there is no building under siege they will just roam through the level, going to different civilian actions to find the player,
+	/// if there is a building under siege, once the police have surrounded all the buildings entrances they will move room by room until they have checked all the rooms
+	/// With both they will respond to noises & cctv alerts. 
+	/// </summary>
 	void newSwatController()
 	{
 		if (buildingUnderSiege == null) {
@@ -1079,10 +784,7 @@ public class PoliceController : MonoBehaviour {
 					}
 				}
 
-				//make the swat move to the entrance of the room
 
-				//if(swat at entrance to room)
-				//make swat go to the 
 			} else {
 				//check for form up stuff
 				foreach (GameObject g in swatInLevel) {
@@ -1316,11 +1018,6 @@ public class PoliceController : MonoBehaviour {
 
 	bool areWeFormedUp()
 	{
-		//if(areAllSwatSpawned()==false)
-		//{
-		//	return false;
-		//}
-
 		if (swatFormedUp == false ) {
 			foreach (GameObject g in swatInLevel) {
 				if (Vector2.Distance (g.transform.position, swatFormUpPoint.position) > 5.0f) {

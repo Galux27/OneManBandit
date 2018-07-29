@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 public class DemoLevelMission : MonoBehaviour {
+	/// <summary>
+	/// Class to control early prototype, not used anymore.
+	/// </summary>
 	public static DemoLevelMission me;
 	public GameObject briefcase,car;
 	public bool hasCase=false;

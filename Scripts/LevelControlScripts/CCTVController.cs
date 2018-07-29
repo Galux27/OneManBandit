@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CCTVController : MonoBehaviour {
+
+	/// <summary>
+	/// Controller class for all CCTVCamera instances in the level
+	/// </summary>
+
 	public static CCTVController me;
 	public CCTVCamera[] camerasInWorld;
 
@@ -24,6 +29,12 @@ public class CCTVController : MonoBehaviour {
 		
 	}
 
+
+	/// <summary>
+	/// Alerts are passed in by individual cameras once they spot the player (if they have been detected by a NPC previously), 
+	/// it will they try to find nearby enemies to go to the camera to see if they can catch the player. 
+	/// </summary>
+	/// <param name="c">C.</param>
 	public void cameraAlert(CCTVCamera c)
 	{
 		List<NPCController> candidatesForInvestigation = new List<NPCController> ();
@@ -54,12 +65,10 @@ public class CCTVController : MonoBehaviour {
 				if (npc.currentBehaviour.myType == behaviourType.searchRooms) {
 					RoomScript r = LevelController.me.getRoomObjectIsIn (c.gameObject);
 					if (r == null) {
-					//	//////Debug.LogError ("Room was null for swat");
 
 					} else {
 						if (NPCBehaviour_SWATSearchMap.roomToGoTo != r) {
-							FindObjectOfType<NPCBehaviourDecider> ().setAllSwatToGoToRoom (r);
-					//		//////Debug.LogError ("Setting swat to go to room " + r.roomName);
+							FindObjectOfType<NPCBehaviourDecider> ().setAllSwatToGoToRoom (r); //TODO switch to just making it use the behaviour decider of the npc its currently on
 						}
 					}
 				}

@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class roomRect : MonoBehaviour{
+	/// <summary>
+	/// Class to store the rect for a room/building 
+	/// </summary>
+
+
 	public Transform bottomLeft,topRight;
 
 	void Awake()

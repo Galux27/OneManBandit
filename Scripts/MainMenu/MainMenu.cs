@@ -4,6 +4,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 public class MainMenu : MonoBehaviour {
+	/// <summary>
+	/// Class that controls the GUI for the main menu, profile selection & creation. Also controls the creating of profiles and their directories. 
+	/// </summary>
+
+
 	public Dropdown myDropdown;
 	public InputField textInput;
 	public MainMenuSection mySection;

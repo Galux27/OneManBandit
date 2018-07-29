@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class that controls the weapons of a human character
+/// </summary>
 public class PersonWeaponController : MonoBehaviour {
 	PersonAnimationController pac;
 	public Weapon currentWeapon;
@@ -39,15 +42,26 @@ public class PersonWeaponController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		//if (this.gameObject.tag == "Player") {
-			OnUpdate ();
-		//}
+		newMelee ();
+		counDownFirerateTimer ();
+
+		if (throwingWeapon == true) {
+			throwWeaponCheck ();
+		} else if (droppingWeapon == true) {
+			dropWeaponCheck ();
+		} else {
+			ammoItemCheck ();
+			areWeAimingDownSight ();
+			//decideMyTorsoAnimation ();
+			if (reloading == true) {
+				reload ();
+			}
+		}
 
 	}
 
 	void ammoItemCheck()
 	{
-
 		if (currentWeapon == null || currentWeapon.melee==true) {
 
 		} else {
@@ -65,33 +79,8 @@ public class PersonWeaponController : MonoBehaviour {
 				}
 			}
 		}
-
-
 	}
 
-	public void OnUpdate()
-	{
-		hasMeleeAnimated ();
-		newMelee ();
-		counDownFirerateTimer ();
-
-		if (throwingWeapon == true) {
-			throwWeaponCheck ();
-		} else if (droppingWeapon == true) {
-			dropWeaponCheck ();
-		} else {
-			ammoItemCheck ();
-			areWeAimingDownSight ();
-			//decideMyTorsoAnimation ();
-			if (reloading == true) {
-				reload ();
-			}
-		}
-
-		//if (currentWeapon.transform.eulerAngles != Vector3.zero) {
-		//	currentWeapon.transform.rotation = Quaternion.Euler (0, 0, 0);
-		//}
-	}
 
 	public void setWeapon(Weapon w)
 	{
@@ -104,52 +93,24 @@ public class PersonWeaponController : MonoBehaviour {
 			} else {
 				currentWeapon.unequipItem ();
 			}
-			//WeaponStore.me.createWeaponPickup (currentWeapon, this.transform.position);
 		}
 
 		if (w == null) {
-			////////Debug.Log ("no weapon passed in, setting to unarmed");
-			//currentWeapon = WeaponStore.me.getWeapon ("Unarmed");
 			currentWeapon=null;
-			////pac.playAnimation ("Unarmed",false);
-
 		} else {
-			
-			//////Debug.Log("Setting weapon to be " + w.WeaponName);
+
 			currentWeapon = w;
 			reloadTimer = currentWeapon.reloadTime;
 
-			////pac.playAnimation (currentWeapon._PickupAnim, true);
-			////pac.playAnimation (currentWeapon._HipAnim, false);
 		}
 		if (currentWeapon == null) {
 
 		} else {
 			ac.changeGunState ();
-			//ac.setIfOneHanded (currentWeapon.oneHanded);
 		}
 	}
 
-	void decideMyTorsoAnimation()
-	{
-		if (currentWeapon == null) {
-			//unarmed
-			if (pac.areWePlayingAnimation (pac.ID, "Unarmed") == false&& pac.areWePlayingAnimation(pac.ID,"Punch")==false) {
-				//pac.playAnimation ("Unarmed",true);
-			}
-		} else {
-			if (aimDownSight == true) {
-				if (pac.areWePlayingAnimation (pac.ID, currentWeapon._ADSAnim) == false&& pac.areWePlayingAnimation(pac.ID,currentWeapon._ReloadAnim)==false) {
-					//pac.playAnimation (currentWeapon._ADSAnim,true);
-				}
-			} else {
-				if (pac.areWePlayingAnimation (pac.ID, currentWeapon._HipAnim) == false && pac.areWePlayingAnimation(pac.ID,currentWeapon._ReloadAnim)==false) {
-					//	//////Debug.Log ("Not playing hipfire animation, adding");
-					//pac.playAnimation (currentWeapon._HipAnim,true);
-				}
-			}
-		}
-	}
+
 
 	void areWeAimingDownSight(){
 		if (currentWeapon == null) {
@@ -163,68 +124,13 @@ public class PersonWeaponController : MonoBehaviour {
 				}
 			}
 		}
-
-		if (currentWeapon == null) {
-
-		} else {
-			if (aimDownSight == true) {
-				//if (pac.areWePlayingAnimation (pac.ID, currentWeapon._ADSAnim) == false&& pac.areWePlayingAnimation(pac.ID,currentWeapon._ReloadAnim)==false) {
-				//	//////Debug.Log ("Not playing ADS animation, adding");
-
-					////pac.playAnimation (currentWeapon._ADSAnim,true);
-				//}
-				//else if( pac.areWePlayingAnimation(pac.ID,currentWeapon._ReloadAnim)==true)
-				//{					
-				//	//pac.playAnimation (currentWeapon._ADSAnim,false);
-				//}
-				//sr.sprite = currentWeapon.aimDownSight;
-			} else {
-				//if (pac.areWePlayingAnimation (pac.ID, currentWeapon._HipAnim) == false && pac.areWePlayingAnimation(pac.ID,currentWeapon._ReloadAnim)==false) {
-				//	//////Debug.Log ("Not playing hipfire animation, adding");
-					////pac.playAnimation (currentWeapon._HipAnim,true);
-				//}
-				//else if( pac.areWePlayingAnimation(pac.ID,currentWeapon._ReloadAnim)==true)
-				//{					
-				//	//pac.playAnimation (currentWeapon._HipAnim,false);
-				//}
-				//sr.sprite = currentWeapon.hipFire;
-			}
-		}
 	}
 
-	void hasMeleeAnimated()
-	{
-		if (startedAttack == true) {
-			if (animationConnected == true) {
-				if (isPunch == false) {
-				//	meleeAttack ();
-				} else {
-				//	Punch ();
-				}
-			}
-		}
-	}
+
 
 	public void Punch()
 	{
-
-		//if (pac.playingAnimation ("Punch") || pac.playingAnimation ("PunchAlt")) {
-		//	return;
-		//}
-
-
-		/*int r = Random.Range (0, 100);
-
-		if (r < 50) {
-			//pac.playAnimation ("Punch", true);
-			//pac.playAnimation ("Unarmed",false);
-
-		} else {
-			//pac.playAnimation ("PunchAlt", true);
-			//pac.playAnimation ("Unarmed",false);
-
-		}*/
-		//meleeAttack (100);
+		
 		if (this.gameObject.tag == "NPC") {
 			fireRateTimer = 1.0f;
 		}
@@ -539,37 +445,14 @@ public class PersonWeaponController : MonoBehaviour {
 		}
 	}
 
-	public void meleeAttack()
-	{
-		if (currentWeapon == null || currentWeapon.melee == false) {
-			return;
-		}
-		//if (pac.playingAnimation (currentWeapon._AttackAnim)) {
-		//	return;
-		//}
-	//
-		////pac.playAnimation (currentWeapon._AttackAnim, true);
-		////pac.playAnimation (currentWeapon._HipAnim,false);
-		//ac.punch ();
-
-		meleeAttack (currentWeapon.meleeDamage);
-		if (this.gameObject.tag == "NPC") {
-			fireRateTimer = 1.0f;
-		}
-		animationConnected = false;
-		startedAttack = false;
-	}
 
 	public void fireWeapon()
 	{
-		
-
 		if (currentWeapon == null) {
 			if (canWeFireWeapon () == false) {
 				return;
 			}
-			//melee attack
-			//play punch animation
+
 			if (canWeFireWeapon () == true) {
 				//Punch ();
 				if (startedAttack == false) {
@@ -639,44 +522,7 @@ public class PersonWeaponController : MonoBehaviour {
 						rotation = Quaternion.Euler (this.transform.rotation.x, this.transform.rotation.y, Random.Range (this.transform.rotation.eulerAngles.z - currentWeapon.recoilMax, this.transform.rotation.eulerAngles.z + currentWeapon.recoilMax));
 					}
 
-					/*if (currentWeapon.oneHanded == true) {
-						if (aimDownSight == true) {
-							
-							GameObject g = (GameObject)Instantiate (currentWeapon.projectile, currentWeapon.bulletSpawnPos, rotation);
-							Bullet b = g.GetComponent<Bullet> ();
-							b.shooter = this.gameObject;
-							if (this.gameObject.tag != "Player") {
-								b.isAiBullet = true;
-							}
 
-						} else {
-							GameObject g = (GameObject)Instantiate (currentWeapon.projectile, currentWeapon.bulletSpawnPos, rotation);
-							Bullet b = g.GetComponent<Bullet> ();
-							b.shooter = this.gameObject;
-							if (this.gameObject.tag != "Player") {
-								b.isAiBullet = true;
-							}
-
-						}
-						bulletFire ();
-					} else {
-						if (aimDownSight == true) {
-							GameObject g = (GameObject)Instantiate (currentWeapon.projectile, currentWeapon.bulletSpawnPos, rotation);
-							Bullet b = g.GetComponent<Bullet> ();
-							b.shooter = this.gameObject;
-							if (this.gameObject.tag != "Player") {
-								b.isAiBullet = true;
-							}
-
-						} else {
-							GameObject g = (GameObject)Instantiate (currentWeapon.projectile,currentWeapon.bulletSpawnPos, rotation);
-							Bullet b = g.GetComponent<Bullet> ();
-							b.shooter = this.gameObject;
-							if (this.gameObject.tag != "Player") {
-								b.isAiBullet = true;
-							}
-
-						}*/
 						GameObject g = (GameObject)Instantiate (currentWeapon.projectile,currentWeapon.bulletSpawnPos.position, currentWeapon.gameObject.transform.rotation);
 						Bullet b = g.GetComponent<Bullet> ();
 						b.shooter = this.gameObject;
@@ -706,11 +552,8 @@ public class PersonWeaponController : MonoBehaviour {
 						Debug.Log ("Reloading true 5");
 
 					}
-					//reload ();
 				}
 			} else {
-				//meleeAttack ();
-
 
 				if (canWeFireWeapon () == true) {
 
@@ -817,7 +660,6 @@ public class PersonWeaponController : MonoBehaviour {
 				} else {
 					currentWeapon.ammoItem = myInv.getAmmoForGun (currentWeapon.WeaponName);
 				}
-				//////Debug.Log ("Setting new ammo to be " + currentWeapon.ammoItem.getItemName ());
 				reloading = false;
 				Debug.LogError ("reloading set false 2");
 				reloadTimer = currentWeapon.reloadTime;
@@ -837,9 +679,7 @@ public class PersonWeaponController : MonoBehaviour {
 			playedReloadAnim = true;
 		}
 
-		////////Debug.Log ("Reloading");
 		if (reloadTimer <= 0) {
-			//need to add some kind of timer, have it on update and just have the ammo reaching 0 setting the bool to start reloading to true
 			if (this.gameObject.tag == "NPC") {
 				GameObject g = (GameObject)Instantiate (ItemDatabase.me.getAmmoItem (currentWeapon), this.transform.position, this.transform.rotation);
 				ai.ammoCount = 0;
@@ -871,264 +711,6 @@ public class PersonWeaponController : MonoBehaviour {
 		animationConnected = false;
 	}
 
-	void meleeAttack(int damage)
-	{
-		Debug.Log (this.gameObject.name + " is melee attacking");
-		////////Debug.Log ("Punching");
-		/// 
-		/// 
-
-		List<RaycastHit2D> hits = new List<RaycastHit2D> ();
-		List<GameObject> objectsHit = new List<GameObject> ();
-		RaycastHit2D[] hits1 = Physics2D.RaycastAll (new Vector2 (this.transform.position.x, this.transform.position.y), new Vector2 (this.transform.up.x/2, this.transform.up.y/2),1.5f);
-		RaycastHit2D[] hits2 = Physics2D.RaycastAll (new Vector2 (this.transform.position.x, this.transform.position.y), new Vector2 (this.transform.up.x/2, this.transform.up.y/2)+new Vector2(-1,0),1.5f);
-		RaycastHit2D[] hits3 = Physics2D.RaycastAll (new Vector2 (this.transform.position.x, this.transform.position.y), new Vector2 (this.transform.up.x/2, this.transform.up.y/2)+new Vector2(1,0),1.5f);
-
-		Debug.DrawRay (this.transform.position, transform.up*1.5f, Color.blue,1.0f);
-		Debug.DrawRay (this.transform.position, (transform.up+(transform.right/2)).normalized*1.5f, Color.blue,1.0f);
-		Debug.DrawRay (this.transform.position, (transform.up+((transform.right*-1)/2)).normalized*1.5f, Color.blue,1.0f);
-
-		foreach (RaycastHit2D r in hits1) {
-			if (r.collider == null) {
-
-			} else {
-				if (objectsHit.Contains (r.collider.gameObject) == false) {
-					hits.Add (r);
-					objectsHit.Add (r.collider.gameObject);
-				}
-			}
-		}
-
-		foreach (RaycastHit2D r in hits2) {
-			if (r.collider == null) {
-
-			} else {
-				if (objectsHit.Contains (r.collider.gameObject) == false) {
-					hits.Add (r);
-					objectsHit.Add (r.collider.gameObject);
-				}
-			}
-		}
-
-		foreach (RaycastHit2D r in hits3) {
-			if (r.collider == null) {
-
-			} else {
-				if (objectsHit.Contains (r.collider.gameObject) == false) {
-					hits.Add (r);
-					objectsHit.Add (r.collider.gameObject);
-				}
-			}
-		}
-	//	////Debug.Break ();
-
-
-		startedAttack = false;
-		foreach (RaycastHit2D melee in hits) {
-			if (melee.collider == null) {
-
-			} else {
-				//Debug.Log ("melee hit " + melee.collider.gameObject.name);
-
-				if (melee.collider.gameObject.tag == "Door") {
-					Debug.Log ("Melee hit " + melee.collider.gameObject.name);
-					DoorScript ds = melee.collider.gameObject.GetComponent<DoorScript> ();
-					if (ds == null) {
-						if (melee.collider.gameObject.transform.parent == null) {
-							Debug.Log ("Could not find door script in parent");
-
-						} else {
-							ds = melee.collider.gameObject.transform.parent.gameObject.GetComponent<DoorScript> ();
-						}
-					}
-
-
-					if (ds == null) {
-						Debug.Log ("Could not find door script");
-					} else {
-						ds.kickInDoor ();
-					}
-					//////Debug.Log ("Door " + ds.gameObject + " kicked in");
-					return;
-				} else if (melee.collider.gameObject.tag == "Window") {
-					Window w = melee.collider.gameObject.GetComponent<Window> ();
-					Debug.Log (melee.collider.gameObject.name);
-					if (w == null) {
-
-					} else {
-						w.smashWindow ();
-					}
-
-					WindowNew w2 = melee.collider.gameObject.GetComponentInParent<WindowNew>();
-					if (w2 == null) {
-					} else {
-						w2.destroyWindow ();
-					}
-
-					return;
-				}
-				else if (melee.collider.gameObject == this.gameObject) {
-					continue;
-				} 
-
-				//do damage to object
-				PersonHealth ph = melee.collider.gameObject.GetComponent<PersonHealth> ();
-				if (ph == null) {
-
-				} else {
-					if (currentWeapon == null) {
-						Inventory i = ph.gameObject.GetComponent<Inventory> ();
-						if (i.leftArm == null) {
-
-						} else {
-							Item toDrop = i.leftArm;
-							i.unequipItem (toDrop);
-
-							i.dropItem (toDrop);
-						}
-
-						if (i.rightArm == null) {
-
-						} else {
-							Item toDrop = i.rightArm;
-							i.unequipItem (toDrop);
-
-							i.dropItem (toDrop);
-						}
-					}
-
-
-					if (ph == PersonHealth.playerHealth) {
-						CameraController.me.hitByBullet (this.transform.position);
-					}
-					NPCController npc = melee.collider.gameObject.GetComponent<NPCController> ();
-
-					if (currentWeapon == null) {
-						if (melee.collider.gameObject.tag == "NPC") {
-							ph.gameObject.GetComponent<BleedingEffect> ().bloodImpact (melee.point, Quaternion.Euler (0, 0, this.transform.eulerAngles.z - 90));
-
-							CanWeDetectTarget detect = melee.collider.gameObject.GetComponent<CanWeDetectTarget> ();
-							//bool inFront = detect.isTargetInFrontOfUs (this.gameObject);
-							ph.dealMeleeDamage (100, false);
-							punchNoise ();
-							if (ph.healthValue > 0) {
-								npc.knockOutNPC ();
-								ph.setAttacked (this.gameObject);
-
-								//////Debug.Break ();
-							}
-
-							//if (inFront == true) {
-							if (this.gameObject.tag == "Player") {//TODO may need to rewrite this in the far future 
-								npc.memory.peopleThatHaveAttackedMe.Add (this.gameObject);
-							}
-
-							//}
-							if (melee.collider.gameObject.tag == "NPC") {
-								npc.memory.objectThatMadeMeSuspisious = this.gameObject;
-								npc.npcB.onHostageRelease ();
-							}
-						} else if (melee.collider.gameObject.tag == "Player") {
-							ph.gameObject.GetComponent<BleedingEffect> ().bloodImpact (melee.point, Quaternion.Euler (0, 0, this.transform.eulerAngles.z - 90));
-
-
-							ph.dealMeleeDamage (100, false);
-							punchNoise ();
-							if (ph.healthValue > 0) {
-								ph.setAttacked (this.gameObject);
-
-								//////Debug.Break ();
-							}
-
-
-						}
-					} else {
-						if (melee.collider.gameObject.tag == "NPC") {
-							
-							if (currentWeapon.bladed == false) {
-								ph.gameObject.GetComponent<BleedingEffect> ().bloodImpact (melee.point, Quaternion.Euler (0, 0, this.transform.eulerAngles.z - 90));
-
-								CanWeDetectTarget detect = melee.collider.gameObject.GetComponent<CanWeDetectTarget> ();
-								//bool inFront = detect.isTargetInFrontOfUs (this.gameObject);
-
-								if (ph.healthValue > 0) {
-									npc.knockOutNPC ();
-									//////Debug.Break ();
-								}
-
-								//if (inFront == true) {
-								if (this.gameObject.tag == "Player") {//TODO may need to rewrite this in the far future 
-									npc.memory.peopleThatHaveAttackedMe.Add (this.gameObject);
-								}
-							//	}
-								if (melee.collider.gameObject.tag == "NPC") {
-									npc.memory.objectThatMadeMeSuspisious = this.gameObject;
-									npc.npcB.onHostageRelease ();
-								}
-								if (currentWeapon.melee == false) {
-									ph.dealDamage (damage, false);
-								} else {
-									ph.dealMeleeDamage (damage, false);
-								}
-								punchNoise ();
-
-								ph.setAttacked (this.gameObject);
-							} else {
-								ph.gameObject.GetComponent<BleedingEffect> ().bloodImpact (melee.point, Quaternion.Euler (0, 0, this.transform.eulerAngles.z - 90));
-								if (melee.collider.gameObject.tag == "NPC") {
-									npc.memory.objectThatMadeMeSuspisious = this.gameObject;
-									npc.npcB.onMeleeAttack ();
-								}
-								if (currentWeapon.melee == false) {
-									ph.dealDamage (damage, true);
-								} else {
-									ph.dealMeleeDamage (damage, true);
-								}
-								punchNoise ();
-
-								ph.setAttacked (this.gameObject);
-
-
-							}
-						} else if (melee.collider.gameObject.tag == "Player") {
-							if (currentWeapon.bladed == false) {
-								ph.gameObject.GetComponent<BleedingEffect> ().bloodImpact (melee.point, Quaternion.Euler (0, 0, this.transform.eulerAngles.z - 90));
-
-							
-							
-
-
-
-								if (currentWeapon.melee == false) {
-									ph.dealDamage (damage, false);
-								} else {
-									ph.dealMeleeDamage (damage, false);
-								}
-								punchNoise ();
-
-							} else {
-								ph.gameObject.GetComponent<BleedingEffect> ().bloodImpact (melee.point, Quaternion.Euler (0, 0, this.transform.eulerAngles.z - 90));
-
-								if (currentWeapon.melee == false) {
-									ph.dealDamage (damage, true);
-								} else {
-									ph.dealMeleeDamage (damage, true);
-								}
-								punchNoise ();
-
-
-
-							}
-						}
-					}
-					//npc.pmc.rotateToFacePosition (this.gameObject.transform.position);
-
-					return;
-				}
-			}
-		}
-
-	}
 
 	void counDownFirerateTimer(){
 		if (fireRateTimer > 0) {
@@ -1193,11 +775,7 @@ public class PersonWeaponController : MonoBehaviour {
 		if (currentWeapon == null) {
 			return false;
 		} else {
-//			if (pac.playing.AnimName == currentWeapon._PickupAnim) {
-			//	return true;
-			//} else {
-				return false;
-			//}
+			return false;
 		}
 	}
 
@@ -1206,14 +784,8 @@ public class PersonWeaponController : MonoBehaviour {
 		if (currentWeapon == null || droppingWeapon==true || throwingWeapon==true) {
 			return;
 		}
-		//dropWeaponAnim
-		//////Debug.Log("Dropping weapon");
-		//pac.playAnimation(currentWeapon._dropAnim,true);
-		//pac.playAnimation ("Unarmed",false);
 		reloading=false;
 		droppingWeapon = true;
-
-		//
 	}
 
 	public void dropWeaponCheck()
@@ -1229,23 +801,10 @@ public class PersonWeaponController : MonoBehaviour {
 			ItemMoniter.me.refreshItems ();
 			droppingWeapon = false;
 		}
-		/*
-			Inventory.playerInventory.removeItemWithoutDrop (currentWeapon);
-		//currentWeapon.transform.parent=null;
-		//currentWeapon.drop
-			myInv.removeItemWithoutDrop (currentWeapon);
-		currentWeapon.inUse = false;
-			WeaponStore.me.createWeaponPickup (currentWeapon, dropWeaponSpawn.position);
-			currentWeapon.unequipItem ();
-			setWeapon (null);
-			droppingWeapon = false;*/
-
 	}
 
 	public void throwWeaponCheck()
 	{
-		
-
 			WeaponStore.me.createWeaponProjectile (currentWeapon, throwWeaponSpawn.position,this.transform.rotation);
 			Item i = currentWeapon;
 			currentWeapon.unequipItem ();
@@ -1261,14 +820,8 @@ public class PersonWeaponController : MonoBehaviour {
 		if (currentWeapon == null|| droppingWeapon==true || throwingWeapon==true) {
 			return;
 		}
-		//////Debug.Log("throwing weapon");
-
-
-		//dropWeaponAnim
-		//pac.playAnimation(currentWeapon._throwAnim,true);
-		//pac.playAnimation ("Unarmed",false);
+	
 		throwingWeapon = true;
-		//currentWeapon = null;
 
 
 	}

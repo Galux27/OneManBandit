@@ -3,14 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 public class CreateNodesFromTilemaps : MonoBehaviour {
-	//did some stuff to the actions in npc so they can get closer to the Nodes without the glitchyness
+
+	/// <summary>
+	/// Class that creates pathfinding nodes based on the Tilemaps provided.
+	/// </summary>
+
 	public static CreateNodesFromTilemaps me;
-	//changed execution order for this and world builder
 	public Grid gridBase;
+
+	/// <summary>
+	/// Floor of the world, for each tile in this tilemap, a node will be created. 
+	/// </summary>
 	public Tilemap floor;//floor of world
+	/// <summary>
+	/// Tilemaps where if a tile is found it will either mark the node as unwalkable or increase its weight so that it is avoided by NPCs
+	/// </summary>
 	public List<Tilemap> obstacleLayers,weightIncreaseLayers; //all layers that contain objects to navigate around
 	public GameObject nodePrefab;
 
+	/// <summary>
+	/// Currently unused, maybe add some AI that take cover in the future 
+	/// </summary>
 	public Tilemap cover,walls;
 
 	//these are the bounds of where we are searching in the world for tiles, have to use world coords to check for tiles in the tile map
@@ -26,13 +39,6 @@ public class CreateNodesFromTilemaps : MonoBehaviour {
 	void Awake () {
 		unsortedNodes = new List<GameObject> ();
 		me = this;
-		////////Debug.Log ("Floor is size "+floor.size);
-		//foreach (Tilemap t in obstacleLayers) {
-		//	//////Debug.Log ("Obstacle " + t.name + " Is size " + t.size);
-		//}
-		//if (createNodesOnAwake == true) {
-		//	generateNodes ();
-		//}
 	}
 
 	void Start()
@@ -42,15 +48,11 @@ public class CreateNodesFromTilemaps : MonoBehaviour {
 
 	public void generateNodes()
 	{
-
 		createNodes ();
 		FindObjectOfType<WorldBuilder>().passInTilemapPathfinding (nodes, gridBoundX, gridBoundY);
 	}
 
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 	public 	int gridBoundX = 0, gridBoundY = 0;
 
 	void createWallColliders()
@@ -73,6 +75,10 @@ public class CreateNodesFromTilemaps : MonoBehaviour {
 		}
 	}
 
+
+	/// <summary>
+	/// Method that creates the nodes, creates all the nodes first then makes a second pass to assign neighbours. 
+	/// </summary>
 	void createNodes()
 	{
 		int gridX = 0; //use these to work out the size and where each node should be in the 2d array we'll use to store our nodes so we can work out neighbours and get paths
@@ -232,52 +238,8 @@ public class CreateNodesFromTilemaps : MonoBehaviour {
 		createWallColliders();
 	}
 
-	int getModiferForNode(WorldTile node)
-	{
-		int mod = 10;
-		/*foreach (WorldTile w in node.myNeighbours) {
-			if (w.walkable == false) {
-				mod += 5;
-			}
 
-			TileBase t = cover.GetTile (new Vector3Int (Mathf.RoundToInt( w.gameObject.transform.position.x),Mathf.RoundToInt( w.gameObject.transform.position.y),0));
-			if (t == null) {
-				
-			} else {
-				mod -= 100;
-			}
 
-			TileBase t2 = walls.GetTile (new Vector3Int (Mathf.RoundToInt( w.gameObject.transform.position.x),Mathf.RoundToInt( w.gameObject.transform.position.y),0));
-
-			if (t2 == null) {
-
-			} else {
-				mod += 50;
-			}
-		}
-
-		if (node.gridX == 0 || node.gridX== gridBoundX - 1 || node.gridY == 0 || node.gridY == gridBoundY - 1) {
-			node.walkable = false;
-			mod += 50;
-		}
-
-		if (mod < 0) {
-			mod = 1;
-		}*/
-
-		return mod;
-	}
-
-	int getModifierFalloff(WorldTile node)
-	{
-		int mod = node.modifier;
-		foreach (WorldTile w in node.myNeighbours) {
-			if (w.modifier > 10) {
-				//mod += Mathf.RoundToInt( w.modifier*0.2f);
-			}
-		}
-		return mod;
-	}
 
 
 

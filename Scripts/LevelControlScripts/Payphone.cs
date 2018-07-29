@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class Payphone : MonoBehaviour {
 
-	// Use this for initialization
+	/// <summary>
+	/// Class that marks an object as a payphone that a civilian can use to call the police. 
+	/// </summary>
+
 	void Start () {
 		LevelController.me.phonesInLevel.Add (this.gameObject);
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 }

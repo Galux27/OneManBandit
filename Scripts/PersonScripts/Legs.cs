@@ -1,8 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Class that used to control the legs of human characters in the game, no longer used. 
+/// </summary>
 public class Legs : MonoBehaviour {
+
+
+
 	public string animationToPlay = "Walk";
 	public SpriteAnimation myLegs;
 	public legState myState;

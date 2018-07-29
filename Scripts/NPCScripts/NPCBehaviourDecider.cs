@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCBehaviourDecider : MonoBehaviour {
-	//fix bug where the NPC will sometimes think that another cop is a suspect, might be summit to do with when they're knocked out
+
+	/// <summary>
+	/// Class that decides what the AI should be doing.
+	/// </summary>
+
 
 	public AIType myType;
 	public NPCController myController;
@@ -29,8 +33,15 @@ public class NPCBehaviourDecider : MonoBehaviour {
 	public float lastTimeIWasAttacked = 0.0f;
 
 	public bool inLitRoom = true;
+
+	/// <summary>
+	/// Enum to show what behaviour the AI should be doing, used to check if we need to destroy the behaviour and get a new one.
+	/// </summary>
 	public whatAiIsDoing doing = whatAiIsDoing.starting;
 
+	/// <summary>
+	/// Debug variable to see which decision is made.
+	/// </summary>
 	public int decision=0;
 	void Awake()
 	{
@@ -60,21 +71,8 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			return;
 		}
 
-		GameObject g = isCorpseNearby ();
-		if (g == null) {
 
-		} else {
-			Debug.Log (this.gameObject.name + " can see a corpse");
-		}
 
-		GameObject g2 = canSeeHostage ();
-		if (g2 == null) {
-
-		} else {
-			Debug.Log (this.gameObject.name + " can see a hostage/knocked person");
-		}
-
-		////////Debug.Log (myController.detect.getDotProduct (CommonObjectsStore.player));
 		inLitRoom = LevelTilemapController.me.areWeLit(this.transform.position);
 		if (myType == AIType.guard) {
 			unfreezeNPC ();
@@ -109,7 +107,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
 				}
 
-				if (Time.time - lastTimeIWasAttacked >= 5.0f&& myController.detect.fov.visibleTargts.Contains(myController.memory.objectThatMadeMeSuspisious.transform)==false) {
+				if (Time.time - lastTimeIWasAttacked >= 5.0f && myController.detect.fov.visibleTargts.Contains (myController.memory.objectThatMadeMeSuspisious.transform) == false) {
 					attackedRecently = false;
 					alarmed = true;
 				}
@@ -121,13 +119,18 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			decideViewRadius ();
 			unfreezeNPC ();
 
-			if (alarmed==false && PoliceController.me.backupHere==false && PoliceController.me.swatHere==false) {
+			if (alarmed == false && PoliceController.me.backupHere == false && PoliceController.me.swatHere == false) {
 				civilianPassive ();
 			} else {
 				civilianAlarmed ();
 			}
 		} else if (myType == AIType.hostage) {
 
+		} else if (myType == AIType.shopkeeper) {
+			unfreezeNPC ();
+			decideViewRadius ();
+
+			shopkeeperDoBehaviour ();
 		}
 	}
 
@@ -369,10 +372,11 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		return false;
 	}
 
+	/// <summary>
+	/// Patrol cop behaviour, if there is not a siege then they will roam around looking for incidents, if there is a siege then they will either guard a building entrance or a roaming point around the level.
+	/// Have a particular order of detecting things that is done VIA the if statements order is : Hostiles -> Suspicious -> Noise -> Hostage -> Corpse -> Raise Alarm
+	/// </summary>
 	public void cop_decideBehaviour(){
-
-
-
 		if (PoliceController.me.underSiege == false && PoliceController.me.swatCalled==false) {
 			GameObject nearbyHostile = isHostileTargetNearby ();
 
@@ -462,6 +466,9 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		}
 	}
 
+	/// <summary>
+	/// Executes the desired behaviour based on the result of cop_decideBehaviour
+	/// </summary>
 	void copDoBehaviour()
 	{
 		//////Debug.Log (this.gameObject.name + " Is doing " + doing.ToString ());
@@ -503,6 +510,8 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
 				myController.currentBehaviour = nb;
 			}
+
+			//Commented out due to rewrite of AttackTarget method, may return to this if it doesn't work out.
 
 			/*if (myController.memory.objectThatMadeMeSuspisious == null) {
 				myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
@@ -830,6 +839,9 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 	}
 
+	/// <summary>
+	/// Decides behaviour for guard to do, similar to the Police in detecting incidents with  a few differences (guards either patrol a set route or guard a location, they also evacuate in the event of a siege)
+	/// </summary>
 	public void guard_decideBehaviour()
 	{
 		decision = 0;
@@ -1319,7 +1331,6 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			}
 
 			if (myController.memory.seenSuspect == true && myController.currentBehaviour.myType == null) {
-				Debug.LogError ("SET TO ATTACK AFTER ESCORT FAILED");
 				doing = whatAiIsDoing.attacking;
 				if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.attackTarget) {
 					if (myController.currentBehaviour == null) {
@@ -1347,91 +1358,15 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		}
 	}
 
-	void swatBehaviourDecide()
-	{
-		GameObject nearbyHostile = isHostileTargetNearby ();
-
-		if (nearbyHostile == null) {
-			if (myController.memory.objectThatMadeMeSuspisious == null) {
-				if (PoliceController.me.buildingSurrounded == true) {
-					//swat raid building
-					doing=whatAiIsDoing.swatRaidBuilding;
-				} else {
-					//swat go to form up point
-					doing=whatAiIsDoing.swatFormUp;
-
-				}
-			} else {
-				if (doAnySwatHaveEyesOnTarget () == true) {
-					doing = whatAiIsDoing.swatAttack;
-				} else {
-					if (PoliceController.me.buildingSurrounded == true) {
-						//swat raid building
-						doing=whatAiIsDoing.swatRaidBuilding;
-					} else {
-						//swat go to form up point
-						doing=whatAiIsDoing.swatFormUp;
-
-					}
-				}
-			}
 
 
-		} else {
-			//attack nearby hostile
-			myController.memory.objectThatMadeMeSuspisious=nearbyHostile;
-			doing=whatAiIsDoing.swatAttack;
-
-		}
-	}
-
-	bool doAnySwatHaveEyesOnTarget()
-	{
-		if (myController.memory.objectThatMadeMeSuspisious == false) {
-			return false;
-		}
-
-		foreach (NPCController npc in NPCManager.me.npcControllers) {
-			if (npc.npcB.myType != AIType.swat) {
-				continue;
-			} else {
-				if (npc.detect.fov.visibleTargts.Contains (myController.memory.objectThatMadeMeSuspisious.transform) == true) {
-					return true;
-				}
-			}
-
-		}
-		return false;
-	}
-
-	void swatDoBehaviour()
-	{
-		swatBehaviourDecide ();
-
-		if (doing == whatAiIsDoing.swatRaidBuilding) {
-			if (myController.currentBehaviour==null|| myController.currentBehaviour.myType !=behaviourType.searchRooms) {
-				setAllSwatToSearch ();
-			//	if (myController.currentBehaviour == null) {
-
-			//	} else {
-			//		Destroy (myController.currentBehaviour);
-			//	}
 
 
-			}
-		} else if (doing == whatAiIsDoing.swatFormUp) {
-			if (myController.currentBehaviour==null||myController.currentBehaviour.myType !=behaviourType.formUp ) {
-				setAllSwatToFormUp ();
-
-			}
-		} else if( doing == whatAiIsDoing.swatAttack) {
-			if (myController.currentBehaviour==null||myController.currentBehaviour.myType != behaviourType.attackTarget ) {
-				setAllSwatToAttack ();
-							
-			}
-		}
-	}
-
+	/// <summary>
+	/// decides if an NPC can switch behaviours e.g. if they're in a fight with the player they don't want to start confiscating an item.
+	/// </summary>
+	/// <returns><c>true</c>, if the behaviour can be switched to<c>false</c> otherwise.</returns>
+	/// <param name="toSwitchTo">Behaviour the NPC wants to switch to</param>
 	bool canWeSwitchBehaviour(whatAiIsDoing toSwitchTo)
 	{
 		if (doing == whatAiIsDoing.attacking) {
@@ -1519,7 +1454,9 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		return false;
 	}
 
-
+	/// <summary>
+	/// Decides the size of the NPCs FOV based on the AI type & whether they are alerted 
+	/// </summary>
 	void decideViewRadius()
 	{
 
@@ -1586,6 +1523,8 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			}
 		}
 	}
+
+
 	public float slerpTimer = 0.0f;
 	int lastCol = 0;
 	void decideFOVColor()
@@ -1689,45 +1628,6 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 	void detectWhetherWeShouldBeAlerted()
 	{
-		/*if (myController.detect.targetDetect (CommonObjectsStore.player) == true) {
-			float suspision = decideHowSuspiciousObjectIs (CommonObjectsStore.player);
-			RoomScript npcRoom = LevelController.me.getRoomObjectIsIn (CommonObjectsStore.player);
-
-//			//////Debug.Log ("Suspision of player = " + suspision);
-			if (suspision < 1.0f) {
-				//everything good
-				if (myType == AIType.guard) {
-					if (npcRoom.traspassing == true) {
-						suspisious = true;
-						myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
-					}
-				}
-
-			} else if (suspision < 7.0f) {
-				if (myType == AIType.guard) {
-					//if (npcRoom.traspassing == true) {
-
-					//} else {
-					//follow player
-					suspisious = true;
-					myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
-					//}
-				} else if (myType == AIType.cop) {
-					suspisious = true;
-					myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
-				}
-
-
-			} else {
-				//order surrender/attack
-				alarmed = true;
-				myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
-
-			}
-		}*/
-
-
-
 		foreach (Transform npc in myController.detect.fov.visibleTargts) {
 			if (npc == null) {
 				continue;
@@ -1882,6 +1782,9 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		}
 	}
 
+	/// <summary>
+	/// Detects items in the level, doesn't use the FOV as that requires the object to have collision data
+	/// </summary>
 	void detectItems()
 	{
 		RoomScript myRoom = LevelController.me.getRoomObjectIsIn (this.gameObject);
@@ -1908,19 +1811,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			}
 		}
 
-		/*foreach (GameObject g in NPCManager.me.corpsesInWorld) {
-			if (g.tag != "Dead/Guarded") {
-				if (myController.detect.areWeNearTarget (g) == true) {
-					if (myController.detect.isTargetInFrontOfUs (g) == true) {
-						if (myController.detect.lineOfSightToTargetWithNoCollider (g) == true) {
-							myController.memory.objectThatMadeMeSuspisious = g;
-							suspisious = true;
-							myController.memory.suspisious = true;
-						}
-					}
-				}
-			}
-		}*/
+
 	}
 
 	public float decideHowSuspiciousObjectIs(GameObject g)
@@ -2068,54 +1959,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		return retVal;
 	}
 
-	void guardPassive()
-	{
-		if (globalAlarm == false) {
-			detectWhetherWeShouldBeAlerted ();
-			detectItems ();
-			if (patrol == true) {
-				if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.patrol) {
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_PatrolRoute> ();
-					myController.currentBehaviour = nb;
-					////PhoneTab_RadioHack.me.setNewText ("No problems here, starting patrol.",radioHackBand.buisness);
 
-				}
-			} else {
-				if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.guardLoc) {
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_GuardLocation> ();
-					myController.currentBehaviour = nb;
-					//PhoneTab_RadioHack.me.setNewText ("No problems here, standing guard",radioHackBand.buisness);
-
-				}
-			}
-		} else {
-			detectWhetherWeShouldBeAlerted ();
-			if (canWeSeeSuspects () == true) {
-				alarmed = true;
-				return;
-			} else {
-				if (patrol == true) {
-					if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.patrol) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_PatrolRoute> ();
-						myController.currentBehaviour = nb;
-						//PhoneTab_RadioHack.me.setNewText ("No problems here, starting patrol.",radioHackBand.buisness);
-
-					}
-				} else {
-					if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.guardLoc) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_GuardLocation> ();
-						myController.currentBehaviour = nb;
-						//PhoneTab_RadioHack.me.setNewText ("No problems here, standing guard",radioHackBand.buisness);
-
-					}
-				}
-			}
-		}
-	}
 
 	bool canWeSeeSuspects()
 	{
@@ -2129,353 +1973,11 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		return false;
 	}
 
-	void checkForArmedNPCs(){ //could probbaly write this to be better and not have to go through every npc
-		if (myController.detect.fov.visibleTargts.Contains (CommonObjectsStore.player.transform)) {
-			PersonWeaponController pwc = CommonObjectsStore.player.GetComponent<PersonWeaponController> ();
-			if (pwc.currentWeapon == null) {
-
-			} else {
-				if (pwc.currentWeapon.illigal == true) {
-					myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
-
-					alarmed = true;
-				}
-			}
-		}
-
-		foreach (GameObject npc in NPCManager.me.npcsInWorld) {
-			if (npc == null) {
-				continue;
-			}
-			if (myController.detect.fov.visibleTargts.Contains (npc.transform)) {
-				NPCController nc = npc.GetComponent<NPCController>();
-				if (nc.npcB.freindlyIDs.Contains (myID) == false && nc.npcB.myID != myID) {
-					PersonWeaponController pwc = npc.GetComponent<PersonWeaponController> ();
-
-					if (pwc.currentWeapon == null) {
-
-					} else {
-						myController.memory.objectThatMadeMeSuspisious =npc;
-						alarmed = true;
-					}
-				}
-			}
-
-
-		}
-	}
-
-	void guardSuspisious()
-	{
-		canWeSeeSuspects ();
-		detectWhetherWeShouldBeAlerted ();
-		//detectItems ();
-		SearchedMarker suspisiousOf;
-
-		if (myController.memory.objectThatMadeMeSuspisious == null) {
-			 if (myController.memory.noiseToInvestigate != Vector3.zero) {
-				if (myController.currentBehaviour.myType != behaviourType.investigate) {
-					//////Debug.Log ("Wanting to investigate location 1");
-
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-					//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-					myController.currentBehaviour = newBehaviour;
-					//PhoneTab_RadioHack.me.setNewText ("Heard something, going to check it out",radioHackBand.buisness);
-				}
-			}
-		} else {
-			suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-
-			NPCController npc = myController.memory.objectThatMadeMeSuspisious.GetComponent<NPCController> ();
-			if (npc == null) {
-
-			} else {
-				if (npc.npcB.myType == AIType.hostage && npc.transform.parent.tag != "Player") {
-					if (myController.currentBehaviour.myType != behaviourType.freeHostage) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_FreeHostage> ();
-						myController.currentBehaviour = npcb;
-						//PhoneTab_RadioHack.me.setNewText ("Someone got tied up, freeing them now",radioHackBand.buisness);
-
-					}
-					return;
-				}
-				else if(npc.npcB.myType == AIType.hostage && npc.transform.parent.tag == "Player")
-				{
-					myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
-					alarmed = true;
-				}
-			}
-
-			if (suspisiousOf == null) {
-				//would be an object, go investigate
-				if (myController.memory.objectThatMadeMeSuspisious != null) {
-					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						//////Debug.Log ("Wanting to investigate object");
-
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour_InvestigateObject newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
-						newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-						//PhoneTab_RadioHack.me.setNewText ("Seen something odd, going to check it out",radioHackBand.buisness);
-
-					}
-				} else if (myController.memory.noiseToInvestigate != Vector3.zero) {
-					//////Debug.Log ("Wanting to investigate location");
-
-					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-						//PhoneTab_RadioHack.me.setNewText ("Heard something, going to check it out",radioHackBand.buisness);
-
-					}
-				}
-				//newBehaviour.Initialise ();
-			
-			} else if (myController.memory.objectThatMadeMeSuspisious.tag == "Dead/Knocked") {
-				if (myController.currentBehaviour.myType != behaviourType.investigate) {
-					//////Debug.Log ("Wanting to investigate Corpse");
-
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateCorpse> ();
-					newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-					myController.currentBehaviour = newBehaviour;
-					//PhoneTab_RadioHack.me.setNewText ("Control, I've found a body",radioHackBand.buisness);
-
-
-				}
-			}
-			else {//if (suspisiousOf.searchedBy.Contains (this.gameObject) == false) { //stops player getting searched by the same npc over and over
-				if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious) == false) {
-					
-					if (suspisiousOf.searchedBy.Contains (this.gameObject) == false) { //NEED TO ADD SOME KIND OF SEARCH + ESCORT OUT
-						if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-							//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
-							myController.currentBehaviour = nb;
-							nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							suspisiousOf.addToSearchedBy (this.gameObject);
-							//PhoneTab_RadioHack.me.setNewText ("Got a suspicious person, going to search them.",radioHackBand.buisness);
-
-						}
-					} else {
-						RoomScript npcRoom = LevelController.me.getRoomObjectIsIn (myController.memory.objectThatMadeMeSuspisious);
-
-						if (npcRoom==null|| npcRoom.traspassing == true) {
-							if (myController.currentBehaviour.myType != behaviourType.traspassing) {
-								Destroy (myController.currentBehaviour);
-								NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_EscortOutOfRestrictedArea> ();
-								myController.currentBehaviour = nb;
-								//PhoneTab_RadioHack.me.setNewText ("Found a trespasser, escorting them out now.",radioHackBand.buisness);
-
-								//suspisiousOf.searchedBy.Add (this.gameObject);
-							}
-						}
-					}
-				} else {
-					alarmed = true;
-				}
-			}
-		}
-	}
-
-	public void guardAggressive()
-	{
 
 
 
-		if (myController.currentBehaviour == null) {
-			NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_RaiseAlarm> ();
-			myController.currentBehaviour = nb;
-		}
-
-		canWeSeeSuspects ();
-
-		if (globalAlarm == false) {
-			bool canWeSeeObject = myController.detect.targetDetect (myController.memory.objectThatMadeMeSuspisious);
-
-			if (canWeSeeObject == true) {
-				if (shouldWeAttackTarget (myController.memory.objectThatMadeMeSuspisious) == true) {
-					if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
-						myController.currentBehaviour = nb;
-						nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						//PhoneTab_RadioHack.me.setNewText ("Engaging target",radioHackBand.buisness);
-
-					}
-				}
-				if (myController.currentBehaviour.myType == behaviourType.attackTarget) {
-					loseTargetTimer -= Time.deltaTime;
-					if (loseTargetTimer <= 0) {
-						Destroy (myController.currentBehaviour);
-						loseTargetTimer = 5.0f;
-					}
-					return;
-				} 
-
-				if (myController.memory.objectThatMadeMeSuspisious.tag == "Player" || myController.memory.objectThatMadeMeSuspisious.tag == "NPC") {
-					if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
-						myController.currentBehaviour = nb;
-						nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						//PhoneTab_RadioHack.me.setNewText ("Engaging target",radioHackBand.buisness);
-
-					}
-
-				} else if(myController.memory.noiseToInvestigate!=Vector3.zero){
-					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-						//PhoneTab_RadioHack.me.setNewText ("Lost the target, searching",radioHackBand.buisness);
-
-					}
-
-				}
-				else if(globalAlarm==false){
-					if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_RaiseAlarm> ();
-						myController.currentBehaviour = nb;
-						//////Debug.LogError("RAISE ALARM 1");
-						//PhoneTab_RadioHack.me.setNewText ("I'm going to call the cops",radioHackBand.buisness);
-
-						//myController.memory.noiseToInvestigate = Vector3.zero;
-					}
-				}
-			} else {
-				if (myController.currentBehaviour.myType == behaviourType.attackTarget) {
-					loseTargetTimer -= Time.deltaTime;
-					if (loseTargetTimer <= 0) {
-						Destroy (myController.currentBehaviour);
-						loseTargetTimer = 5.0f;
-						RoomScript r = LevelController.me.getRoomObjectIsIn (this.gameObject);
-						if (r == null) {
-							if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-								Destroy (myController.currentBehaviour);
-								NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_RaiseAlarm> ();
-								//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-								myController.currentBehaviour = newBehaviour;
-								//PhoneTab_RadioHack.me.setNewText ("Going to call for backup",radioHackBand.cop);
-							}
-						} else {
-							if (myController.currentBehaviour.myType != behaviourType.searchRooms) {
-								Destroy (myController.currentBehaviour);
-								NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-								myController.currentBehaviour = npcb;
-								//PhoneTab_RadioHack.me.setNewText ("Searching room for suspects",radioHackBand.cop);
-
-							}
-						}
-
-					}
-					return;
-
-				} 
-				if (myController.memory.objectThatMadeMeSuspisious == null) {
-					if (Vector3.Distance (this.transform.position, myController.memory.noiseToInvestigate) > 1.5f && myController.memory.noiseToInvestigate!=Vector3.zero) {
-						if (myController.currentBehaviour.myType != behaviourType.investigate && myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							myController.currentBehaviour = newBehaviour;
-							//PhoneTab_RadioHack.me.setNewText ("Heard something, going to check it out",radioHackBand.buisness);
-
-						}
-					} else if(Vector3.Distance (this.transform.position, myController.memory.noiseToInvestigate) <= 1.5f && myController.memory.noiseToInvestigate!=Vector3.zero) {
-						if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_RaiseAlarm> ();
-							myController.currentBehaviour = nb;
-							//////Debug.LogError("RAISE ALARM 2");
-
-							//myController.memory.noiseToInvestigate = Vector3.zero;
-							//PhoneTab_RadioHack.me.setNewText ("I'm going to call the cops",radioHackBand.buisness);
-
-						}
-					}
-				} else {
-					////////Debug.LogError ("Post hostage 1");
-					if (PlayerAction.currentAction == null) {
-						if (myController.currentBehaviour==null || myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_RaiseAlarm> ();
-							myController.currentBehaviour = nb;
-							////////Debug.LogError("RAISE ALARM 3");
-
-							//PhoneTab_RadioHack.me.setNewText ("I'm going to call the cops",radioHackBand.buisness);
-
-							//myController.memory.noiseToInvestigate = Vector3.zero;
-						}
-					}
-					else if(PlayerAction.currentAction.getType()=="Take Hostage" && myController.detect.hostageTest(myController.memory.objectThatMadeMeSuspisious)==true){
-						//test somethign out first of february
-						if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
-							myController.currentBehaviour = nb;
-							nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							//PhoneTab_RadioHack.me.setNewText ("Engaging target",radioHackBand.buisness);
-
-						}
-
-					}
-				}
 
 
-			}
-		} else {
-			bool canWeSeeObject = myController.detect.targetDetect (myController.memory.objectThatMadeMeSuspisious);
-
-			if (canWeSeeObject == true) {
-				if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
-					myController.currentBehaviour = nb;
-					nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-					//PhoneTab_RadioHack.me.setNewText ("Engaging target",radioHackBand.buisness);
-
-				}
-				myController.memory.noiseToInvestigate = myController.memory.objectThatMadeMeSuspisious.transform.position;
-			} else {
-				if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious) == false) {
-					if (myController.currentBehaviour.myType != behaviourType.updateSuspects) {
-						////////Debug.Log ("Updating suspects");
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_UpdateSuspects> ();
-						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-						//PhoneTab_RadioHack.me.setNewText ("I'm coming with a description of the suspect, standby",radioHackBand.buisness);
-
-					}
-				} else {
-					if (myController.memory.noiseToInvestigate != Vector3.zero) {
-						if (myController.currentBehaviour.myType != behaviourType.investigate) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							myController.currentBehaviour = newBehaviour;
-							//PhoneTab_RadioHack.me.setNewText ("Investigating location",radioHackBand.buisness);
-
-						}
-					}
-				}
-
-				if (Vector3.Distance (this.transform.position, myController.memory.noiseToInvestigate) < 1.5f) {
-					alarmed = false;
-				}
-			}
-		}
-
-
-	}
 
 
 	void shouldNPCBeArmed()
@@ -2516,450 +2018,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			}
 		}
 
-		/*(foreach (GameObject g in NPCManager.me.corpsesInWorld) {
-			if (myController.detect.areWeNearTarget (g) == true) {
-				if (myController.detect.isTargetInFrontOfUs (g) == true) {
-					if (myController.detect.lineOfSightToTargetWithNoCollider (g) == true) {
-						myController.memory.objectThatMadeMeSuspisious = g;
-						suspisious = true;
-						myController.memory.suspisious = true;
-						////////Debug.Log (this.gameObject.name);
-						//////Debug.Break ();
-					}
-				}
-			}
-		}*/
-	}
 
-	public void copPassive()
-	{
-		//if (myController.currentBehaviour == null) {
-		//	NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-		//	myController.currentBehaviour = npcb;
-		//}
-
-		if (myController.currentBehaviour == null) {
-			//if ( myController.currentBehaviour.myType != behaviourType.searchRooms) {
-			//Destroy (myController.currentBehaviour);
-			NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-			myController.currentBehaviour = npcb;
-			//PhoneTab_RadioHack.me.setNewText ("Moving to invesigate room",radioHackBand.cop);
-
-			//}
-		}
-
-		detectWhetherWeShouldBeAlerted ();
-
-		detectCorpses ();
-		if (canWeSeeSuspects () == false) {
-			if (myController.memory.objectThatMadeMeSuspisious == null) {
-				if (myController.currentBehaviour==null || myController.currentBehaviour.myType != behaviourType.searchRooms) {
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-					myController.currentBehaviour = npcb;
-					//PhoneTab_RadioHack.me.setNewText ("Moving to invesigate room",radioHackBand.cop);
-
-				}
-			} else {
-
-				if (myController.memory.objectThatMadeMeSuspisious.tag == "Player" || myController.memory.objectThatMadeMeSuspisious.tag == "NPC") {
-					SearchedMarker suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-					if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious) == false) {
-						if (suspisiousOf == null) {
-							if (myController.currentBehaviour.myType != behaviourType.investigate) {
-								//////Debug.Log ("Passive cop investigating location " + myController.memory.objectThatMadeMeSuspisious.name);
-								Destroy (myController.currentBehaviour);
-								NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
-								newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-								myController.currentBehaviour = newBehaviour;
-								//PhoneTab_RadioHack.me.setNewText ("Potential suspect sighted, going to investigate",radioHackBand.cop);
-
-							}
-						} else {
-							if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-								//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
-								Destroy (myController.currentBehaviour);
-								NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
-								myController.currentBehaviour = nb;
-								nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-								suspisiousOf.addToSearchedBy (this.gameObject);
-								//PhoneTab_RadioHack.me.setNewText ("Potential suspect sighted, going to investigate",radioHackBand.cop);
-
-							}
-						}
-					} else {
-						alarmed = true;
-					}
-				} else if (myController.memory.objectThatMadeMeSuspisious.tag != "Dead/Knocked" || myController.memory.objectThatMadeMeSuspisious.tag != "Dead/Guarded") {
-					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						//////Debug.Log ("Passive cop investigating location " + myController.memory.objectThatMadeMeSuspisious.name);
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
-						newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-						//PhoneTab_RadioHack.me.setNewText ("Found a suspicious object, investigating",radioHackBand.cop);
-
-					}
-				} else {
-					if ( myController.currentBehaviour.myType != behaviourType.searchRooms) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-						myController.currentBehaviour = npcb;
-						//PhoneTab_RadioHack.me.setNewText ("Moving to invesigate room",radioHackBand.cop);
-
-					}
-				}
-			}
-		} else {
-			PersonWeaponController pwc = myController.memory.objectThatMadeMeSuspisious.GetComponent<PersonWeaponController> ();
-			SearchedMarker suspisiousOf = null;//s = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-
-			if (pwc == null) {
-				//not got a weapon,
-			} else {
-
-				//alarmed = true;
-				if (pwc.currentWeapon == null && LevelController.me.suspects.Contains(myController.memory.objectThatMadeMeSuspisious)==false) {
-					if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-						//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
-						suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
-						myController.currentBehaviour = nb;
-						nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						suspisiousOf.addToSearchedBy (this.gameObject);
-						//PhoneTab_RadioHack.me.setNewText ("Potential suspect sighted, going to investigate",radioHackBand.cop);
-
-					}
-				} else {
-					alarmed = true;
-				}
-			}
-		}
-
-		if (myController.currentBehaviour == null) {
-			//if ( myController.currentBehaviour.myType != behaviourType.searchRooms) {
-			//Destroy (myController.currentBehaviour);
-			NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-			myController.currentBehaviour = npcb;
-			//PhoneTab_RadioHack.me.setNewText ("Moving to invesigate room",radioHackBand.cop);
-
-			//}
-		}
-
-	}
-
-	public void copSuspicious()
-	{
-		detectWhetherWeShouldBeAlerted ();
-
-		if (canWeSeeSuspects () == false) {
-			if (myController.memory.objectThatMadeMeSuspisious == null) {
-				if (myController.memory.noiseToInvestigate == Vector3.zero) {
-					//suspisious = false;
-
-				} else {
-
-
-
-					//go to location
-					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						//////Debug.Log ("Investigating location on Suspicious" );
-
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-						//PhoneTab_RadioHack.me.setNewText ("Moving to invesigate location, standby",radioHackBand.cop);
-
-					}
-
-				}
-
-
-			} else {
-				
-
-				// go to object
-				if (myController.memory.objectThatMadeMeSuspisious.tag != "Dead/Knocked" && myController.memory.objectThatMadeMeSuspisious.tag != "Dead/Guarded") {
-					if (myController.memory.objectThatMadeMeSuspisious.tag != "Player" && myController.memory.objectThatMadeMeSuspisious.tag != "NPC") {
-						if (myController.currentBehaviour.myType != behaviourType.investigate) {
-							//////Debug.Log ("Wanting to investigate object");
-
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour_InvestigateObject newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
-							newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							myController.currentBehaviour = newBehaviour;
-							//PhoneTab_RadioHack.me.setNewText ("Found a suspicious object, investigating",radioHackBand.cop);
-
-						}
-					} else {
-						//PersonWeaponController pwc = myController.memory.objectThatMadeMeSuspisious.GetComponent<PersonWeaponController> ();
-						if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious) == false) {
-							SearchedMarker suspisiousOf = null;//s = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-
-							NPCController npc = myController.memory.objectThatMadeMeSuspisious.GetComponent<NPCController> ();
-							if (npc == null) {
-								if (myController.currentBehaviour.myType != behaviourType.searchPerson && myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-									//////Debug.Log ("COP SEARCH ONE Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
-									suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-									Destroy (myController.currentBehaviour);
-									NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
-									myController.currentBehaviour = nb;
-									nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-									suspisiousOf.addToSearchedBy (this.gameObject);
-									//PhoneTab_RadioHack.me.setNewText ("Potential suspect spotted, investigating.",radioHackBand.cop);
-
-								}
-							} else {
-								if (npc.npcB.myType == AIType.hostage && npc.transform.parent.tag != "Player") {
-									if (myController.currentBehaviour.myType != behaviourType.freeHostage && npc.transform.parent.gameObject.tag != "Player") {
-										Destroy (myController.currentBehaviour);
-										NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_FreeHostage> ();
-										myController.currentBehaviour = npcb;
-										//PhoneTab_RadioHack.me.setNewText ("Found a suspicious object, investigating",radioHackBand.cop);
-
-									}
-									else if(npc.npcB.myType == AIType.hostage && npc.transform.parent.tag == "Player")
-									{
-										myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
-										alarmed = true;
-									}
-								} else {
-									if (myController.currentBehaviour.myType != behaviourType.searchPerson && myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-										//////Debug.Log ("COP SEARCH TWO Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
-										suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-										Destroy (myController.currentBehaviour);
-										NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
-										myController.currentBehaviour = nb;
-										nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-										suspisiousOf.addToSearchedBy (this.gameObject);
-										//PhoneTab_RadioHack.me.setNewText ("Potential suspect spotted, investigating.",radioHackBand.cop);
-
-									}
-								}
-							}
-
-
-
-						}
-					}
-				} else {
-					if (copAlarm == false) {
-						if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_CopRaiseAlarm> ();
-							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-
-							myController.currentBehaviour = newBehaviour;
-							//PhoneTab_RadioHack.me.setNewText ("Calling for backup.",radioHackBand.cop);
-
-						}
-					} else {
-						if (myController.currentBehaviour.myType != behaviourType.guardCorpse) {
-							//////Debug.Log ("Guarding Corpse");
-
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_GuardCorpse> ();
-							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							myController.currentBehaviour = newBehaviour;
-							//PhoneTab_RadioHack.me.setNewText ("Guarding a body untill backup gets here.",radioHackBand.cop);
-
-						}
-					}
-				}
-
-			}
-		} else {
-
-
-
-			PersonWeaponController pwc = myController.memory.objectThatMadeMeSuspisious.GetComponent<PersonWeaponController> ();
-			SearchedMarker suspisiousOf = null;//s = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-
-			if (pwc == null) {
-				//not got a weapon,
-			} else {
-				alarmed = true;
-				/*if (pwc.currentWeapon == null) {
-					if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-						//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
-						suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
-						myController.currentBehaviour = nb;
-						nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						suspisiousOf.addToSearchedBy (this.gameObject);
-					}
-				} else {
-					alarmed = true;
-				}*/
-			}
-		}
-
-
-	}
-		
-	public void copAlarmed()
-	{
-		//detectWhetherWeShouldBeAlerted ();
-		if (myController.currentBehaviour == null) {
-			//if ( myController.currentBehaviour.myType != behaviourType.searchRooms) {
-			//Destroy (myController.currentBehaviour);
-			NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-			myController.currentBehaviour = npcb;
-			//PhoneTab_RadioHack.me.setNewText ("Searching room for suspects",radioHackBand.cop);
-
-			//}
-		}
-		bool canWeSeeObject = false;// myController.detect.targetDetect (myController.memory.objectThatMadeMeSuspisious);
-
-		foreach (GameObject g in LevelController.me.suspects) {
-			if (myController.detect.fov.visibleTargts.Contains (g.transform)) {
-				myController.memory.objectThatMadeMeSuspisious = g;
-			}
-		}
-
-		if (myController.memory.objectThatMadeMeSuspisious==null || myController.detect.fov.visibleTargts.Contains (myController.memory.objectThatMadeMeSuspisious.transform) == false) {
-			canWeSeeObject = false;
-		} else {
-			canWeSeeObject = true;
-			if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious)) {
-				attemptToArrest = false;
-			}
-		}
-
-		if (canWeSeeObject == true) {
-			if (shouldWeAttackTarget (myController.memory.objectThatMadeMeSuspisious) == true) {
-				if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
-					myController.currentBehaviour = nb;
-					nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-					//PhoneTab_RadioHack.me.setNewText ("Engaging target",radioHackBand.buisness);
-
-				}
-			}
-
-			if (attemptToArrest == true) {
-				if (myController.currentBehaviour.myType != behaviourType.arrestTarget) {
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_ArrestTarget> ();
-					nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-					myController.currentBehaviour = nb;
-					//PhoneTab_RadioHack.me.setNewText ("Moving to arrest target.",radioHackBand.cop);
-
-				}
-			} else {
-				if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
-					myController.currentBehaviour = nb;
-					nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-					//PhoneTab_RadioHack.me.setNewText ("Target is hostile, taking him down.",radioHackBand.cop);
-
-				}
-			}
-			myController.memory.noiseToInvestigate = myController.memory.objectThatMadeMeSuspisious.transform.position;
-		} else {
-		/*	if (myController.currentBehaviour.myType == behaviourType.attackTarget) {
-				loseTargetTimer -= Time.deltaTime;
-				if (loseTargetTimer <= 0) {
-					Destroy (myController.currentBehaviour);
-					loseTargetTimer = 5.0f;
-					RoomScript r = LevelController.me.getRoomObjectIsIn (this.gameObject);
-					if (r == null) {
-						if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_CopRaiseAlarm> ();
-							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							myController.currentBehaviour = newBehaviour;
-							//PhoneTab_RadioHack.me.setNewText ("Going to call for backup",radioHackBand.cop);
-						}
-					} else {
-						if (myController.currentBehaviour.myType != behaviourType.searchRooms) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-							myController.currentBehaviour = npcb;
-							//PhoneTab_RadioHack.me.setNewText ("Searching room for suspects",radioHackBand.cop);
-
-						}
-					}
-
-				}
-				return;
-
-			} */
-
-
-			if (copAlarm == true) {
-				if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious) == false) {
-					if (myController.currentBehaviour.myType != behaviourType.updateSuspects) {
-						//////Debug.Log ("Updating suspects");
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_UpdateSuspects> ();
-						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-						//PhoneTab_RadioHack.me.setNewText ("Going to update suspects description, standby",radioHackBand.cop);
-
-					}
-				} else {
-					if (myController.memory.noiseToInvestigate != Vector3.zero) {
-						if (myController.currentBehaviour.myType != behaviourType.investigate) {
-							//////Debug.Log ("Investigating location on alarmed");
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							myController.currentBehaviour = newBehaviour;
-							//PhoneTab_RadioHack.me.setNewText ("I've heard something, going to investigate",radioHackBand.cop);
-
-						}
-					} else {
-						if (myController.currentBehaviour.myType != behaviourType.searchRooms) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_SearchRoom> ();
-							myController.currentBehaviour = npcb;
-							//PhoneTab_RadioHack.me.setNewText ("Searching room for suspects",radioHackBand.cop);
-
-						}
-					}
-				}
-
-				if (Vector3.Distance (this.transform.position, myController.memory.noiseToInvestigate) < 1.5f) {
-					alarmed = false;
-				}
-			} else {
-				if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-					Destroy (myController.currentBehaviour);
-					NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_CopRaiseAlarm> ();
-					//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-					myController.currentBehaviour = newBehaviour;
-					//PhoneTab_RadioHack.me.setNewText ("Going to call for backup",radioHackBand.cop);
-
-				}
-			}
-		}
-
-	
-	}
-
-	void setAllSwatToFormUp(){
-		foreach (NPCController npc in NPCManager.me.npcControllers) {
-			if (npc.npcB.myType == AIType.swat) {
-				if (npc.currentBehaviour == null) {
-
-				} else {
-					if (npc.currentBehaviour.myType == behaviourType.formUp) {
-							
-					} else {
-						Destroy (npc.currentBehaviour);
-						NPCBehaviour nb = npc.gameObject.AddComponent<NPCBehaviour_SwatFormUp> ();
-						npc.currentBehaviour = nb;
-					}
-				}
-			}
-		}
 	}
 
 	void setAllSwatToAttack()
@@ -3061,106 +2120,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 	}
 
 	public float swatLoseTargetTimer = 10.0f;
-	public void swatPassive()
-	{
-		shouldNPCBeArmed ();
-		if (myController.currentBehaviour == null) {
-			NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SWATSearchMap> ();
-			myController.currentBehaviour = nb;
-			//PhoneTab_RadioHack.me.setNewText ("Team Alpha moving in",radioHackBand.swat);
 
-		}
-
-		foreach (Transform t in myController.detect.fov.visibleTargts) {
-			if (t == null) {
-				continue;
-			}
-
-
-			if (shouldWeAttackTarget (t.gameObject) == true) {
-				myController.memory.objectThatMadeMeSuspisious = t.gameObject;
-				setAllSwatToAttack ();
-			}
-		}
-
-		if (myController.currentBehaviour.myType == behaviourType.attackTarget) {
-			if (canWeSeeSuspects () == false) {
-				swatLoseTargetTimer -= Time.deltaTime;
-				if (swatLoseTargetTimer <= 0) {
-					setAllSwatToSearch ();
-					swatLoseTargetTimer = 10.0f;
-				}
-			} else {
-				swatLoseTargetTimer = 10.0f;
-				myController.memory.noiseToInvestigate = myController.memory.objectThatMadeMeSuspisious.transform.position;
-			}
-			return;
-		}
-
-		if (canWeSeeSuspects () == true || hasSwatSeenArmedTarget()==true) {
-
-			if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-				setAllSwatToAttack ();
-				//////Debug.Log ("Set all swat to attack");
-			}
-
-		}
-
-		//if (FindObjectOfType<NPCBehaviour_SWATAttackTarget> () == true && myController.currentBehaviour.myType == behaviourType.attackTarget) {
-		//	return;
-		//}
-
-		/*if (canWeSeeSuspects () == false) {
-			if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-				if (myController.memory.noiseToInvestigate == Vector3.zero) {
-					if (myController.currentBehaviour.myType != behaviourType.searchRooms) {
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_SWATSearchMap> ();
-						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-					}
-				} else {
-					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						//////Debug.Log ("Investigating location on alarmed");
-						Destroy (myController.currentBehaviour);
-						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-						myController.currentBehaviour = newBehaviour;
-					}
-				}
-			} else {
-				swatLoseTargetTimer -= Time.deltaTime;
-				if (swatLoseTargetTimer <= 0) {
-					swatLoseTargetTimer = 5.0f;
-					if (myController.memory.noiseToInvestigate == Vector3.zero) {
-						if (myController.currentBehaviour.myType != behaviourType.searchRooms) {
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_SWATSearchMap> ();
-							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							myController.currentBehaviour = newBehaviour;
-						}
-					} else {
-						if (myController.currentBehaviour.myType != behaviourType.investigate) {
-							//////Debug.Log ("Investigating location on alarmed");
-							Destroy (myController.currentBehaviour);
-							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
-							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-							myController.currentBehaviour = newBehaviour;
-						}
-					}
-				}
-			}
-		} else {
-			swatLoseTargetTimer = 5.0f;
-			if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-				Destroy (myController.currentBehaviour);
-				NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SWATAttackTarget> ();
-				myController.currentBehaviour = nb;
-				nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-			}
-			myController.memory.noiseToInvestigate = myController.memory.objectThatMadeMeSuspisious.transform.position;
-		}*/
-	}
 
 
 	void civilianPassive()
@@ -3240,14 +2200,6 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			setAllSwatToAttack ();
 		}
 		else{
-			//if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
-			//	Destroy (myController.currentBehaviour);
-			//	NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
-			//	myController.currentBehaviour = nb;
-			//	nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
-				//PhoneTab_RadioHack.me.setNewText ("Target is hostile, taking him down.",radioHackBand.cop);
-				////////Debug.Log("Adding attack target");
-			//}
 			alarmed = true;
 		}
 		setAttacked ();
@@ -3260,6 +2212,136 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		attackedRecently = true;
 	}
 
+
+	void shopkeeperDecideBehaviour()
+	{
+		decision = 0;
+		GameObject nearbyHostile = isHostileTargetNearby ();
+
+			if (nearbyHostile == null) {
+				decision++;
+				GameObject nearbySuspicious = null;// suspiciousTarget ();
+				////////Debug.LogError ("Trying to find person to search");
+
+				if (nearbySuspicious == null) {
+					decision++;
+
+					GameObject traspasser = isPersonTraspassing ();
+					if (traspasser == null) {
+						decision++;
+
+						if (myController.memory.noiseToInvestigate != Vector3.zero) {
+							if (canWeSwitchBehaviour (whatAiIsDoing.investigatingLocation) == true) {
+								doing = whatAiIsDoing.investigatingLocation;
+							}
+						} else {
+							decision++;
+
+							GameObject nearbyHostage = canSeeHostage ();
+
+							if (nearbyHostage == null) {
+								decision++;
+
+								GameObject nearbyCorpse = isCorpseNearby ();
+
+								if (nearbyCorpse == null) {
+									decision++;
+
+									GameObject nearbyItem = null;
+
+									if (nearbyItem == null) {
+										decision++;
+
+										if (shouldWeRaiseAlarm () == true) {
+											decision++;
+											if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm)) {
+												doing = whatAiIsDoing.raisingAlarm;
+											}
+											////Debug.Log ("Setting alarm 1");
+										}
+									}
+
+								} else {
+									if (shouldWeRaiseAlarm () == true) {
+										doing = whatAiIsDoing.raisingAlarm;
+										////Debug.Log ("setting alarm 2");
+										myController.memory.objectThatMadeMeSuspisious = nearbyCorpse;
+
+									} else {
+										doing = whatAiIsDoing.leaving;
+									}
+								}
+							} else {
+								//////Debug.LogError (this.gameObject.name + " found a hostage, attempting to free");
+								if (canWeSwitchBehaviour (whatAiIsDoing.freeingHostage) == true) {
+									doing = whatAiIsDoing.freeingHostage;
+									myController.memory.objectThatMadeMeSuspisious = nearbyHostage;
+								}
+							}
+						}
+					} else {
+						if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm) == true) {
+							doing = whatAiIsDoing.raisingAlarm;
+							myController.memory.objectThatMadeMeSuspisious = traspasser;
+						}
+					}
+				} else {
+					//////Debug.LogError ("Found person to search");
+
+					if (canWeSwitchBehaviour (whatAiIsDoing.searchingPerson)) {
+						doing = whatAiIsDoing.searchingPerson;
+						myController.memory.objectThatMadeMeSuspisious = nearbySuspicious;
+					}
+				}
+			} else {
+				doing = whatAiIsDoing.raisingAlarm;
+				myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
+			}
+
+
+		if (PoliceController.me.buildingUnderSiege == null) {
+			if (myController.memory.beenAttacked == true || myController.memory.peopleThatHaveAttackedMe.Contains (CommonObjectsStore.player) || alarmed == true) {
+				if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm)) {
+					doing = whatAiIsDoing.raisingAlarm;
+				}
+			} else {
+				doing = whatAiIsDoing.shopkeep;
+			}
+		} else {
+			if (PoliceController.me.buildingUnderSiege.isPosInRoom (this.transform.position) == true) {
+				doing = whatAiIsDoing.leaving;
+			}
+		}
+	}
+
+	void shopkeeperDoBehaviour()
+	{
+		Debug.Log ("Shopkeeper is doing " + doing.ToString ());
+		shopkeeperDecideBehaviour ();
+		if (doing == whatAiIsDoing.shopkeep||doing==whatAiIsDoing.starting) {
+			if (myController.currentBehaviour == null) {
+
+			} else if (myController.currentBehaviour.myType != behaviourType.shopkeeper) {
+				Destroy (myController.currentBehaviour);
+			}
+			myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_Shopkeeper> ();
+		} else if (doing == whatAiIsDoing.raisingAlarm) {
+			if (myController.currentBehaviour == null) {
+
+			} else if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
+				Destroy (myController.currentBehaviour);
+			}
+			NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_CivilianRaiseAlarm> ();
+			myController.currentBehaviour = npcb;
+		} else if (doing == whatAiIsDoing.leaving) {
+			if (myController.currentBehaviour == null) {
+
+			} else if (myController.currentBehaviour.myType != behaviourType.exitLevel) {
+				Destroy (myController.currentBehaviour);
+			}
+			myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
+		}
+	}
 
 }
 
@@ -3282,7 +2364,9 @@ public enum whatAiIsDoing
 	swatFormUp,
 	swatRaidBuilding,
 	swatAttack,
-	evacuate
+	evacuate,
+	shopkeep,
+	leaving
 }
 
 

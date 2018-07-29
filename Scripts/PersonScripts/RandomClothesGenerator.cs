@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Class to randomly generate an outfit, will replace with a propper outfit generator at some point.
+/// </summary>
 public class RandomClothesGenerator : MonoBehaviour {
 	public List<string> clothes1, clothes2, clothes3, clothes4, clothes5;
 	// Use this for initialization

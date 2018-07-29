@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CivilianAction : MonoBehaviour {
+
+	/// <summary>
+	/// This is a class to give civilians something to do when roaming about the map, they will go to a point, wait for X seconds then find something else to do.
+	/// Also has options for sitting & going for a specific action after doing this one e.g. using a toilet then washing hands 
+	/// </summary>
+
 	public float timeActionTakes,resetValue;
 	public string animationName;
 	public Transform positionForAction;

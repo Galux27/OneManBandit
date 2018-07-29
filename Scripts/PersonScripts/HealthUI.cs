@@ -2,7 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class to control the UI for the player health. 
+/// </summary>
 public class HealthUI : MonoBehaviour {
+	
+
 	public Image healthBar;
 	RectTransform health,armour;
 	public Text bloodDisplay;

@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCController : MonoBehaviour {
+	/// <summary>
+	/// Class that stores all the important things relating to an NPC and calls the OnUpdate for the behaviour decider.
+	/// </summary>
+
 	public NPCBehaviour currentBehaviour;
 
 	public PersonMovementController pmc;
@@ -68,14 +72,9 @@ public class NPCController : MonoBehaviour {
 		if (NPCManager.me.npcControllers.Contains (this) == false) {
 			NPCManager.me.npcControllers.Add (this);
 		}
-
-	//	NPCBehaviour test = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
-		//test.passInGameobject (CommonObjectsStore.player);
-		//currentBehaviour = test;
 	}
 	public float stunTimer = 0.0f;
 
-	// Update is called once per frame
 	void Update () {
 		if (currentBehaviour == null) {
 			return;
@@ -95,10 +94,7 @@ public class NPCController : MonoBehaviour {
 				Destroy (myHalo);
 			}
 		}
-		//if (Time.deltaTime > 0.1f) {
-			//Debug.Log (this.gameObject.name + " was doing " + currentBehaviour.myType);
-		//}
-
+	
 
 		if (knockedDown == false && npcB.myType!=AIType.hostage) {
 			skipAiCheckOnFrame = false;
@@ -108,178 +104,8 @@ public class NPCController : MonoBehaviour {
 			}
 
 
-			//if (npcB.myType == AIType.civilian) {
-			//	if (currentBehaviour==null ||  currentBehaviour.myType != behaviourType.civilianAction) {
-			//		if (pwc.enabled == true) {
-			//			pwc.OnUpdate ();
-			//		}
-			//	}
-			//} else {
-			//	if (pwc.enabled == true) {
-			//		pwc.OnUpdate ();
-			//	}
-			//}
-
-
-			/*if (skipAiCheckOnFrame == false) {
-				if (myType == AIType.aggressive) {
-					AgressiveAI ();
-				} else if (myType == AIType.guard) {
-					GuardAI ();
-				}
-			}*/
 		} else if(knockedDown==true){
 			knockedOut ();
-		}
-	}
-
-	void GuardAI()
-	{
-		if (currentBehaviour == null) {
-			if (doWeHaveAWeapon () == true) {
-				if (currentBehaviour == null || currentBehaviour.myType != behaviourType.patrol && currentBehaviour.myType != behaviourType.getAmmo) {
-					NPCBehaviour_PatrolRoute newBehaviour = this.gameObject.AddComponent<NPCBehaviour_PatrolRoute> ();
-					if (currentBehaviour == null) {
-
-					} else {
-						Destroy (currentBehaviour);
-					}
-					currentBehaviour = newBehaviour;
-				}
-			} else {
-				NPCBehaviour_FindGear newBehaviour = this.gameObject.AddComponent<NPCBehaviour_FindGear> ();
-				if (currentBehaviour == null) {
-
-				} else {
-					Destroy (currentBehaviour);
-				}
-				currentBehaviour = newBehaviour;
-			}
-		} else {
-			if (doWeHaveAWeapon () == true) {
-				if (memory.suspisious == false) {
-					if (currentBehaviour == null || currentBehaviour.myType != behaviourType.patrol && currentBehaviour.myType != behaviourType.getAmmo) {
-						NPCBehaviour_PatrolRoute newBehaviour = this.gameObject.AddComponent<NPCBehaviour_PatrolRoute> ();
-						if (currentBehaviour == null) {
-
-						} else {
-							Destroy (currentBehaviour);
-						}
-						currentBehaviour = newBehaviour;
-					}
-				} else {
-					if (currentBehaviour.myType != behaviourType.investigate) {
-						NPCBehaviour_InvestigateObject newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
-						newBehaviour.passInGameobject (memory.objectThatMadeMeSuspisious);
-						//newBehaviour.Initialise ();
-						if (currentBehaviour == null) {
-
-						} else {
-							Destroy (currentBehaviour);
-						}
-						currentBehaviour = newBehaviour;
-
-					}
-				}
-			} else {
-				NPCBehaviour_FindGear newBehaviour = this.gameObject.AddComponent<NPCBehaviour_FindGear> ();
-				if (currentBehaviour == null) {
-
-				} else {
-					Destroy (currentBehaviour);
-				}
-				currentBehaviour = newBehaviour;
-			}
-		}
-	}
-
-
-	void AgressiveAI()
-	{
-		if (doWeHaveAWeapon () == true) {
-			if (canWeFireWeapon () == true) {
-				if (currentBehaviour == null || currentBehaviour.myType != behaviourType.attackTarget) {
-					NPCBehaviour_AttackTarget newBehaviour = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
-					newBehaviour.passInGameobject (CommonObjectsStore.player);
-					if (currentBehaviour == null) {
-
-					} else {
-						Destroy (currentBehaviour);
-					}
-					currentBehaviour = newBehaviour;
-				}
-			} else {
-				if (currentBehaviour == null || currentBehaviour.myType != behaviourType.getAmmo && currentBehaviour.myType != behaviourType.getWeapon) {
-					if (pwc.currentWeapon == null) {
-						NPCBehaviour_FindGear newBehaviour = this.gameObject.AddComponent<NPCBehaviour_FindGear> ();
-						//////Debug.Log ("GEAR FIND 1");
-						if (currentBehaviour == null) {
-
-						} else {
-							Destroy (currentBehaviour);
-						}
-						currentBehaviour = newBehaviour;
-					} else {
-						NPCBehaviour_FindAmmo newBehaviour = this.gameObject.AddComponent<NPCBehaviour_FindAmmo> ();
-						if (currentBehaviour == null) {
-
-						} else {
-							Destroy (currentBehaviour);
-						}
-						currentBehaviour = newBehaviour;
-					}
-				}
-
-				/*if (currentBehaviour == null || currentBehaviour.myType != behaviourType.getWeapon) {
-					NPCBehaviour_FindGear newBehaviour = this.gameObject.AddComponent<NPCBehaviour_FindGear> ();
-					if (currentBehaviour == null) {
-
-					} else {
-						Destroy (currentBehaviour);
-					}
-					currentBehaviour = newBehaviour;
-				}*/
-			}
-		} else {
-
-
-			if (currentBehaviour == null || currentBehaviour.myType != behaviourType.getWeapon && currentBehaviour.myType != behaviourType.attackTarget) {
-				//////Debug.Log ("GEAR FIND 2");
-
-				NPCBehaviour_FindGear newBehaviour = this.gameObject.AddComponent<NPCBehaviour_FindGear> ();
-				if (currentBehaviour == null) {
-
-				} else {
-					Destroy (currentBehaviour);
-				}
-				currentBehaviour = newBehaviour;
-			}
-		}
-	}
-
-	public bool doWeHaveAWeapon()
-	{
-		if (pwc.currentWeapon == null) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	public bool canWeFireWeapon()
-	{
-		if (pwc.currentWeapon == null) {
-			return true;
-		}else{
-			if (pwc.currentWeapon.melee == true) {
-				return true;
-			} else {
-				if (inv.getAmmoForGun (pwc.currentWeapon.WeaponName) == null) {
-					return false;
-				} else {
-					return true;
-				}
-			}
 		}
 	}
 
@@ -478,7 +304,6 @@ public class NPCController : MonoBehaviour {
 	{
 		NPCManager.me.npcsInWorld.Remove (this.gameObject);
 		NPCManager.me.npcControllers.Remove (this);
-
 	}
 
 
@@ -489,5 +314,6 @@ public enum AIType{
 	cop, //gets called by guards, will work as a team to try and secure a building, will call for backup if they lose a member or 
 	civilian, //walks around and does activities, will flee if they spot something bad, will try to raise alarm if they are far enough from the player
 	swat,
-	hostage
+	hostage,
+	shopkeeper
 }

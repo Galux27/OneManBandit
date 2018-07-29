@@ -4,9 +4,16 @@ using UnityEngine;
 
 public class Incident : MonoBehaviour {
 
+	/// <summary>
+	/// Class to control incidents, if the incident controller has an incident with the same name it will create the objects in this class at the inciden position 
+	/// </summary>
+
 	public string incidentName = "";
 	public GameObject objectToCreate;
 	public List<GameObject> optionalObjectsToCreate;
+	/// <summary>
+	/// Number of days that the incident stays for 
+	/// </summary>
 	public int timeLimit=1;
 
 	public GameObject board;

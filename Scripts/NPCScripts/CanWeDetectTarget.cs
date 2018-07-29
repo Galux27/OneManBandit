@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CanWeDetectTarget : MonoBehaviour {
+
+	/// <summary>
+	/// Class that is used to work out if an NPC can detect an object, done via distance, raycast and the object begin infront of the NPC
+	/// </summary>
+
 	public NPCController myController;
 	public GameObject target;
 	public bool detect=false;

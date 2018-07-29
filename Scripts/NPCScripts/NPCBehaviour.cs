@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCBehaviour : MonoBehaviour {
+
+	/// <summary>
+	/// This is the base class for all NPC Behaviours, to get NPCs to do something the child class will just overwrite one or more of these methods to get the required functionality.
+	/// </summary>
+
 	public bool isInitialised;
 	public NPCController myController;
 	public behaviourType myType;
@@ -41,7 +46,9 @@ public class NPCBehaviour : MonoBehaviour {
 
 	}
 }
-
+/// <summary>
+/// The type of the NPC behaviour, used when working out whether the behaviour should be changed. 
+/// </summary>
 public enum behaviourType{
 	none,
 	getWeapon,
@@ -63,5 +70,6 @@ public enum behaviourType{
 	freeHostage,
 	guardEntrance,
 	formUp,
-	evacuate
+	evacuate,
+	shopkeeper
 }

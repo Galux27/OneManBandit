@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCDoorOpener : MonoBehaviour {
+
+	/// <summary>
+	/// Class that detects if a door is infront of an NPC and opens it if so. 
+	/// </summary>
+
 	NPCController myController;
 	float timer = 0.5f;
-	bool madeTrigger = true;
 	// Use this for initialization
 	void Start () {
 		myController = this.GetComponent<NPCController> ();
@@ -14,14 +18,7 @@ public class NPCDoorOpener : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		openDoor ();
-		if (madeTrigger == true) {
-			timer -= Time.deltaTime;
-			if (timer <= 0) {
-				this.GetComponent<Collider2D> ().isTrigger = false;
 
-				madeTrigger = false;
-			}
-		}
 	}
 
 	void openDoor()

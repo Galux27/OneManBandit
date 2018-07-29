@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Old animation controller from when all the animation was done via "SpriteAnimations", unused since moving to the Unity Animation system.
+/// </summary>
 public class PersonAnimationController : MonoBehaviour {
 	public string ID;
 	SpriteRenderer sr;

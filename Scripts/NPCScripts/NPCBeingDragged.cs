@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCBeingDragged : MonoBehaviour {
+	/// <summary>
+	/// Class added to knocked out/dead npcs to allow the player to "drag" them. 
+	/// </summary>
+
 	Rigidbody2D rid;
 
 	void Awake()

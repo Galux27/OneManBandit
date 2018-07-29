@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class DoorScript : MonoBehaviour {
 
+	/// <summary>
+	/// Class that controls all kinds of door
+	/// </summary>
+
 	public GameObject endLeft, endRight, center;
 	public float size = 1.0f;
 
@@ -27,13 +31,25 @@ public class DoorScript : MonoBehaviour {
 	public List<Container> placesToSpawnUnlockItems;
 	public int doorHealth = 2;
 	public Vector3 openRotation,closeRotation;
+
+	/// <summary>
+	/// The note in world that contains the keycode for the door (if locked by keycode) 
+	/// </summary>
 	public GameObject myCode;
 	public Sprite fallenSprite;
 	public GameObject doorMesh;
 	public bool canKickIn = true;
 	public AudioClip doorSoundEffect,doorDestroyed,impact;
+
+	/// <summary>
+	/// When doors are generated they get an ID number that is serialized so that it can be linked with a key item taht  
+	/// </summary>
 	public int myID;
 	public bool initialised=false;
+
+	/// <summary>
+	/// Marks the door as temporary so its not serialized with the rest of the level. 
+	/// </summary>
 	public bool isTempDoor=false;
 	public string doorIncidentName;
 	void Awake()
@@ -389,13 +405,6 @@ public class DoorScript : MonoBehaviour {
 	public Vector3 posOfLastOpened;
 	void openDoor()
 	{
-		//this.gameObject.transform.rotation = Quaternion.Euler (new Vector3(0,0,this.transform.rotation.eulerAngles.z + 90));
-	//	float timer = 3.0f;
-		//while (timer > 0.0f) {
-		////	this.gameObject.transform.rotation = Quaternion.Slerp (this.transform.rotation,Quaternion.Euler( new Vector3(0,0,this.transform.rotation.eulerAngles.z + 90)),5*Time.deltaTime);
-		//	timer -= Time.deltaTime;
-		//}
-		//doorOpen = true;
 		if (doorOpen == false) {
 			doorOpen = true;
 		}
@@ -406,12 +415,6 @@ public class DoorScript : MonoBehaviour {
 		if (doorOpen == true) {
 			doorOpen = false;
 		}
-		//this.gameObject.transform.rotation = Quaternion.Euler (new Vector3(0,0,this.transform.rotation.eulerAngles.z - 90));
-		//float timer = 3.0f;
-		//while (timer > 0.0f) {
-		//	this.gameObject.transform.rotation = Quaternion.Slerp (this.transform.rotation, Quaternion.Euler (new Vector3 (0, 0, this.transform.rotation.eulerAngles.z - 90)), 5 * Time.deltaTime);
-		//	timer -= Time.deltaTime;
-		//}
 	}
 	float openTimer = 0.2f;
 
@@ -449,19 +452,6 @@ public class DoorScript : MonoBehaviour {
 
 		Vector3 heading = posOfLastOpened - this.transform.position;
 		return Vector3.Dot (heading, this.transform.up);
-	}
-
-	public void setSize()
-	{
-		//center.transform.localScale = new Vector3 (size, 1, 1);
-		//Vector3 centerPos = new Vector3 (size / 2, , 0);
-		//center.transform.position = centerPos;
-
-		//Vector3 posLeft = center.transform.position + ((size / 2) * center.transform.right * -1);
-		//Vector3 posRight = center.transform.position + ((size / 2) * center.transform.right);
-		//endLeft.transform.position = posLeft;
-		//endRight.transform.position = posRight;
-
 	}
 
 	public void createMyKey()

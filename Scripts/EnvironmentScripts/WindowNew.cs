@@ -6,7 +6,7 @@ public class WindowNew : MonoBehaviour {
 	/// <summary>
 	/// Script to control 3d windows. 
 	/// </summary>
-	public bool windowOpen = false,windowDestroyed = false,initilised=false;
+	public bool windowOpen = false,windowDestroyed = false,initilised=false,openable=true;
 	public GameObject window,windowOpenCol,windowClosedCol,destroyed;
 	void Start()
 	{
@@ -35,7 +35,7 @@ public class WindowNew : MonoBehaviour {
 	}
 	void Update()
 	{
-		if (windowDestroyed == false) {
+		if (windowDestroyed == false && openable==true) {
 			if (Vector3.Distance (this.transform.position, CommonObjectsStore.player.transform.position) < 1.5f) {
 				if (Input.GetKeyDown (KeyCode.E)) {
 					if (windowOpen == true) {

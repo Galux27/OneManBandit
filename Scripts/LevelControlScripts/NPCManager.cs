@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCManager : MonoBehaviour {
+
+	/// <summary>
+	/// Class that stores all the NPCs and corpses in the world. Also calls the NPC conrollers update function to run the AI, done here rather than in update to see if the performance increase from having X ai run a frame would provide a performance increase. 
+	/// </summary>
+
 	public static NPCManager me;
 	public List<GameObject> npcsInWorld=new List<GameObject>(), corpsesInWorld=new List<GameObject>();
 	public List<NPCController> npcControllers;

@@ -7,7 +7,7 @@ public class ShopUI : MonoBehaviour {
 	public List<ShopItem> shopUIs,basketUIs;
 	public bool displayBasket=true;
 	public GameObject shopParent;
-	Shop myShop;
+	public Shop myShop;
 	public Text moneyDisp,itemsInBasketDisp,totalWeight,totalCost,basketTitle;
 	public List<string> itemsInBasket;
 
@@ -36,7 +36,8 @@ public class ShopUI : MonoBehaviour {
 			}
 			LoadingDataStore.me.setStashValue (stashValue);
 			itemsInBasket.Clear ();
-			setUIs ();
+			resetUIs ();
+			//setUIs ();
 		}
 	}
 
@@ -89,6 +90,16 @@ public class ShopUI : MonoBehaviour {
 	}
 
 	public int shopEndPoint = 0,playerInvEndPoint=0,basketEndPoint=0;
+
+	void resetUIs()
+	{
+		if(displayBasket==true){
+			
+			foreach (ShopItem si in basketUIs) {
+				si.gameObject.SetActive (false);
+			}
+		}
+	}
 
 	void setUIs()
 	{
@@ -251,6 +262,7 @@ public class ShopUI : MonoBehaviour {
 			itemsInBasket = new List<string> ();
 		}
 		itemsInBasket.Add (item);
+		getEndPoints ();
 		setUIs ();
 	}
 

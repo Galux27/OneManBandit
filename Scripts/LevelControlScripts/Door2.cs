@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Door2 : MonoBehaviour {
-
+	/// <summary>
+	/// unused door, for ingame door see "Door Script"
+	/// </summary>
 	public Vector3 startingRotation;
 	public bool doorOpen=false;
 	public bool autoClose = true;

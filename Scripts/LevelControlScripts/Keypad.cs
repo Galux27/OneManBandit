@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 public class Keypad : MonoBehaviour {
+
+	/// <summary>
+	/// Class that controls the UI for entering a keycode for a number 
+	/// </summary>
+
 	public static Keypad me;
 	public GameObject guiObject;
 	public DoorScript doorToOpen;

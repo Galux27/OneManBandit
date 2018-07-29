@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+/// <summary>
+/// Class that controls the health of a human character. 
+/// </summary>
 public class PersonHealth : MonoBehaviour {
 	public static PersonHealth playerHealth;
 	// Use this for initialization
@@ -27,6 +31,8 @@ public class PersonHealth : MonoBehaviour {
 		
 
 		armourValue = myInventory.getArmourMod (); 
+
+		//Player is invincible in editor for convinience
 		if (this == playerHealth && Application.isEditor==true && playerInvinvible==true|| Application.isEditor==true && amIInvincible==true) {
 
 			healthValue = 5200.0f;
@@ -93,7 +99,6 @@ public class PersonHealth : MonoBehaviour {
 		int chance = Random.Range (0, 200);
 		int odds = Mathf.RoundToInt(healthAsPercentage + (armourValue));
 
-		////////Debug.Log (odds + "||" + chance);
 
 		if (chance > odds) {
 			return true;
@@ -162,11 +167,8 @@ public class PersonHealth : MonoBehaviour {
 		this.GetComponent<Rigidbody2D> ().isKinematic = false;
 		this.GetComponent<Rigidbody2D> ().angularVelocity = 0.0f;
 		this.GetComponent<Rigidbody2D> ().velocity = new Vector2 (0, 0);
-		//this.gameObject.GetComponentInChildren<CircleCollider2D> ().enabled = false;
 
-		//this.GetComponent<SpriteRenderer> ().color = Color.red;
 		PersonAnimationController pac = this.GetComponent<PersonAnimationController> ();
-		//pac.forceFinishCurrentAnim ();
 		pac.animationsToPlay.Clear ();
 		pac.playing = null;
 		pac.counter = 0;
@@ -174,22 +176,7 @@ public class PersonHealth : MonoBehaviour {
 		this.gameObject.GetComponent<SpriteRenderer> ().sortingOrder = 1;
 		ArtemAnimationController ac = this.gameObject.GetComponentInChildren<ArtemAnimationController> ();
 		ac.setFallen ();
-		//this.GetComponent<SpriteRenderer> ().sprite = ac.myAesthetic.dead;
-		//ac.disableBodyParts ();
-		//ac.disableLegs ();
 
-		//death by punch doesnt work
-		//if (this.GetComponentInChildren<Legs> () == true) {
-		//	GameObject legs = this.GetComponentInChildren<Legs> ().gameObject;
-		//	legs.SetActive (false);
-		//}
-
-		//if (this.GetComponentInChildren<HeadController> () == true) {
-		//	GameObject head = this.GetComponentInChildren<HeadController> ().gameObject;
-		//	head.SetActive (false);
-		//}
-
-		//myInventory.die ();
 		this.gameObject.tag = "Dead/Knocked";
 
 		this.gameObject.GetComponent<PersonColliderDecider> ().onDeath ();
@@ -266,10 +253,8 @@ public class PersonHealth : MonoBehaviour {
 	float fireTimer = 0.1f;
 	public void dealDamageFromFire()
 	{
-		//fireTimer -= Time.deltaTime;
-		//if (fireTimer <= 0) {
+		
 		dealDamage (10, false);
-		//	fireTimer = 0.1f;
-		//}
+
 	}
 }

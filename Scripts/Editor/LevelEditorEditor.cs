@@ -1869,6 +1869,7 @@ public class LevelEditorEditor : Editor {
 			if (GUILayout.Button ("Clear nature", GUILayout.Width (125), GUILayout.Height (25))) {
 				debugClearNature ();
 			}
+
 		} else {
 			GUILayout.Label ("Erase Size " + eraseRadius.ToString ());
 			eraseRadius = GUILayout.HorizontalSlider (eraseRadius, 1.0f, 10.0f, GUILayout.Width (100.0f), GUILayout.Height (25.0f));

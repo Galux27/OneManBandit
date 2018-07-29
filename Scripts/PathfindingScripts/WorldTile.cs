@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class for pathfinding nodes from when the pathfinding wasn't multithreaded, now used for more gameplay stuff. 
+/// </summary>
 public class WorldTile : MonoBehaviour {
 	public int gCost;
 	public int hCost;
@@ -22,11 +25,11 @@ public class WorldTile : MonoBehaviour {
 			return gCost + hCost;
 		}
 	}
-
-
-
 }
 
+/// <summary>
+/// Class for multithreaded pathfinding node, identical to WorldTile but modified so it uses nothing unity specific so it can run on a seperate thread. 
+/// </summary>
 public class ThreadedWorldTile
 {
 

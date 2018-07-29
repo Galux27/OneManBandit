@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class FloorScript : MonoBehaviour {
+
+	/// <summary>
+	/// Just here for when I decide to implement multiple floors, has no use at the moment. 
+	/// </summary>
+
 	public Transform bottomLeft,topRight;
 	public string name;
 

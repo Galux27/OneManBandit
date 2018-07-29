@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Controls the head of an NPC, can rotate to face an object or play an animation for the head. 
+/// </summary>
 public class HeadController : MonoBehaviour {
 	public string animationName = "HeadDefault";
 	Rigidbody2D rid;

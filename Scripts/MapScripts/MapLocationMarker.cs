@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 public class MapLocationMarker : MonoBehaviour {
+	/// <summary>
+	/// Class that controls the markers for locations on the map. 
+	/// </summary>
+
 	public static MapLocationMarker toDisplay;
 	public string locationName,sceneName;
 	public bool displayIcon = false;

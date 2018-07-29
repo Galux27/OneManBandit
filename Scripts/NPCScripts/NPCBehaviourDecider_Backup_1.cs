@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
-	//fix bug where the NPC will sometimes think that another cop is a suspect, might be summit to do with when they're knocked out
-
+/// <summary>
+/// Backup of NPC behaviour decider, unused.
+/// </summary>
 	public AIType myType;
 	public NPCController myController;
 

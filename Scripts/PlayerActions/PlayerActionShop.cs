@@ -18,6 +18,10 @@ public class PlayerActionShop  : PlayerAction {
 			myShop = this.GetComponent<Shop> ();
 		}
 
+		if (myShop.shopAvailable == false) {
+			return false;
+		}
+
 		if (myBuilding == null) {
 			myBuilding = LevelController.me.getBuildingPosIsIn (this.gameObject.transform.position);
 		}

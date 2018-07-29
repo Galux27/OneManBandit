@@ -41,6 +41,9 @@ public class WorldBuilder : MonoBehaviour {
 		}
 	}
 
+	/// <summary>
+	/// Method that fixes an issue with baking the pathfinding nodes in the editor, basicly just double checks that they are assigned in the grid.
+	/// </summary>
 	void debugFixNodes()
 	{
 		Debug.Log ("Had to fix nodes cause summit went wrong " + width + " | " + height);
@@ -73,88 +76,6 @@ public class WorldBuilder : MonoBehaviour {
 	}
 
 	#endif
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
-	List<WorldTile> getNeighbours(int x,int y)
-	{
-
-
-		List<WorldTile> myNeighbours = new List<WorldTile> ();
-	//	WorldTile currentTile = worldTiles [x, y].GetComponent<WorldTile> ();
-	//	currentTile.myNeighbours = new List<WorldTile> ();
-
-
-
-		if (x > 0 && x < width-1) {
-			//can get tiles on both left and right of the tile
-
-			if (y > 0 && y < height - 1) {
-				//top and bottom
-				myNeighbours.Add(worldTiles[x+1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x-1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y+1].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y-1].GetComponent<WorldTile>());
-
-			} else if (y == 0) {
-				//just top
-				myNeighbours.Add(worldTiles[x+1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x-1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y+1].GetComponent<WorldTile>());
-			} else if (y == height - 1) {
-				//just bottom
-				myNeighbours.Add(worldTiles[x,y-1].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x+1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x-1,y].GetComponent<WorldTile>());
-			}
-
-
-		} else if (x == 0) {
-			//can't get tile on left
-			if (y > 0 && y < height - 1) {
-				//top and bottom
-				myNeighbours.Add(worldTiles[x+1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y-1].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y+1].GetComponent<WorldTile>());
-			} else if (y == 0) {
-				//just top
-				myNeighbours.Add(worldTiles[x+1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y+1].GetComponent<WorldTile>());
-			} else if (y == height - 1) {
-				//just bottom
-				myNeighbours.Add(worldTiles[x+1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y-1].GetComponent<WorldTile>());
-			}
-		} else if (x == width-1) {
-			//can't get tile on right
-			if (y > 0 && y < height - 1) {
-				//top and bottom
-				myNeighbours.Add(worldTiles[x-1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y+1].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y-1].GetComponent<WorldTile>());
-			} else if (y == 0) {
-				//just top
-				myNeighbours.Add(worldTiles[x-1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y+1].GetComponent<WorldTile>());
-			} else if (y == height - 1) {
-				//just bottom
-				myNeighbours.Add(worldTiles[x-1,y].GetComponent<WorldTile>());
-				myNeighbours.Add(worldTiles[x,y-1].GetComponent<WorldTile>());
-			}
-		}
-
-
-		return myNeighbours;
-	}
-
 
 	public WorldTile getNearest(Vector3 pos){
 		WorldTile retVal = null;
@@ -290,64 +211,6 @@ public class WorldBuilder : MonoBehaviour {
 		return retVal;
 	}
 
-	public ThreadedWorldTile findNearestThreadedWorldTile(Vector3 pos)
-	{
-		int xIndex = 0, yIndex = 0;
-
-		ThreadedWorldTile t = threadedGetNearest (pos);
-		//RoomScript r = LevelController.me.getRoomPosIsIn (pos);
-		ThreadedWorldTile fallback = t;
-
-		if (t.walkable == false) {
-			Debug.Log ("Retval was not walkable");
-			List<ThreadedWorldTile> otherTiles = new List<ThreadedWorldTile> ();
-			otherTiles.Add (Pathfinding.me.pathNodes [xIndex + 1, yIndex]);
-			otherTiles.Add (Pathfinding.me.pathNodes [xIndex - 1, yIndex]);
-			otherTiles.Add (Pathfinding.me.pathNodes [xIndex , yIndex+ 1]);
-			otherTiles.Add (Pathfinding.me.pathNodes [xIndex , yIndex- 1]);
-
-			otherTiles.Add (Pathfinding.me.pathNodes [xIndex + 1, yIndex -1]);
-			otherTiles.Add (Pathfinding.me.pathNodes [xIndex - 1, yIndex+1]);
-			otherTiles.Add (Pathfinding.me.pathNodes [xIndex +1, yIndex+ 1]);
-			otherTiles.Add (Pathfinding.me.pathNodes [xIndex -1, yIndex- 1]);
-
-			List<ThreadedWorldTile> walkable = new List<ThreadedWorldTile> ();
-
-			foreach(ThreadedWorldTile w in otherTiles){
-				if (w.walkable == true) {
-					walkable.Add (w);
-				}
-			}
-
-			float nearest = 999999.0f;
-
-			foreach(ThreadedWorldTile w in walkable){
-				float d3 = Vector3.Distance (pos,w.worldPos);
-				if (d3 < nearest) {
-					nearest = d3;
-					t = w;
-				}
-			}
-
-
-		}
-
-
-		float d = Vector3.Distance(t.worldPos,pos);
-
-		foreach (ThreadedWorldTile w in t.myNeighbours) {
-		//	RoomScript r2 = LevelController.me.getRoomPosIsIn (w.worldPos);
-			if (w.walkable == true ) {
-				float d2 = Vector3.Distance (w.worldPos, pos);
-				if (d2 < d) {
-					t = w;
-				}
-			}
-		}
-
-			return t;
-
-	}
 
 	public GameObject bottomLeftNode, topRightNode;
 

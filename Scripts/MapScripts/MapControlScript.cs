@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 public class MapControlScript : MonoBehaviour {
+
+	/// <summary>
+	/// Class that controls the world map (displaying it and movement)
+	/// </summary>
+
 	public static MapControlScript me;
 	public bool displayMap=false;
 	public GameObject mapObj;

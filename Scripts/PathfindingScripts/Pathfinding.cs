@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class that contains an unthreaded & threaded versions of the A* algorithm, 
+/// </summary>
 public class Pathfinding : MonoBehaviour {
+
+
 
 	public static Pathfinding me;
 	public GameObject player,target;
@@ -48,7 +53,6 @@ public class Pathfinding : MonoBehaviour {
 			doubleCheckForWalkable = true;
 		}
 
-		tempModReset ();
 	}
 
 	public List<Vector3> findPath(GameObject me,GameObject targetObj)
@@ -81,7 +85,6 @@ public class Pathfinding : MonoBehaviour {
 	public void findPath(GameObject startPos,GameObject endPos,ref List<WorldTile> store)
 	{
 		
-		//try{
 			WorldTile startNode; //had a bug where the method would go through all the tiles in the grid causing a lag spike, just added a condititon to check for a nearby walkable tile, if its null after this it just abandons the path
 
 			if (startPos.GetComponent<WorldTile> () == true) {
@@ -90,8 +93,7 @@ public class Pathfinding : MonoBehaviour {
 				startNode = WorldBuilder.me.findNearestWorldTile (startPos.transform.position);
 			}
 
-			//= WorldBuilder.me.findNearestWorldTile (startPos.transform.position); //WorldBuilder.me.tileFromWorldPos (WorldBuilder.me.findNearestWorldTile( startPos.transform.position));
-			////////Debug.Log(startNode.name);
+			
 			WorldTile endNode ;
 
 			if (endPos.GetComponent<WorldTile> () == true) {
@@ -110,13 +112,9 @@ public class Pathfinding : MonoBehaviour {
 		}
 
 		if (startNode == null || endNode == null) {
-			//////Debug.LogError ("One of the nodes was null, can't get path");
 			return;
 		}
 
-			// =WorldBuilder.me.findNearestWorldTile( endPos.transform.position);// WorldBuilder.me.tileFromWorldPos (endPos.transform.position);
-			//WorldTile startNode = .NodeFromWorldPoint(startPos);
-			//Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
 
 			List<WorldTile> openSet = new List<WorldTile>();
@@ -157,9 +155,7 @@ public class Pathfinding : MonoBehaviour {
 					}
 				}
 			}
-		//catch{
-		//	//////Debug.LogError ("Something Went Wrong with the pathfinding");
-		//}
+
 	}
 
 
@@ -188,12 +184,7 @@ public class Pathfinding : MonoBehaviour {
 
 		while (currentNode != startNode) {
 			path.Add(currentNode);
-			//currentNode.tempModifiers = 0;
-			//currentNode.tempModifiers += 10;
-			//currentNode.gCost = 0;
-			if (highlightPathFound == true) {
-				//currentNode.gameObject.GetComponent<SpriteRenderer>().color = Color.blue;
-			}
+
 			currentNode = currentNode.parent;
 		}
 		path.Reverse();
@@ -276,21 +267,10 @@ public class Pathfinding : MonoBehaviour {
 		//try{
 		ThreadedWorldTile startNode = pathNodes[sX,sY]; //had a bug where the method would go through all the tiles in the grid causing a lag spike, just added a condititon to check for a nearby walkable tile, if its null after this it just abandons the path
 
-	/*	if (startPos.GetComponent<ThreadedWorldTile> () == true) {
-			startNode = startPos.GetComponent<ThreadedWorldTile> ();
-		} else {
-			startNode = WorldBuilder.me.findNearestThreadedWorldTile (startPos.transform.position);
-		}*/
 
-		//= WorldBuilder.me.findNearestThreadedWorldTile (startPos.transform.position); //WorldBuilder.me.tileFromWorldPos (WorldBuilder.me.findNearestThreadedWorldTile( startPos.transform.position));
-		////////Debug.Log(startNode.name);
 		ThreadedWorldTile endNode = pathNodes[eX,eY];
 
-		/*if (endPos.GetComponent<ThreadedWorldTile> () == true) {
-			endNode = endPos.GetComponent<ThreadedWorldTile> ();
-		} else {
-			endNode = WorldBuilder.me.findNearestThreadedWorldTile (endPos.transform.position);
-		}*/
+	
 
 
 		if (startNode.walkable == false) {
@@ -302,13 +282,10 @@ public class Pathfinding : MonoBehaviour {
 		}
 
 		if (startNode == null || endNode == null) {
-			////////Debug.LogError ("One of the nodes was null, can't get path");
 			return;
 		}
 
-		// =WorldBuilder.me.findNearestThreadedWorldTile( endPos.transform.position);// WorldBuilder.me.tileFromWorldPos (endPos.transform.position);
-		//ThreadedWorldTile startNode = .NodeFromWorldPoint(startPos);
-		//Node targetNode = grid.NodeFromWorldPoint(targetPos);
+	
 
 
 		List<ThreadedWorldTile> openSet = new List<ThreadedWorldTile>();
@@ -317,7 +294,6 @@ public class Pathfinding : MonoBehaviour {
 
 		while (openSet.Count > 0) {
 			ThreadedWorldTile node = openSet[0];
-			////////Debug.Log ("Using thread to try and find path " + node.worldPos.ToString());
 
 			for (int i = 1; i < openSet.Count; i ++) {
 				if (openSet[i].fCost < node.fCost || openSet[i].fCost == node.fCost) {
@@ -351,9 +327,7 @@ public class Pathfinding : MonoBehaviour {
 				}
 			}
 		}
-		//catch{
-		//	//////Debug.LogError ("Something Went Wrong with the pathfinding");
-		//}
+
 	}
 
 
@@ -377,15 +351,12 @@ public class Pathfinding : MonoBehaviour {
 
 	void threaded_RetracePath(ThreadedWorldTile startNode,ThreadedWorldTile targetNode,ref List<ThreadedWorldTile> store)
 	{
-		////////Debug.Log ("Retracing threaded path length: " + store.Count);
 		List<ThreadedWorldTile> path = new List<ThreadedWorldTile>();
 		ThreadedWorldTile currentNode = targetNode;
 
 		while (currentNode != startNode) {
 			path.Add(currentNode);
-			if (highlightPathFound == true) {
-				//currentNode.gameObject.GetComponent<SpriteRenderer>().color = Color.blue;
-			}
+
 			currentNode = currentNode.parent;
 		}
 		path.Reverse();
@@ -404,31 +375,7 @@ public class Pathfinding : MonoBehaviour {
 
 	float tempModResetTimer = 5.0f;
 
-	void tempModReset()
-	{
-		return;
 
-		tempModResetTimer -= Time.deltaTime;
-		if (tempModResetTimer <= 0) {
-			for (int x = 0; x < WorldBuilder.me.worldTiles.GetLength (0) - 1; x++) {
-				for (int y = 0; y < WorldBuilder.me.worldTiles.GetLength (1) - 1; y++) {
-					GameObject g = WorldBuilder.me.worldTiles [x, y];
-					if (g == null) {
-
-					} else {
-						WorldTile wt = g.GetComponent<WorldTile> ();
-						if (wt == null) {
-
-						} else {
-							//wt.tempModifiers -= 10;
-						}
-					}
-				
-				}
-			}
-			tempModResetTimer = 5.0f;
-		}
-	}
 
 
 

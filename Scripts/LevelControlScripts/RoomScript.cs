@@ -3,16 +3,28 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class RoomScript : MonoBehaviour {
-	//public Transform bottomLeft,topRight;
+
+	/// <summary>
+	/// Class that defines rooms in a building. 
+	/// </summary>
+	
 	public string roomName;
 	public List<roomRect> rectsInRoom;
 	public bool shootOnSight,traspassing;
 	public List<Item> itemsInRoomAtStart;
 	public List<GameObject> pointsInRoom;
 	// Use this for initialization
+
+	/// <summary>
+	/// the points in the room that the Swat will secure, just the corners of the roomRects 
+	/// </summary>
 	public List<Vector3> pointsForSwat;
 	public List<GameObject> nodesForSwat;
 	public List<Transform> entrances;
+
+	/// <summary>
+	///  distance of the room entrance to the point where the swat forms up, used to define order swat search rooms
+	/// </summary>
 	public int distFromSwatFormUp = 0;
 
 	public bool isOutdoors=false;
@@ -81,6 +93,7 @@ public class RoomScript : MonoBehaviour {
 
 	}
 
+	//TODO change this to not use new GameObject() in instatiate as it creates 2 gameobjects instead of 1.
 	public void addNewRoomRect()
 	{
 		if (rectsInRoom == null) {

@@ -20,6 +20,10 @@ public class BuildingScript : MonoBehaviour {
 	public List<WorldTile> tilesInBuilding;
 	public bool isOutdoors=false;
 	public static BuildingScript outdoors;
+
+	/// <summary>
+	/// Each rect has an invisible object above it that blocks light from hitting the floor inside, to give the effect of there being more building above
+	/// </summary>
 	public List<GameObject> shadowBlockers;
 	public bool buildingClosed=false;
 	void Awake()
@@ -67,7 +71,7 @@ public class BuildingScript : MonoBehaviour {
 	}
 
 	/// <summary>
-	/// Sets incidents in the building, with sufficient incidents the building will be closed till they are fixed.
+	/// Sets incidents in the building (broken doors/windows), with sufficient incidents the building will be closed till they are fixed.
 	/// </summary>
 	void checkForIncidentsInBuilding()
 	{
@@ -111,7 +115,12 @@ public class BuildingScript : MonoBehaviour {
 			buildingClosed = true;
 		}
 	}
-	
+
+	/// <summary>
+	/// Checks whether the item is one of the instances that the item database uses (true) or is an instance in the world (false)
+	/// </summary>
+	/// <returns><c>true</c>, , <c>false</c> otherwise.</returns>
+	/// <param name="i">The index.</param>
 	bool isItemBase(Item i)
 	{
 		foreach(GameObject i2 in ItemDatabase.me.items)
@@ -163,6 +172,9 @@ public class BuildingScript : MonoBehaviour {
 
 	}
 
+	/// <summary>
+	/// Finds nodes that are in this building.
+	/// </summary>
 	public void getPoints()
 	{
 		tilesInBuilding = new List<WorldTile> ();
@@ -201,11 +213,6 @@ public class BuildingScript : MonoBehaviour {
 	}
 
 	// Update is called once per frame
-	void Update () {
-		if (Input.GetKeyDown (KeyCode.G) && Application.isEditor==true) {
-			setBuildingUnderSiege ();
-		}
-	}
 
 	public bool isObjectInRoom(GameObject obj)
 	{
@@ -243,7 +250,10 @@ public class BuildingScript : MonoBehaviour {
 		return false;
 	}
 		
-
+	/// <summary>
+	/// Returns the items in the building that are not held in a container or disabled
+	/// </summary>
+	/// <returns>The in room.</returns>
 	public List<Item> itemsInRoom()
 	{
 		List<Item> retVal = new List<Item> ();

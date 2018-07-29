@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class that controls the shape of the collider for the NPC
+/// </summary>
 public class PersonColliderDecider : MonoBehaviour {
 	public Collider2D twoHandADS,normal,down;
 	PersonWeaponController pwc;

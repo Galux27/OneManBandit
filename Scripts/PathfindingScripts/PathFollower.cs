@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class for finding NPCs a path to a target and moving them along it.
+/// </summary>
 public class PathFollower : MonoBehaviour {
 	public GameObject target;
 	public float pathResetRate = 1.0f, pathTimer = 1.0f;
@@ -47,20 +50,7 @@ public class PathFollower : MonoBehaviour {
 		distToNextPoint = Vector3.Distance (this.transform.position, getCurrentPoint ());
 		myPos = this.transform.position;
 
-	/*	shouldWeAvoidObstacle ();
-		if (obstacle == true && limitTimer <= 0) {
-			avoidObstacle ();
-		} else {
-			if (limitTimer > 0) {
-				limitTimer -= Time.deltaTime;
-			}
-
-			if (limitTimer <= 0 && obstacle == true ) {
-				workOutPositionOnNewPath ();
-				obstacle = false;
-			}
-
-		}*/
+	
 
 		if (useMultiThreading == false) {
 			if (followPath == true) {
@@ -85,7 +75,6 @@ public class PathFollower : MonoBehaviour {
 				} else {
 					if (tp.Update ()) {
 						tp.Stop ();
-						//	tp = null;
 					} else {
 
 					}
@@ -110,13 +99,8 @@ public class PathFollower : MonoBehaviour {
 
 	bool shouldWeRefreshPath()
 	{
-		//if (myController.npcB.myType == AIType.civilian) {
-		//	return false;
-		//}
-		//|| Vector3.Distance(this.transform.position,target.transform.position)>5.0f && counter ==currentPath.Count-1 && askedForNewPath==false || stuckCounter >= 50 || currentPath.Count==0 && askedForNewPath==false
-
-
-		if (target.gameObject.tag == "Player" || target.gameObject.tag == "NPC" || Vector3.Distance (pathOrigin, target.transform.position) > 2.5f || myController.currentBehaviour.myType == behaviourType.exitLevel && myController.npcB.myType == AIType.civilian || myController.npcB.myType == AIType.swat|| myController.npcB.myType == AIType.cop && myController.currentBehaviour.myType == behaviourType.guardEntrance || target.GetComponent<RefreshPathMarker>()==true || Vector2.Distance(target.transform.position,currentPath[currentPath.Count-1])>3.0f && waitingForPath==false && askedForNewPath==false) {
+		
+		if (target.gameObject.tag == "Player" || target.gameObject.tag == "NPC" || Vector3.Distance (pathOrigin, target.transform.position) > 2.5f || myController.currentBehaviour.myType == behaviourType.exitLevel && myController.npcB.myType == AIType.civilian || myController.npcB.myType == AIType.swat|| myController.npcB.myType == AIType.cop && myController.currentBehaviour.myType == behaviourType.guardEntrance  || Vector2.Distance(target.transform.position,currentPath[currentPath.Count-1])>3.0f && waitingForPath==false && askedForNewPath==false) {
 			stuckCounter = 0;
 			return true;
 		} else {
@@ -140,39 +124,16 @@ public class PathFollower : MonoBehaviour {
 
 	public void threaded_GetPath(Vector3 start, Vector3 end)
 	{
-		/*WorldTile s = WorldBuilder.me.findNearestWorldTile (start);
-		WorldTile e = WorldBuilder.me.findNearestWorldTile (end);
-
-		if (target == null) {
-			target = e.gameObject;
-		}
-
-		//////Debug.Log (this.gameObject.name + " is trying to get a path to " + end);
-		ThreadedWorldTile ts = Pathfinding.me.pathNodes [s.gridX, s.gridY];
-		ThreadedWorldTile te = Pathfinding.me.pathNodes [e.gridX, e.gridY];
-
-		if (tp == null) {
-			tp = new ThreadedPathfind ();
-		}
-		waitingForPath = true;
-
-		tp.initialise (new Vector3Int (s.gridX, s.gridY, 0), new Vector3Int (e.gridX, e.gridY, 0), this);
-		tp.Start ();*/
 
 		if (target == null) {
 			target = WorldBuilder.me.findNearestWorldTile (end).gameObject;
 		}
-		////Debug.Log (this.gameObject.name + " wants a path ");
 		ThreadedPathfindInterface.me.jobsToDo.Add (new ThreadedPathfindJob (target, this));
-
-		//List<ThreadedWorldTile> list = new List<ThreadedWorldTile> ();
-		//Pathfinding.me.findPath (s.gridX, s.gridY, e.gridX, e.gridY, ref list);
-		//setNewPath (list,this.transform.position);
+	
 	}
 
 	Vector3 getMidPointOfNextTwoPoints()
 	{
-		//go through each node from the current and check if you can get a clear line of sight to them, if so then go to the next one, if not then get the last one checked
 
 
 		if (currentPath == null) {
@@ -284,12 +245,7 @@ public class PathFollower : MonoBehaviour {
 		}
 
 
-		////Debug.Log ("trying to get path to " + end.name);
 		if (useMultiThreading == true) {
-			//GameObject s = WorldBuilder.me.getNearest (start.transform.position).gameObject;
-			//GameObject e = WorldBuilder.me.getNearest (end.transform.position).gameObject;
-
-
 			target = end;
 			followPath = true;
 			threaded_GetPath (start, end);
@@ -347,8 +303,7 @@ public class PathFollower : MonoBehaviour {
 				newIndex = i;
 			} else {
 				Debug.DrawRay (this.transform.position,(heading/distance)*Vector2.Distance(this.transform.position,currentPath[i]), Color.red,20.0f);
-				//Debug.Break ();
-//				Debug.Log ("Path smoothing hit object " + ray.collider.gameObject.name);
+			
 				break;
 			}
 		}
@@ -357,24 +312,6 @@ public class PathFollower : MonoBehaviour {
 
 	void pathMoniter()
 	{
-		
-
-		/*for (int x = counter+1; x < currentPath.Count - 1; x++) {
-			if (myController.detect.lineOfSightToTargetWithNoColliderForPathfin (currentPath [x])==true) {
-				if (counter < currentPath.Count-1) {
-					tempCount++;
-				} else {
-					tempCount = currentPath.Count - 1;
-				}
-			} else {
-				break;
-			}
-		}*/
-		////////Debug.Log (this.gameObject.name + " went from " + currentPath [counter] + " to " + currentPath [tempCount] + " Skipping " + (tempCount - counter) + " Nodes.");
-
-		////if (counter == tempCount) {
-		//	tempCount++;
-		//}
 		if (pathSmoothing == true) {
 			int tempCount = counter;
 
@@ -425,19 +362,6 @@ public class PathFollower : MonoBehaviour {
 
 	void pathRefresh()
 	{
-		
-
-
-		/*if (counter >= currentPath.Count - 2) {			
-			//myController.pmc.setStopped ();
-
-			getPath (this.gameObject, target);
-
-			askedForNewPath = true;
-			return;
-		}*/
-
-
 		if (pathTimer > 0.0f || askedForNewPath==true) {
 			pathTimer -= Time.deltaTime;
 			return;
@@ -448,23 +372,17 @@ public class PathFollower : MonoBehaviour {
 		}
 
 		if (Vector2.Distance (target.transform.position, pathOrigin) > 1.5f &&pathTimer <= 0  || counter >= currentPath.Count-3 && pathTimer<=0 ) {
-//			Debug.Log (this.gameObject.name + " requested a new path to " + target.name);
 			getPath (this.gameObject, target);
 			askedForNewPath = true;
 
 			pathTimer = pathResetRate;
 		}
-		/*pathTimer -= Time.deltaTime;
-		if (pathTimer <= 0) {
-			getPath (this.gameObject, target);
-			pathTimer = pathResetRate;
-		}*/
+	
 	}
 	bool gotNewPath=false;
 	public void setNewPath(List<ThreadedWorldTile> list,Vector3 startPos)
 	{
-		////////Debug.Log ("Path set");
-		////////Debug.Log (list.Count);
+		
 
 		askedForNewPath = false;
 		waitingForPath = false;
@@ -481,25 +399,14 @@ public class PathFollower : MonoBehaviour {
 				currentPath.Reverse ();
 
 				followPath = true;
-			//	waitingForPath = true;
-				//currentPath.Reverse ();
+			
 			} else {
 				
 				followPath = true;
-			//	waitingForPath = true;
 				currentPath.Reverse ();
 			}
 			gotNewPath = true;
-			//workOutPositionOnNewPath ();
 
-			//if (Vector3.Distance (myPos, currentPath [0]) > Vector3.Distance (myPos, currentPath [currentPath.Count - 1])) {
-			//	currentPath.Reverse ();
-
-			//}
-
-			//counter = 0;
-			//followPath = true;
-			//waitingForPath = false;
 
 			if (tp == null) {
 
@@ -516,8 +423,6 @@ public class PathFollower : MonoBehaviour {
 
 	public void setNewPath(List<Vector3> list)
 	{
-//		//////Debug.Log ("Path set " + list.Count + " Nodes");
-		////////Debug.Log (list.Count);
 		waitingForPath = false;
 
 		askedForNewPath = false;
@@ -528,25 +433,15 @@ public class PathFollower : MonoBehaviour {
 			counter = 0;
 
 			if (Vector2.Distance (myPos, currentPath [currentPath.Count - 1]) > Vector2.Distance (myPos, currentPath [0])) {
-				//currentPath.Reverse ();
-			
+
 				followPath = true;
-				//waitingForPath = true;
-				//currentPath.Reverse ();
+
 			} else {
 				
 				followPath = true;
-				//waitingForPath = true;
 				currentPath.Reverse ();
 			}
 			gotNewPath = true;
-			//workOutPositionOnNewPath ();
-		//	if (tp == null) {
-
-		//	} else {
-			//	tp.Stop ();
-			//	//tp = null;
-			//}
 		}
 
 
@@ -560,6 +455,9 @@ public class PathFollower : MonoBehaviour {
 	}
 
 	public LayerMask wallMask;
+	/// <summary>
+	/// If the NPC gets stuck on a wall for long enough this tells it to get a new path.
+	/// </summary>
 	void rayWallCollider()
 	{
 		RaycastHit2D rayForward = Physics2D.Raycast (this.transform.position, transform.up, 1.0f,wallMask);
@@ -568,42 +466,9 @@ public class PathFollower : MonoBehaviour {
 		if (rayForward.collider == null) {
 
 		} else {
-			//bug.Log ("Fixing wall bumb, moving down");
 
 			fixWallBump (new Vector3 (this.transform.position.x, this.transform.position.y, 0) + (transform.up*-1));
 		}
-
-		/*RaycastHit2D rayBackward = Physics2D.Raycast (this.transform.position, transform.up*-1, 1.5f,wallMask);
-		Debug.DrawRay (this.transform.position, transform.up*-1.5f, Color.cyan);
-
-		if (rayBackward.collider == null) {
-
-		} else {
-			//////Debug.Log ("Fixing wall bumb, moving up");
-
-			fixWallBump (new Vector3 (this.transform.position.x, this.transform.position.y+1, 0));
-		}
-
-		RaycastHit2D rayRight = Physics2D.Raycast (this.transform.position, transform.right, 1.5f,wallMask);
-		Debug.DrawRay (this.transform.position, transform.right*1.5f, Color.cyan);
-
-		if (rayRight.collider == null) {
-
-		} else {
-			//////Debug.Log ("Fixing wall bumb, moving left");
-			fixWallBump (new Vector3 (this.transform.position.x-1, this.transform.position.y, 0));
-		}
-
-		RaycastHit2D rayLeft = Physics2D.Raycast (this.transform.position, transform.right*-1, 1.5f,wallMask);
-		Debug.DrawRay (this.transform.position, transform.right*-1.5f, Color.cyan);
-
-		if (rayLeft.collider == null) {
-
-		} else {
-			//////Debug.Log ("Fixing wall bumb, moving right");
-
-			fixWallBump (new Vector3 (this.transform.position.x+1, this.transform.position.y, 0));
-		}*/
 	}
 
 	void fixWallBump(Vector3 start)
@@ -636,9 +501,6 @@ public class PathFollower : MonoBehaviour {
 			}
 			counter = tempCount;
 		}
-		//////Debug.Log (this.gameObject.name + " got stuck & needed a new path");
-		////Debug.Break ();
-
 	}
 
 	public void workOutPositionOnNewPath()
@@ -659,95 +521,7 @@ public class PathFollower : MonoBehaviour {
 		}
 		counter = closestIndex;
 	}
-
-	/*void OnCollisionStay2D(Collision2D other)
-	{
-		if (other == null) {
-			return;
-		}
-
-		if (other.transform.root.tag == "NPC" || other.gameObject.tag=="ImpassableObject") {
-			shouldWeAvoidObstacle ();
-			Debug.Log ("Collided with NPC, calling collision avoidance");
-		}
-	}*/
-
-
-	public bool obstacle=false;
-	void shouldWeAvoidObstacle()
-	{
-		Vector3 heading = this.transform.up.normalized;
-		bool startInCol = Physics2D.queriesStartInColliders;
-		Physics2D.queriesStartInColliders = false;
-		RaycastHit2D hit = Physics2D.Raycast (this.transform.position,heading, 1.5f,CommonObjectsStore.me.maskForObjectAvoidance);
-		Debug.DrawRay (this.transform.position, heading, Color.green);
-		if (hit.collider == null) {
-			//dirMod = Vector3.zero;
-			objInWay=null;
-			obstacle = false;
-		} else {
-			//Debug.Log (this.gameObject.name + " was blocked by " + hit.collider.gameObject.name);
-			if (hit.collider.transform.root.tag == "Door" ||hit.collider.gameObject.tag != "NPC")  {
-				return;
-			}
-			/*if (hit.collider.gameObject.tag != "NPC") {
-				if (objInWay == null) {
-					pathRefresh ();
-					objInWay = hit.collider.gameObject;
-
-				} else if (hit.collider.gameObject.tag != objInWay.gameObject.tag) {
-					pathRefresh ();
-
-				}
-			}*/
-			obstacle = true;
-		}
-		Physics2D.queriesStartInColliders = startInCol;
-	}
-	public Vector3 dirMod=Vector3.zero;
-	void avoidObstacle()
-	{
-		Vector3 headingWithMostRoom = Vector3.zero;
-		List<float> dist = new List<float> ();
-		List<Vector3> dir = new List<Vector3> ();
-
-		bool startInCol = Physics2D.queriesStartInColliders;
-		Physics2D.queriesStartInColliders = false;
-
-		for (int x = -90; x < 90; x += 10) {
-			Vector3 noAndle = this.transform.up.normalized;
-			Quaternion spreadAngle = Quaternion.AngleAxis (x, new Vector3 (0, 0, 1));
-			Vector3 vec = spreadAngle * noAndle;
-			RaycastHit2D ray = Physics2D.Raycast (this.transform.position, vec,CommonObjectsStore.me.maskForObjectAvoidance);
-			Debug.DrawRay (this.transform.position, vec);
-			dist.Add (ray.distance);
-			dir.Add (vec.normalized);
-		}
-		float longest = 0.0f;
-		int ind = 0;
-
-		float d = 9999999.0f;
-
-		//foreach (Vector3 pos in dir) {
-		//	if (Vector2.Distance (pos, getMidPointOfNextTwoPoints ()) < d) {
-		//		d = Vector2.Distance (pos, getMidPointOfNextTwoPoints ());
-		//		ind = dir.IndexOf (pos);
-		//	}
-		//}
-
-		foreach (float f in dist) {
-			if (f > longest) {
-				longest = f;
-				ind = dist.IndexOf (f);
-			}
-		}
-		Debug.DrawLine (this.transform.position, this.transform.position + (dirMod*dist[ind]), Color.red);
-		limitTimer = 1.5f;
-		dirMod = dir [ind];
-		Physics2D.queriesStartInColliders = startInCol;
-		//Debug.Break ();
-	}
-	GameObject objInWay=null;
-
+	public GameObject obstacle;
+	public Vector3 dirMod;
 	float limitTimer = 0.5f;
 }

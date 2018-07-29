@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CCTVCamera : MonoBehaviour {
-	//TODO copy in camera movement from loud or quiet
+	/// <summary>
+	/// Class that controls a CCTV camera. 
+	/// </summary>
+
 	CanWeDetectTarget detect;
 	public GameObject leftLineOfSightMarker, rightLineOfSightMarker;
 	Rigidbody2D rid;

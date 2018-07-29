@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class NPCItemInitialiser : MonoBehaviour {
+
+	/// <summary>
+	/// Class that adds items to an NPC at the start of the game. 
+	/// </summary>
+
 	NPCController myController;
 
 	public string weaponToGet;
@@ -13,15 +18,10 @@ public class NPCItemInitialiser : MonoBehaviour {
 		myController = this.GetComponent<NPCController> ();
 	}
 
-	// Use this for initialization
 	void Start () {
 		createItems ();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 
 	void createItems()
 	{
