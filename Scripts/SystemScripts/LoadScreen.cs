@@ -7,6 +7,10 @@ using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
 #endif
+
+/// <summary>
+/// Class that controls loading scenes
+/// </summary>
 public class LoadScreen : MonoBehaviour {
 	public static LoadScreen loadScreen;
 	public bool loadScene = false;
@@ -33,10 +37,7 @@ public class LoadScreen : MonoBehaviour {
 
 		if (loadOnAwake == true) {
 			startLoading = true;
-			//StartCoroutine (LoadNewScene ());
 		}
-		//loadScene = true;
-
 	}
 
 	void fadeInColor()
@@ -53,12 +54,10 @@ public class LoadScreen : MonoBehaviour {
 			if (fadeInTimer < 1.0f) {
 				fadeInColor ();
 			} else {
-				//if (loadScene == true) {
 				loadText.color = new Color (1, 1, 1, Mathf.PingPong (Time.time, 1));
 				if (coroutineStarted == false) {
 					StartCoroutine (LoadNewScene ());
 				}
-				//	}
 			}
 		} else {
 			myBackground.color = new Color (0, 0, 0, fadeInTimer);
@@ -120,6 +119,10 @@ public class LoadScreen : MonoBehaviour {
 		LoadingDataStore.me.storePlayerData ();
 	}
 
+	/// <summary>
+	/// Sometimes we don't need to save data e.g. going from the main menu to the first level, restarting after dying etc...
+	/// </summary>
+	/// <param name="sceneName">Scene name.</param>
 	public void loadSceneWithoutStoringData(string sceneName)
 	{
 		if (InventorySwitch.me == null) {

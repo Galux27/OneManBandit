@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that draws a line showing how far a throwable will go. 
+/// </summary>
 public class ThrowableUI : MonoBehaviour {
 	public static ThrowableUI me;
 	public bool displayUI = false;

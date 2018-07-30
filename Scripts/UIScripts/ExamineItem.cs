@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class to control the examine item UI 
+/// </summary>
 public class ExamineItem : MonoBehaviour {
 	public static ExamineItem me;
 	public GameObject examineGameobject;

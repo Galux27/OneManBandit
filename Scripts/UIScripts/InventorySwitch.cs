@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Class that controls the switching between the 3 main UI components (inventory, crafting, map)
+/// </summary>
 public class InventorySwitch : MonoBehaviour {
 	public static InventorySwitch me;
 	public GameObject switchParent;

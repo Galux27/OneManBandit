@@ -4,6 +4,10 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
 
+
+/// <summary>
+/// Class that reads & writes data on application load and scene changes
+/// </summary>
 public class LoadingDataStore : MonoBehaviour {
 	public static LoadingDataStore me;
 
@@ -38,18 +42,7 @@ public class LoadingDataStore : MonoBehaviour {
 		} 
 	}
 	
-	// Update is called once per frame
-	void Update () {
-	//	if (Input.GetKeyDown (KeyCode.E)) {
-			//storePlayerData ();
-			//writePlayerData ();
-	//	}
 
-		//if (Input.GetKeyDown (KeyCode.Q)) {
-
-		//	readPlayerData ();
-		//}
-	}
 
 	public void storePlayerData()
 	{

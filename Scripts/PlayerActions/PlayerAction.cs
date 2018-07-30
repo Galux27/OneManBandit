@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Base class for actions that the player could do in the world.
+/// </summary>
 public class PlayerAction : MonoBehaviour {
 
 
@@ -14,46 +17,14 @@ public class PlayerAction : MonoBehaviour {
 	public static PlayerAction currentAction;
 	public bool doingAction=false;
 	public bool illigal=false;
-	public HighlightObjectWithPlayerActions highlight;
 	void Start () {
 		
 	}
 
-	void highlightInitalise()
-	{
-		if (this.gameObject.GetComponent<HighlightObjectWithPlayerActions> () == false) {
-			highlight = this.gameObject.AddComponent<HighlightObjectWithPlayerActions> ();
-		} 
 
-		PlayerAction[] myActions = this.gameObject.GetComponents<PlayerAction> ();
-		foreach(PlayerAction pa in myActions)
-		{
-			if (pa.highlight == null) {
-				pa.highlight = highlight;
-			}
-		}
-
-		//else {
-		//	highlight = this.gameObject.GetComponent<HighlightObjectWithPlayerActions> ();
-		//}
-		if (highlight == null) {
-			//////Debug.Log ("Highlight is null");
-		} else {
-			highlight.Initialise ();
-		}
-	}
 	
 	// Update is called once per frame
 	void Update () {
-		//inputDetect ();
-		if (highlight == null) {
-			highlightInitalise ();
-		} else {
-			if (highlight.enabled == false) {
-				highlight.enabled = true;
-			}
-		}
-
 		if (currentAction == this && doingAction == true) {
 			doAction ();
 		}
@@ -118,14 +89,7 @@ public class PlayerAction : MonoBehaviour {
 	{
 		NewPlayerActionUI.me.allActions.Remove (this);
 		NewPlayerActionUI.me.myActions.Remove (this);
-		PlayerAction[] actions = this.gameObject.GetComponents<PlayerAction> ();
-		if (actions.Length == 1) {
-			if (highlight == null) {
 
-			} else {
-				highlight.enabled = false;
-			}
-		}
 	}
 
 	void OnEnable()

@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
+
+/// <summary>
+/// This class acts as an interface for the threaded pathfinding and NPCs that want a path
+/// works by having NPCs pass in their PathFollower script and a location they want to go, this creates a threaded pathfind job and gets added to a list which is done one at a time until the list is empty 
+/// </summary>
 public class ThreadedPathfindInterface : MonoBehaviour {
 	public static ThreadedPathfindInterface me;
 	public List<ThreadedPathfindJob> jobsToDo;
@@ -9,26 +14,17 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 	public Thread t,t2;
 
 	public ThreadedPathfindNode[,] nodes;
+
+
+	//Variables below this are just for displaying in the editor to see what object is asking for paths, not actually used to calculate them
 	public int numberOfJobsToDo=0;
 	public string currentJobTarget="",latestJobRequestedBy="";
 	public float timeLastPathTook = 0.0f;
 	public int lengthOfLastPath=0;
 	float timePathStarted=0.0f;
 	public GameObject latestRequestedBy,currentPathRequested;
-	public List<string> editorPathDisplay;
 
-	void Debug_ShowPaths()
-	{
-		if (Application.isEditor) {
-			editorPathDisplay = new List<string> ();
-			foreach (ThreadedPathfindJob tp in jobsToDo) {
-				if (tp.returnTo == null) {
-					continue;
-				}
-				editorPathDisplay.Add (tp.returnTo.gameObject.name + " to " + tp.target.ToString ());
-			}
-		}
-	}
+
 
 	void Awake()
 	{
@@ -38,11 +34,10 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		jobsToDo = new List<ThreadedPathfindJob> ();
 	}
 
-	// Use this for initialization
-	void Start () {
-		
-	}
 
+	/// <summary>
+	/// When NPCs are destroyed if they have a path request then it gets removed here. 
+	/// </summary>
 	void removeNonNeededPaths()
 	{
 		foreach (ThreadedPathfindJob tp in jobsToDo) {
@@ -58,7 +53,6 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		removeNonNeededPaths ();
-		Debug_ShowPaths ();
 		if (countTime == true) {
 			timer += Time.deltaTime;
 		}
@@ -86,14 +80,7 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		numberOfJobsToDo = jobsToDo.Count;
 	}
 
-	void setModifiersForThreadedNodes()
-	{
-		for (int x = 0; x < nodes.GetLength (0); x++) {
-			for (int y = 0; y < nodes.GetLength (1); y++) {
 
-			}
-		}
-	}
 
 	void LateUpdate(){
 		if (nodes == null) {
@@ -119,10 +106,8 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		if (jobsToDo.Count > 0) {
 			if (currentJob == null) {
 				currentJob = getJobToDo ();
-				//countTime = true;
 				timePathStarted = Time.time;
 				jobsToDo.Remove (currentJob);
-				////////Debug.Log ("Doing Job Path To " + currentJob.target.transform.position + " For " + currentJob.returnTo.gameObject.name);
 				t = new Thread (currentJob.doJob);
 				t.Start ();
 
@@ -138,12 +123,8 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 					timeLastPathTook = Time.time - timePathStarted;
 					timePathStarted = 0.0f;
 					timer = 0.0f;
-					////////Debug.Log ("Current Job is Done, moving to next");
-					/// 
-					/// 
-					if (timeLastPathTook > 1.0f) {
-					//	Debug.Break ();
-					}
+
+
 					currentJob = null;
 				}
 			}
@@ -174,43 +155,12 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		}
 
 
-		/*if (jobsToDo.Count > 0) {
-			if (currentJob == null) {
-				Debug.Log ("Using thread 1 to get path");
-
-				currentJob = jobsToDo [0];
-				jobsToDo.Remove (currentJob);
-				////////Debug.Log ("Doing Job Path To " + currentJob.target.transform.position + " For " + currentJob.returnTo.gameObject.name);
-				t = new Thread (currentJob.doJob);
-				t.Start ();
-
-			} else {
-				if (currentJob.jobIsDone == true) {
-					Debug.Log ("Thread 1 is done with path");
-
-					////////Debug.Log ("Current Job is Done, moving to next");
-					currentJob = null;
-				}
-			}
-		}
-
-		if (jobsToDo.Count > 0) {
-			if (currentJobT2 == null) {
-				Debug.Log ("Using thread 2 to get path");
-				currentJobT2 = jobsToDo [0];
-				jobsToDo.Remove (currentJobT2);
-				t2 = new Thread (currentJobT2.doJob);
-				t2.Start ();
-			} else {
-				if (currentJobT2.jobIsDone == true) {
-					currentJobT2 = null;
-					Debug.Log ("Thread 2 is done with path");
-									
-				}
-			}
-		}*/
+	
 	}
 
+	/// <summary>
+	/// Creates the threaded pathfinding nodes based on the non threaded nodes taken from the tilemaps 
+	/// </summary>
 	void initialiseNodes()
 	{
 		WorldBuilder wb = FindObjectOfType<WorldBuilder> ();
@@ -263,7 +213,6 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		List<ThreadedPathfindNode> openSet = new List<ThreadedPathfindNode> ();
 		HashSet<ThreadedPathfindNode> closedSet = new HashSet<ThreadedPathfindNode> ();
 		openSet.Add (nodes [currentJob.sX, currentJob.sY]);
-		////////Debug.Log ("Going from " + nodes [currentJob.sX, currentJob.sY].worldPos + " to " + nodes [currentJob.fX, currentJob.fY]);
 		while (openSet.Count > 0) {
 			ThreadedPathfindNode currentNode = openSet [0];
 
@@ -277,25 +226,16 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 
 			openSet.Remove (currentNode);
 			closedSet.Add (currentNode);
-			////////Debug.Log ("Current node has " + currentNode.myNeighbours.Count);
 
 			if (currentNode.Equals (nodes [currentJob.fX, currentJob.fY])) {
-				////////Debug.Log ("Found path, returning from thread, length was " + foundPath.Count);
 				foundPath = retracePath (nodes [currentJob.sX, currentJob.sY], currentNode);
 				break;
 			}
 
 			foreach (ThreadedPathfindNode neighbour in currentNode.myNeighbours) {
-				//!neighbour.walkable && neighbour.worldPos != nodes [currentJob.fX, currentJob.fY].worldPos ||
 				if (neighbour.walkable == false && neighbour!=nodes [currentJob.fX, currentJob.fY] || closedSet.Contains (neighbour) || neighbour == null ) {
 					continue;
 				}
-
-			//	if (currentNode.walkable == false) {
-				//	if (neighbour.walkable == false) {
-					//	continue;
-				//	}
-				//}
 
 				//took out modifier
 				int newMoveCost = currentNode.gCost + GetDistance (currentNode, neighbour) + neighbour.getModifier();
@@ -311,7 +251,6 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 				}
 			}
 		}
-		////////Debug.Log ("INTHREAD Found path with " + foundPath.Count);
 		return foundPath;
 
 	}
@@ -321,13 +260,11 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		List<ThreadedPathfindNode> foundPath = new List<ThreadedPathfindNode> ();
 		ThreadedPathfindNode currentNode = end;
 		while (currentNode != start) {
-			////////Debug.Log ("Retracing path " + currentNode.worldPos);
 
 			currentNode.gCost = 0;
 			foundPath.Add (currentNode);
 			currentNode = currentNode.parent;
 		}
-		////////Debug.Log ("Retracing path was " + foundPath.Count);
 
 		foundPath.Reverse ();
 		return foundPath;

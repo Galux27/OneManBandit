@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class for controlling a police car, follows a set path and then creates police at the end of it 
+/// </summary>
 public class PoliceCarScript : MonoBehaviour {
 	public List<Transform> copSpawnPoints;
 	public List<GameObject> pointsToRaycastFrom;
@@ -36,6 +39,7 @@ public class PoliceCarScript : MonoBehaviour {
 			counter = myRoute.Count-1;
 		}
 
+		//if the police car gets stuck on anything then it counts down a timer and when it reaches 0 it spawns the police regardless of whether its reached the end of its path.
 		rayObjectDetect ();
 		if (raysHitAnything == true && spawnCops==false && inBoundsOfMap()==true) {
 			timeTillStop -= Time.deltaTime;
@@ -59,9 +63,7 @@ public class PoliceCarScript : MonoBehaviour {
 		catch{
 
 		}
-
-
-
+			
 		if (areWeAtDestination () == false && spawnedCops == false && raysHitAnything == false) {
 			moveToPoint ();
 

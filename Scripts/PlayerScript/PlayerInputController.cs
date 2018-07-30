@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class that controls the players input & some movement
+/// </summary>
 public class PlayerInputController : MonoBehaviour {
 	public static PlayerInputController me;
 	PersonMovementController pmc;
@@ -33,8 +36,6 @@ public class PlayerInputController : MonoBehaviour {
 			return;
 		}
 
-
-
 		if (MapControlScript.me.displayMap == false) {
 			pmc.moveDirSet ();
 			rotateToMouse ();
@@ -46,21 +47,19 @@ public class PlayerInputController : MonoBehaviour {
 			openPhoneShortcut ();
 			debugStuff ();
 		}
-		mapInput ();
 	}
 
+	/// <summary>
+	/// Just a method for testing out things in the editor, to be removed in final build.
+	/// </summary>
 	void debugStuff()
 	{
 		if (Application.isEditor) {
 			Vector3 headingToPoint = (this.transform.position+new Vector3(0,1,0)) - (this.transform.position-new Vector3(0,1,0)) ;
-			//Vector3 headingToNextPoint = - this.transform.position;
 			float distance = headingToPoint.magnitude;
 
 			float dotProduct = Vector3.Dot (headingToPoint, this.transform.position);
-			//float dotProduct2 = Vector3.Dot (headingToNextPoint, this.transform.position);
-
-			//Debug.Log ("Dotproduct above was " + dotProduct);
-
+	
 			if (Input.GetKeyDown (KeyCode.O)) {
 				
 				NPCController[] npcs = FindObjectsOfType<NPCController> ();
@@ -78,34 +77,13 @@ public class PlayerInputController : MonoBehaviour {
 					}
 				}
 			}
-
-			if (Input.GetKeyDown (KeyCode.L)) {
-				LightSource[] sources = FindObjectsOfType<LightSource> ();
-				foreach (LightSource l in sources) {
-					if (l != LightSource.sun) {
-						l.debugSwitch ();
-					}
-				}
-			}
-
-			if (Input.GetKeyDown (KeyCode.M)) {
-				foreach (NPCController npc in NPCManager.me.npcControllers) {
-					if (npc.npcB.myType == AIType.swat) {
-						npc.myHealth.dealDamage (5200, true);
-						break;
-					}
-				}
-			}
 		}
 	}
 
 
-
-	void LateUpdate()
-	{
-
-	}
-
+	/// <summary>
+	/// Player is rotated here rather than in its person movement script due to the camera perspective warping the position of the mouse.
+	/// </summary>
 	void rotateToMouse()
 	{
 		if (CommonObjectsStore.me.mainCam.orthographic == true) {
@@ -201,12 +179,7 @@ public class PlayerInputController : MonoBehaviour {
 			} else {
 				InventorySwitch.me.enable ();
 			}
-			//if (Inventory.playerInventory.inventoryGUI.activeInHierarchy == false) {
-			//	Inventory.playerInventory.enableInv ();
-		//	} else {
-			//	Inventory.playerInventory.disableInv ();
-			//	ItemMoniter.me.nearIndex = 0;
-		//	}
+		
 		}
 	}
 
@@ -243,9 +216,13 @@ public class PlayerInputController : MonoBehaviour {
 		}
 	}
 
+	/// <summary>
+	/// Checks for UI elements that are active that should stop the player attacking e.g. shops, conversations,keypads etc... to stop the player attacking accidently
+	/// </summary>
+	/// <returns><c>true</c>, if we be able to click was shoulded, <c>false</c> otherwise.</returns>
 	public bool shouldWeBeAbleToClick()
 	{
-		if (Keypad.me.isKeypadInUse()==true|| PlayerActionUI.me.isMenuOpen () == true || Inventory.playerInventory.inventoryGUI.activeInHierarchy==true|| ExamineItem.me.isExaminingItem()==true || PhoneController.me.phoneOpen() || ComputerUIControl.me.computerBeingUsed==true || InventorySwitch.me.switchParent.activeInHierarchy==true) {
+		if (Keypad.me.isKeypadInUse()==true|| PlayerActionUI.me.isMenuOpen () == true || Inventory.playerInventory.inventoryGUI.activeInHierarchy==true|| ExamineItem.me.isExaminingItem()==true || PhoneController.me.phoneOpen() || ComputerUIControl.me.computerBeingUsed==true || InventorySwitch.me.switchParent.activeInHierarchy==true || CraftingUIParent.me.craftObj.activeInHierarchy==true || ConversationUI.me.convParent.activeInHierarchy==true || ShopUI.me.shopParent.activeInHierarchy==true) {
 			return false;
 		} else {
 			return true;
@@ -258,33 +235,6 @@ public class PlayerInputController : MonoBehaviour {
 			PauseMenu.me.openPauseMenu ();
 		}
 	}
-	GameObject prevNode;
 
-	public Vector3 inWorld,threaded;
 
-	void displayNearestNode()
-	{
-		WorldTile wt = WorldBuilder.me.getNearest (this.transform.position);
-
-		threaded = Pathfinding.me.pathNodes [wt.gridX, wt.gridY].worldPos;
-		inWorld = wt.gameObject.transform.position;
-
-		if (wt.gameObject != prevNode) {
-			if (prevNode == null) {
-
-			} else {
-				prevNode.layer = 21;
-			}
-			prevNode = wt.gameObject;
-
-			wt.gameObject.layer = 0;
-		}
-	}
-
-	public void mapInput()
-	{
-		//if (Input.GetKeyDown (KeyCode.M)) {
-		//	MapControlScript.me.mapSwitch ();
-		//}
-	}
 }

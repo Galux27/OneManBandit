@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// UI for phone alert. 
+/// </summary>
 public class PhoneAlert : MonoBehaviour {
 	public static PhoneAlert me;
 	public bool alertOpen=false;

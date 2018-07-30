@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class for a road section with multile potential points to go to from it. 
+/// </summary>
 public class NewRoadJunction:NewRoadSection{
 	public List<NewRoadJunction> potentialPoints;
 

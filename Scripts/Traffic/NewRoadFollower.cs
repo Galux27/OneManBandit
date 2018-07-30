@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Class to control cars that move around the level following the roads and making random decisions when they reach junctions
+/// They also increase the weight of nearby nodes to help civilians avoid them. 
+/// </summary>
 public class NewRoadFollower : MonoBehaviour {
 	NewRoad r;
 	NewRoadJunction nr;

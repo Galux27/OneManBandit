@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class to control shops  
+/// </summary>
 public class Shop : MonoBehaviour {
 	public static List<Shop> shopsInWorld;
 	public List<string> itemsICouldSell,itemsIHave,itemsIBuy;
@@ -31,7 +34,6 @@ public class Shop : MonoBehaviour {
 		keeperDecider = myKeeper.GetComponent<NPCBehaviourDecider> ();
 		keeperController.myType = AIType.shopkeeper;
 		keeperDecider.myType = AIType.shopkeeper;
-		//ShopUI.me.enableShopUI (this);
 	}
 
 	void Update()

@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that draws an arrow at the object being affected by the current player action. 
+/// </summary>
 public class PlayerActionArrow : MonoBehaviour {
 	public Image arrow;
 	// Use this for initialization

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class SpriteColorSwapper : MonoBehaviour {
 	public Texture2D mColorSwapTex,newPallete;
 	public Color[] mSpriteColors;

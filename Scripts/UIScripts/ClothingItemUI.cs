@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+
+/// <summary>
+/// Class for displaying the UI for one item of clothing the player is wearing 
+/// </summary>
 public class ClothingItemUI : MonoBehaviour {
 
 	void Awake()

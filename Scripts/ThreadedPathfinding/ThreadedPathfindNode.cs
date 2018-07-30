@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class for the threaded pathfinding nodes 
+/// </summary>
 public class ThreadedPathfindNode  {
 
 	public int gCost;

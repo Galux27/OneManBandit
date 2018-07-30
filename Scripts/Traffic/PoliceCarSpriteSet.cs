@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class that changes the sprite of a police car based on what it spawns. 
+/// </summary>
 public class PoliceCarSpriteSet : MonoBehaviour {
 	public Sprite policeCar,policeVan;
 	// Use this for initialization
@@ -12,10 +15,5 @@ public class PoliceCarSpriteSet : MonoBehaviour {
 			this.GetComponent<SpriteRenderer> ().sprite = policeVan;
 		}
 		Destroy (this);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 }

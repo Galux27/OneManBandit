@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that controls the switching between the clothing and equipment UIs 
+/// </summary>
 public class ClothingUIControl : MonoBehaviour {
 	public GameObject clothingParent,equipmentParent;
 	public Text disp;
-	//public ClothingItemUI head,face,torso,lShol,rShol,lFore,rFore,lHand,rHand,lThigh,rThigh,lCalf,rCalf,lFoot,rFoot;
 	public List<ClothingItemUI> uis;
 	// Use this for initialization
 	void Start () {

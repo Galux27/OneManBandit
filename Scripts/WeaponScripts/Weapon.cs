@@ -2,39 +2,50 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Class for weapons. 
+/// </summary>
 public class Weapon : Item {
 
 	public string WeaponName = "";
-	public Sprite aimDownSight,hipFire,pickup,holding; //replace these with animations once I've written an animation system, may have to make it strings instead so that multiple 
+	public Sprite pickup,holding; //replace these with animations once I've written an animation system, may have to make it strings instead so that multiple 
 	public float fireRate;
 	public int clipCapacity;
 	public bool oneHanded,melee;
 	public GameObject projectile;
 	public float recoilMax;
-	public string _PickupAnim,_HipAnim,_ADSAnim,_throwAnim,_dropAnim,_ReloadAnim,_AttackAnim;
 	public AmmoItem ammoItem;
 	public int meleeDamage;
 	public bool bladed = false;
 	public float reloadTime;
 	public Transform bulletSpawnPos;
-	public Sprite[] meleeAnimation;
+
+	/// <summary>
+	/// an animation to play when attacking e.g. flash comming of the barral of a gun. 
+	/// </summary>
+	public Sprite[] animation;
 	public bool playMeleeAnim = false;
 	public float meleeTimer = 0.05f;
 	public int meleeCounter=0;
 	public float resetTime = 0.05f;
 	public float noiseRange = 5.0f;
 	public AudioClip attackNoise,gunEmpty;
+
+	/// <summary>
+	/// Value for the Animation controller that decides the animation to play whilst holding the weapon. 
+	/// </summary>
 	public int gunAnimValue=0;
 	void animate()
 	{
-		if (meleeAnimation.Length == 0 || meleeAnimation [meleeCounter]==null ) {
+		if (animation.Length == 0 || animation [meleeCounter]==null ) {
 			return;
 		}
 
 		meleeTimer -= Time.deltaTime;
 		if (meleeTimer <= 0) {
-			this.gameObject.GetComponent<SpriteRenderer> ().sprite = meleeAnimation [meleeCounter];
-			if (meleeCounter < meleeAnimation.Length - 1) {
+			this.gameObject.GetComponent<SpriteRenderer> ().sprite = animation [meleeCounter];
+			if (meleeCounter < animation.Length - 1) {
 				meleeCounter++;
 			} else {
 				meleeCounter = 0;
@@ -49,7 +60,6 @@ public class Weapon : Item {
 
 	public override void equipItem ()
 	{
-		//CommonObjectsStore.player.GetComponent<PersonWeaponController> ().setWeapon (this);
 		this.gameObject.GetComponentInParent<PersonWeaponController>().setWeapon(this);
 
 		Inventory i = this.gameObject.GetComponentInParent<Inventory> ();

@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that draws a progress bar based on values passed in 
+/// </summary>
 public class ProgressBar : MonoBehaviour {
 	public RectTransform progressBar;
 	public float maxWidth,maxValue,currentValue;//max value is the value we are working towards,current is what we are working to

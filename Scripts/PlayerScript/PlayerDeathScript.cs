@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that controls fading to white and the restart button appearing when the player dies. 
+/// </summary>
 public class PlayerDeathScript : MonoBehaviour {
 	public static PlayerDeathScript me;
 	public Image tex;

@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that controls the UI of a single item when a shop is being interacted wtih
+/// </summary>
 public class ShopItem : MonoBehaviour {
 	public Item i;
 	public Text itemName,itemPrice;

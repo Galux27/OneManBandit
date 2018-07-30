@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+/// <summary>
+/// Class that controls the pause menu. 
+/// </summary>
 public class PauseMenu : MonoBehaviour {
 	public static PauseMenu me;
 	public GameObject pauseGUIParent;

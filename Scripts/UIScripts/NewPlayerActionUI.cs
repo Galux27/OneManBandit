@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that controls a list of all the available player actions available 
+/// </summary>
 public class NewPlayerActionUI : MonoBehaviour {
 	public static NewPlayerActionUI me;
 	public List<PlayerAction> allActions,myActions;
@@ -14,10 +18,7 @@ public class NewPlayerActionUI : MonoBehaviour {
 		me = this;
 	}
 
-	// Use this for initialization
-	void Start () {
-		
-	}
+
 
 	// Update is called once per frame
 	void Update () {

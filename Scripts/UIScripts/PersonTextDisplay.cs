@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that controls a speech bubble text above an NPC 
+/// </summary>
 public class PersonTextDisplay : MonoBehaviour {
 	public Text myText;
 	public GameObject toFollow;
@@ -92,6 +96,9 @@ public class PersonTextDisplay : MonoBehaviour {
 		myImage.enabled = true;
 	}
 
+	/// <summary>
+	/// The speech bubble & text is done via the UI system rather than world coordinates so it needs to be converted so it stays in the correct position. 
+	/// </summary>
 	void setPosition()
 	{
 		if (toFollow == null) {

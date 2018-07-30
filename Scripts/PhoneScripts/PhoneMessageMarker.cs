@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// Class for displaying a message via the PhoneAlert when the player is nearby and has a line of sight to the player 
+/// </summary>
 public class PhoneMessageMarker : MonoBehaviour {
 	public string messageToAdd = "";
 	public bool addedMessage=false;
@@ -36,11 +38,7 @@ public class PhoneMessageMarker : MonoBehaviour {
 
 	public bool lineOfSightToTarget(GameObject target)
 	{
-
-
 		Vector3 origin = this.transform.position;
-
-
 		Vector3 heading = target.transform.position - origin;
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading);
 		Debug.DrawRay (origin, heading,Color.cyan);
@@ -48,7 +46,6 @@ public class PhoneMessageMarker : MonoBehaviour {
 		if (ray.collider == null) {
 
 		} else {
-			//			//////Debug.Log ("Ray hit object with tag " + ray.collider.gameObject.tag);
 			if (ray.collider.gameObject == target) {
 				return true;
 			}

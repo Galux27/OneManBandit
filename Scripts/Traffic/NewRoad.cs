@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Class that stores all the road sections in a leve
+/// </summary>
 public class NewRoad : MonoBehaviour {
 	public List<NewRoadJunction> sectionsInTheRoad;
 
@@ -20,7 +23,9 @@ public class NewRoad : MonoBehaviour {
 		return retVal;
 	}
 }
-
+/// <summary>
+/// Class that is a base for a single road section. 
+/// </summary>
 public class NewRoadSection : MonoBehaviour{
 	public Transform startPoint;
 	public NewRoadSection nextPoint;

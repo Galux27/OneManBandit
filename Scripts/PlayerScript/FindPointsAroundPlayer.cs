@@ -1,7 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//TODO: LOOKINTO WHY AI WASNT RAISING THE ALARM WHEN LOOKING AT THE PLAYER (MIGHT BE BECAUSE IM MANUALLY SETTING THE PLAYER AS A TARGET RATHER THAN THEM BEING DISCOVERED) + SOMETIMES THE COLOR OF THE FOV IS WRONG WHEN ATTACKING
+/// <summary>
+/// Class that maintains a list of walkable nodes around the player, done here for AI that are trying to combat a player with a human shield so they can move to points around the player to see if they have a better shot.
+///  Its done here rather than on the individual NPC to hopefully get a performance increase.
+/// </summary>
 public class FindPointsAroundPlayer : MonoBehaviour {
 	public static FindPointsAroundPlayer me;
 	public List<GameObject> myNodesNearMe;
@@ -24,8 +27,6 @@ public class FindPointsAroundPlayer : MonoBehaviour {
 	}
 
 	public IEnumerator findPointsRoundPlayer(){
-		findPoints ();
-		//yield return new WaitForSeconds (0.1f);
 		foreach (GameObject g in myNodesNearMe) {
 			g.GetComponent<SpriteRenderer> ().color += Color.cyan;
 
@@ -105,24 +106,15 @@ public class FindPointsAroundPlayer : MonoBehaviour {
 
 	}
 
-	void findPoints()
-	{
-//		//////Debug.Log ("Finding points around player");
 
-	}
 
 
 	public bool lineOfSightToTargetWithNoColliderForPathfin(Vector3 target){
 		Vector3 origin =this.transform.position;
-	
-
-
-
 		Vector3 heading = target - origin;
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading,Vector3.Distance(this.transform.position,target));
 
 		if (ray.collider == null) {
-			//			//////Debug.Log ("No ray hit");
 			Debug.DrawRay (origin, heading,Color.green);
 
 			return true;
@@ -130,16 +122,8 @@ public class FindPointsAroundPlayer : MonoBehaviour {
 			if (ray.collider.gameObject.tag == "Player") {
 				return true;
 			}
-
-
-			////Debug.Log ("Ray hit " + ray.collider.gameObject.name);
 			Debug.DrawRay (origin, heading,Color.red);
 
-			//if (ray.collider.gameObject.tag == "WallCollider") {
-			//	//////Debug.Log ("We hit a wall " + ray.collider.gameObject.name);
-			//}
-
-			////////Debug.Log (ray.collider.gameObject.name);
 			return false;
 		}
 	}

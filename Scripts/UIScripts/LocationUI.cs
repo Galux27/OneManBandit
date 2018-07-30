@@ -3,19 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+
+
 public class LocationUI : MonoBehaviour {
 	public Text myText;
 	BuildingScript currentBuilding;
 	RoomScript currentRoom;
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		//setText ();
-	}
+
 
 	void setText()
 	{

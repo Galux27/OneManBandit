@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Base class for various phone tabs that are available
+/// </summary>
 public class PhoneTab : MonoBehaviour {
 
 	public bool active=false;
@@ -18,7 +22,7 @@ public class PhoneTab : MonoBehaviour {
 
 	public virtual void onUpdate()
 	{
-		//do any shit that needs to be done every frame
+		//do anything that needs to be done every frame
 	}
 
 }

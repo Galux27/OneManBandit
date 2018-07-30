@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// Class that controls the entire UI of the shop being interacted with. 
+/// </summary>
 public class ShopUI : MonoBehaviour {
 	public static ShopUI me;
 	public List<ShopItem> shopUIs,basketUIs;
@@ -21,7 +25,6 @@ public class ShopUI : MonoBehaviour {
 	public void buyItems()
 	{
 		if (canWeBuy () == true) {
-			Debug.Log ("BUYING ITEMS");
 			int stashValue = LoadingDataStore.me.getStashValue ();
 			foreach (string st in itemsInBasket) {
 				GameObject g = ItemDatabase.me.getItem (st);
@@ -37,7 +40,6 @@ public class ShopUI : MonoBehaviour {
 			LoadingDataStore.me.setStashValue (stashValue);
 			itemsInBasket.Clear ();
 			resetUIs ();
-			//setUIs ();
 		}
 	}
 
@@ -57,7 +59,6 @@ public class ShopUI : MonoBehaviour {
 		if (stash >= value) {
 			return true;
 		} else {
-			Debug.Log ("CANNOT BUY ITEMS, NOT ENOUGH MONEY");
 			return false;
 		}
 	}

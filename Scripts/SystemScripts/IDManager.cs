@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+
+/// <summary>
+/// Class used for generating IDs for linking doors & keys. 
+/// </summary>
 public class IDManager : MonoBehaviour {
 	public static IDManager me;
 	int curID = 0;

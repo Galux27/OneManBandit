@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Class that controls the phone 
+/// </summary>
 public class PhoneController : MonoBehaviour {
 	public static PhoneController me;
 
