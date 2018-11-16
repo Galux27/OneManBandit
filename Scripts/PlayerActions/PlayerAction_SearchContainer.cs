@@ -8,9 +8,9 @@ public class PlayerAction_SearchContainer  : PlayerAction {
 	{
 		illigal = true;		
 
-		if (myContainer.open == false) {
+		//if (myContainer.open == false) {
 			myContainer.actionOpenContainer ();
-		}
+		//}
 		InventorySwitch.me.enable ();
 
 		if (Inventory.playerInventory.inventoryGUI.activeInHierarchy == false) {
@@ -30,7 +30,17 @@ public class PlayerAction_SearchContainer  : PlayerAction {
 			} else {
 				return false;
 			}
-		} else {
+		} else if (this.transform.parent!=null && this.transform.parent.tag == "Car") {
+			if (PlayerCarController.inCar == false) {
+				if (Vector3.Distance (this.transform.position, CommonObjectsStore.player.transform.position) < 2.5f) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}else{
 			if (Vector3.Distance (this.transform.position, CommonObjectsStore.player.transform.position) < 2.5f && transform.parent == null) {
 				return true;
 			} else {

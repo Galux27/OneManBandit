@@ -41,7 +41,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 		if (myController.knockedDown == true || PersonHealth.playerHealth.healthValue<=0) {
 			return;
 		}
-		////////Debug.Log (myController.detect.getDotProduct (CommonObjectsStore.player));
+		//////////Debug.Log (myController.detect.getDotProduct (CommonObjectsStore.player));
 		if (myType == AIType.guard) {
 			unfreezeNPC ();
 			decideViewRadius ();
@@ -219,7 +219,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 			float suspision = decideHowSuspiciousObjectIs (CommonObjectsStore.player);
 			RoomScript npcRoom = LevelController.me.getRoomObjectIsIn (CommonObjectsStore.player);
 
-//			//////Debug.Log ("Suspision of player = " + suspision);
+//			////////Debug.Log ("Suspision of player = " + suspision);
 			if (suspision < 1.0f) {
 				//everything good
 				if (myType == AIType.guard) {
@@ -272,11 +272,11 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 					RoomScript npcRoom = LevelController.me.getRoomObjectIsIn (npc.gameObject);
 
 					float suspision = decideHowSuspiciousObjectIs (npc.gameObject);
-					//			//////Debug.Log ("Suspision of player = " + suspision);
+					//			////////Debug.Log ("Suspision of player = " + suspision);
 					if (suspision < 1.0f) {
 						//everything good
 						if (myType == AIType.guard) {
-							if (npcRoom.traspassing == true) {
+							if (npcRoom.traspassingInRoom() == true) {
 								suspisious = true;
 								myController.memory.objectThatMadeMeSuspisious = npc.gameObject;
 							}
@@ -307,11 +307,11 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 				float suspision = decideHowSuspiciousObjectIs (CommonObjectsStore.player);
 				RoomScript npcRoom = LevelController.me.getRoomObjectIsIn (CommonObjectsStore.player);
 
-				//			//////Debug.Log ("Suspision of player = " + suspision);
+				//			////////Debug.Log ("Suspision of player = " + suspision);
 				if (suspision < 1.0f) {
 					//everything good
 					if (myType == AIType.guard) {
-						if (npcRoom==null || npcRoom.traspassing == true) {
+						if (npcRoom==null || npcRoom.traspassingInRoom() == true) {
 							suspisious = true;
 							myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
 						}
@@ -320,7 +320,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 				} else if (suspision < 7.0f) {
 					if (myType == AIType.guard) {
 
-						if (npcRoom==null || npcRoom.traspassing == true) {
+						if (npcRoom==null || npcRoom.traspassingInRoom() == true) {
 							suspisious = true;
 							myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
 						}
@@ -345,7 +345,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 
 				}
 
-				//////Debug.Log (this.gameObject.name + " is looking at the player " + suspision.ToString ());
+				////////Debug.Log (this.gameObject.name + " is looking at the player " + suspision.ToString ());
 					
 			}
 		}
@@ -417,7 +417,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 						if (myController.detect.areWeNearTarget (i.gameObject)) {
 							if (myController.detect.isTargetInFrontOfUs (i.gameObject)) {
 								if (myController.detect.lineOfSightToTargetWithNoCollider (i.gameObject)) {
-									////////Debug.Log ("Item " + i.itemName + " was detected");
+									//////////Debug.Log ("Item " + i.itemName + " was detected");
 									myController.memory.objectThatMadeMeSuspisious = i.gameObject;
 									suspisious = true;
 									myController.memory.suspisious = true;
@@ -502,7 +502,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 			if (r == null) {
 				//player probs outside
 			} else {
-				if (r.traspassing == true) {
+				if (r.traspassingInRoom() == true) {
 				//	retVal += 5.0f;
 				}
 			}
@@ -562,7 +562,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 			if (r == null) {
 				//player probs outside
 			} else {
-				if (r.traspassing == true) {
+				if (r.traspassingInRoom() == true) {
 					retVal += 5.0f;
 				}
 			}
@@ -680,7 +680,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 		if (myController.memory.objectThatMadeMeSuspisious == null) {
 			 if (myController.memory.noiseToInvestigate != Vector3.zero) {
 				if (myController.currentBehaviour.myType != behaviourType.investigate) {
-					//////Debug.Log ("Wanting to investigate location 1");
+					////////Debug.Log ("Wanting to investigate location 1");
 
 					Destroy (myController.currentBehaviour);
 					NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
@@ -717,7 +717,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 				//would be an object, go investigate
 				if (myController.memory.objectThatMadeMeSuspisious != null) {
 					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						//////Debug.Log ("Wanting to investigate object");
+						////////Debug.Log ("Wanting to investigate object");
 
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour_InvestigateObject newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
@@ -727,7 +727,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 
 					}
 				} else if (myController.memory.noiseToInvestigate != Vector3.zero) {
-					//////Debug.Log ("Wanting to investigate location");
+					////////Debug.Log ("Wanting to investigate location");
 
 					if (myController.currentBehaviour.myType != behaviourType.investigate) {
 						Destroy (myController.currentBehaviour);
@@ -742,7 +742,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 			
 			} else if (myController.memory.objectThatMadeMeSuspisious.tag == "Dead/Knocked") {
 				if (myController.currentBehaviour.myType != behaviourType.investigate) {
-					//////Debug.Log ("Wanting to investigate Corpse");
+					////////Debug.Log ("Wanting to investigate Corpse");
 
 					Destroy (myController.currentBehaviour);
 					NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateCorpse> ();
@@ -758,7 +758,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 					
 					if (suspisiousOf.searchedBy.Contains (this.gameObject) == false) { //NEED TO ADD SOME KIND OF SEARCH + ESCORT OUT
 						if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-							//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
+							////////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
 							Destroy (myController.currentBehaviour);
 							NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
 							myController.currentBehaviour = nb;
@@ -770,7 +770,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 					} else {
 						RoomScript npcRoom = LevelController.me.getRoomObjectIsIn (myController.memory.objectThatMadeMeSuspisious);
 
-						if (npcRoom==null|| npcRoom.traspassing == true) {
+						if (npcRoom==null|| npcRoom.traspassingInRoom() == true) {
 							if (myController.currentBehaviour.myType != behaviourType.traspassing) {
 								Destroy (myController.currentBehaviour);
 								NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_EscortOutOfRestrictedArea> ();
@@ -849,7 +849,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_RaiseAlarm> ();
 						myController.currentBehaviour = nb;
-						//////Debug.LogError("RAISE ALARM 1");
+						////////Debug.LogError("RAISE ALARM 1");
 						//PhoneTab_RadioHack.me.setNewText ("I'm going to call the cops",radioHackBand.buisness);
 
 						//myController.memory.noiseToInvestigate = Vector3.zero;
@@ -899,7 +899,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 							Destroy (myController.currentBehaviour);
 							NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_RaiseAlarm> ();
 							myController.currentBehaviour = nb;
-							//////Debug.LogError("RAISE ALARM 2");
+							////////Debug.LogError("RAISE ALARM 2");
 
 							//myController.memory.noiseToInvestigate = Vector3.zero;
 							//PhoneTab_RadioHack.me.setNewText ("I'm going to call the cops",radioHackBand.buisness);
@@ -907,13 +907,13 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 						}
 					}
 				} else {
-					////////Debug.LogError ("Post hostage 1");
+					//////////Debug.LogError ("Post hostage 1");
 					if (PlayerAction.currentAction == null) {
 						if (myController.currentBehaviour==null || myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
 							Destroy (myController.currentBehaviour);
 							NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_RaiseAlarm> ();
 							myController.currentBehaviour = nb;
-							////////Debug.LogError("RAISE ALARM 3");
+							//////////Debug.LogError("RAISE ALARM 3");
 
 							//PhoneTab_RadioHack.me.setNewText ("I'm going to call the cops",radioHackBand.buisness);
 
@@ -952,7 +952,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 			} else {
 				if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious) == false) {
 					if (myController.currentBehaviour.myType != behaviourType.updateSuspects) {
-						////////Debug.Log ("Updating suspects");
+						//////////Debug.Log ("Updating suspects");
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_UpdateSuspects> ();
 						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1028,8 +1028,8 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 						myController.memory.objectThatMadeMeSuspisious = g;
 						suspisious = true;
 						myController.memory.suspisious = true;
-						////////Debug.Log (this.gameObject.name);
-						//////Debug.Break ();
+						//////////Debug.Log (this.gameObject.name);
+						////////Debug.Break ();
 					}
 				}
 			}
@@ -1072,7 +1072,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 					if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious) == false) {
 						if (suspisiousOf == null) {
 							if (myController.currentBehaviour.myType != behaviourType.investigate) {
-								//////Debug.Log ("Passive cop investigating location " + myController.memory.objectThatMadeMeSuspisious.name);
+								////////Debug.Log ("Passive cop investigating location " + myController.memory.objectThatMadeMeSuspisious.name);
 								Destroy (myController.currentBehaviour);
 								NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
 								newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1082,7 +1082,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 							}
 						} else {
 							if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-								//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
+								////////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
 								Destroy (myController.currentBehaviour);
 								NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
 								myController.currentBehaviour = nb;
@@ -1097,7 +1097,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 					}
 				} else if (myController.memory.objectThatMadeMeSuspisious.tag != "Dead/Knocked" || myController.memory.objectThatMadeMeSuspisious.tag != "Dead/Guarded") {
 					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						//////Debug.Log ("Passive cop investigating location " + myController.memory.objectThatMadeMeSuspisious.name);
+						////////Debug.Log ("Passive cop investigating location " + myController.memory.objectThatMadeMeSuspisious.name);
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
 						newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1126,7 +1126,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 				//alarmed = true;
 				if (pwc.currentWeapon == null && LevelController.me.suspects.Contains(myController.memory.objectThatMadeMeSuspisious)==false) {
 					if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-						//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
+						////////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
 						suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
@@ -1169,7 +1169,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 
 					//go to location
 					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						//////Debug.Log ("Investigating location on Suspicious" );
+						////////Debug.Log ("Investigating location on Suspicious" );
 
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
@@ -1189,7 +1189,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 				if (myController.memory.objectThatMadeMeSuspisious.tag != "Dead/Knocked" && myController.memory.objectThatMadeMeSuspisious.tag != "Dead/Guarded") {
 					if (myController.memory.objectThatMadeMeSuspisious.tag != "Player" && myController.memory.objectThatMadeMeSuspisious.tag != "NPC") {
 						if (myController.currentBehaviour.myType != behaviourType.investigate) {
-							//////Debug.Log ("Wanting to investigate object");
+							////////Debug.Log ("Wanting to investigate object");
 
 							Destroy (myController.currentBehaviour);
 							NPCBehaviour_InvestigateObject newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvestigateObject> ();
@@ -1206,7 +1206,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 							NPCController npc = myController.memory.objectThatMadeMeSuspisious.GetComponent<NPCController> ();
 							if (npc == null) {
 								if (myController.currentBehaviour.myType != behaviourType.searchPerson && myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-									//////Debug.Log ("COP SEARCH ONE Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
+									////////Debug.Log ("COP SEARCH ONE Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
 									suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
 									Destroy (myController.currentBehaviour);
 									NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
@@ -1232,7 +1232,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 									}
 								} else {
 									if (myController.currentBehaviour.myType != behaviourType.searchPerson && myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-										//////Debug.Log ("COP SEARCH TWO Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
+										////////Debug.Log ("COP SEARCH TWO Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
 										suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
 										Destroy (myController.currentBehaviour);
 										NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
@@ -1263,7 +1263,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 						}
 					} else {
 						if (myController.currentBehaviour.myType != behaviourType.guardCorpse) {
-							//////Debug.Log ("Guarding Corpse");
+							////////Debug.Log ("Guarding Corpse");
 
 							Destroy (myController.currentBehaviour);
 							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_GuardCorpse> ();
@@ -1289,7 +1289,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 				alarmed = true;
 				/*if (pwc.currentWeapon == null) {
 					if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-						//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
+						////////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
 						suspisiousOf = myController.memory.objectThatMadeMeSuspisious.GetComponent<SearchedMarker> ();
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_SearchPerson> ();
@@ -1401,7 +1401,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 			if (copAlarm == true) {
 				if (LevelController.me.suspects.Contains (myController.memory.objectThatMadeMeSuspisious) == false) {
 					if (myController.currentBehaviour.myType != behaviourType.updateSuspects) {
-						//////Debug.Log ("Updating suspects");
+						////////Debug.Log ("Updating suspects");
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_UpdateSuspects> ();
 						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1412,7 +1412,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 				} else {
 					if (myController.memory.noiseToInvestigate != Vector3.zero) {
 						if (myController.currentBehaviour.myType != behaviourType.investigate) {
-							//////Debug.Log ("Investigating location on alarmed");
+							////////Debug.Log ("Investigating location on alarmed");
 							Destroy (myController.currentBehaviour);
 							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
 							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1580,7 +1580,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 
 			if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
 				setAllSwatToAttack ();
-				//////Debug.Log ("Set all swat to attack");
+				////////Debug.Log ("Set all swat to attack");
 			}
 
 		}
@@ -1600,7 +1600,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 					}
 				} else {
 					if (myController.currentBehaviour.myType != behaviourType.investigate) {
-						//////Debug.Log ("Investigating location on alarmed");
+						////////Debug.Log ("Investigating location on alarmed");
 						Destroy (myController.currentBehaviour);
 						NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
 						//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1620,7 +1620,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 						}
 					} else {
 						if (myController.currentBehaviour.myType != behaviourType.investigate) {
-							//////Debug.Log ("Investigating location on alarmed");
+							////////Debug.Log ("Investigating location on alarmed");
 							Destroy (myController.currentBehaviour);
 							NPCBehaviour newBehaviour = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
 							//newBehaviour.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1654,7 +1654,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 				NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_DoCivilianAction> ();
 				myController.currentBehaviour = nb;
 			} else {
-				//////Debug.Log ("Civilian exiting level");
+				////////Debug.Log ("Civilian exiting level");
 				NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
 				myController.currentBehaviour = nb;
 			}
@@ -1694,18 +1694,18 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 			setAllSwatToAttack ();
 		}
 		else{
-			////////Debug.Log ("Hostage release");
+			//////////Debug.Log ("Hostage release");
 			if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
 				Destroy (myController.currentBehaviour);
 				NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
 				myController.currentBehaviour = nb;
 				nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
 				//PhoneTab_RadioHack.me.setNewText ("Target is hostile, taking him down.",radioHackBand.cop);
-				////////Debug.Log("Adding attack target");
+				//////////Debug.Log("Adding attack target");
 			}
 			return;
 			//alarmed = true;
-			//////Debug.Break();
+			////////Debug.Break();
 		}
 	}
 
@@ -1724,7 +1724,7 @@ public class NPCBehaviourDecider_Backup_1 : MonoBehaviour {
 			//	myController.currentBehaviour = nb;
 			//	nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
 				//PhoneTab_RadioHack.me.setNewText ("Target is hostile, taking him down.",radioHackBand.cop);
-				////////Debug.Log("Adding attack target");
+				//////////Debug.Log("Adding attack target");
 			//}
 			alarmed = true;
 		}

@@ -25,7 +25,136 @@ public class BuildingScript : MonoBehaviour {
 	/// Each rect has an invisible object above it that blocks light from hitting the floor inside, to give the effect of there being more building above
 	/// </summary>
 	public List<GameObject> shadowBlockers;
-	public bool buildingClosed=false;
+    public bool buildingClosed = false, closedFromIncident = false;
+
+    public bool buildingHasOpeningTime;
+    public int openHour = 0, openMin = 0;
+    public int closeHour = 23, closeMin = 59;
+
+    bool shouldWeCloseBuilding()
+    {
+        if (closedFromIncident == true)
+        {
+            return true;
+        }
+
+        if(TimeScript.me.hour < openHour || TimeScript.me.hour >closeHour)
+        {
+            return true;
+        }else if(TimeScript.me.hour==openHour)
+        {
+            if(TimeScript.me.minute<openMin)
+            {
+                return true;
+            }
+        }else if(TimeScript.me.hour == closeHour)
+        {
+            if(TimeScript.me.minute>=closeMin)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void openCloseBuildingControl()
+    {
+        if(shouldWeCloseBuilding())
+        {
+            if(buildingClosed==false)
+            {
+                closeBuilding();
+                //Debug.Log("Building was closed "  + buildingName);
+            }
+            //Debug.Log("Building should be closed " + buildingName);
+        }
+        else
+        {
+            if(buildingClosed==true)
+            {
+                openBuilding();
+                //Debug.Log("Building was opened");
+            }
+            //Debug.Log("Building should be open " + buildingName);
+
+        }
+    }
+
+
+    void closeBuilding()
+    {
+        CivilianAction[] actions = FindObjectsOfType<CivilianAction>();
+        foreach (CivilianAction ca in actions)
+        {
+            if (isPosInRoom(ca.positionForAction.position))
+            {
+                ca.actionAvailable = false;
+            }
+        }
+
+        DoorScript[] doors = getAllDoorsInLevel().ToArray();
+        foreach (DoorScript d in doors)
+        {
+            if (isPosInRoom(d.transform.position))
+            {
+                d.locked = true;
+                if (d.GetComponent<PlayerAction_UnlockWithLockpick>() == false)
+                {
+                    d.gameObject.AddComponent<PlayerAction_UnlockWithLockpick>();
+                }
+            }
+        }
+
+        foreach (RoomScript r in myRooms)
+        {
+            r.closed = true;
+        }
+
+        foreach(Shop s in Shop.shopsInWorld)
+        {
+            s.shopAvailable = false;
+            s.myKeeper.SetActive(false);
+        }
+        buildingClosed = true;
+    }
+
+    void openBuilding()
+    {
+        CivilianAction[] actions = FindObjectsOfType<CivilianAction>();
+        foreach (CivilianAction ca in actions)
+        {
+            if (isPosInRoom(ca.positionForAction.position))
+            {
+                ca.actionAvailable = true;
+            }
+        }
+
+        DoorScript[] doors = getAllDoorsInLevel().ToArray();
+        foreach (DoorScript d in doors)
+        {
+            if (isPosInRoom(d.transform.position))
+            {
+                d.locked = false;
+               // if (d.GetComponent<PlayerAction_UnlockWithLockpick>() == true)
+              //  {
+             //       d.gameObject.AddComponent<PlayerAction_UnlockWithLockpick>();
+             //   }
+            }
+        }
+
+        foreach (RoomScript r in myRooms)
+        {
+            r.closed = true;
+        }
+
+        foreach (Shop s in Shop.shopsInWorld)
+        {
+            s.shopAvailable = true;
+            s.myKeeper.SetActive(true);
+        }
+        buildingClosed = false;
+    }
+
 	void Awake()
 	{
 
@@ -81,7 +210,7 @@ public class BuildingScript : MonoBehaviour {
 				numOfIncidentsInBuilding++;
 			}
 		}
-		Debug.Log ("We found " + numOfIncidentsInBuilding + " incidents in the building " + buildingName);
+		//Debug.Log ("We found " + numOfIncidentsInBuilding + " incidents in the building " + buildingName);
 		if (numOfIncidentsInBuilding >= 5) {
 			CivilianAction[] actions = FindObjectsOfType<CivilianAction> ();
 			foreach (CivilianAction ca in actions) {
@@ -113,6 +242,7 @@ public class BuildingScript : MonoBehaviour {
 				}
 			}
 			buildingClosed = true;
+            closedFromIncident = true;
 		}
 	}
 
@@ -193,7 +323,7 @@ public class BuildingScript : MonoBehaviour {
 
 	void Start () {
 		itemsInRoomAtStart = itemsInRoom ();
-		//		//////Debug.Log ("There are " + itemsInRoomAtStart.Count + " Items in " + roomName);
+		//		////////Debug.Log ("There are " + itemsInRoomAtStart.Count + " Items in " + roomName);
 		if (tilesInBuilding == null || tilesInBuilding.Count == 0) {
 			tilesInBuilding = new List<WorldTile> ();
 
@@ -212,9 +342,12 @@ public class BuildingScript : MonoBehaviour {
 		checkForIncidentsInBuilding ();
 	}
 
-	// Update is called once per frame
-
-	public bool isObjectInRoom(GameObject obj)
+    // Update is called once per frame
+    private void Update()
+    {
+        openCloseBuildingControl();
+    }
+    public bool isObjectInRoom(GameObject obj)
 	{
 
 		foreach (roomRect r in rectsInBuilding) {

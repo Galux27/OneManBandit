@@ -34,6 +34,10 @@ public class PersonColliderDecider : MonoBehaviour {
 
 	void Update()
 	{
+		if (this.gameObject.tag == "Player" && PlayerCarController.inCar == true) {
+			return;
+		}
+
 		if (this.gameObject.tag == "Dead/Knocked") {
 			if (down == null) {
 				down = this.gameObject.AddComponent<CircleCollider2D> ();

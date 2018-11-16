@@ -35,7 +35,7 @@ public class AmmoItem : Item {
 	void Update()
 	{
 		if (loadingAmmo == true) {
-			Debug.Log ("MANUAL RELOAD");
+			//Debug.Log ("MANUAL RELOAD");
 			CommonObjectsStore.pwc.manualReload (this);
 		}
 	}
@@ -51,15 +51,15 @@ public class AmmoItem : Item {
 		Inventory i = CommonObjectsStore.player.GetComponent<Inventory> ();
 
 		if (w == null) {
-			Debug.Log ("Weapon was null");
+			//Debug.Log ("Weapon was null");
 		} else {
 			if (canWeUseAmmoInWeapon (w.WeaponName) == true && ammoCount>0 && CommonObjectsStore.pwc.currentWeapon.ammoItem!=this) {
 				loadingAmmo = true;
 				this.gameObject.SetActive (true);
 				this.gameObject.GetComponent<SpriteRenderer> ().enabled = false;
-				Debug.Log ("CAN REALOD");
+				//Debug.Log ("CAN REALOD");
 			} else {
-				Debug.Log ("CANT RELOAD");
+				//Debug.Log ("CANT RELOAD");
 			}
 		}
 	}

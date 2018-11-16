@@ -92,7 +92,7 @@ public class FindPointsAroundPlayer : MonoBehaviour {
 
 		}
 
-		////Debug.Log ("Looking for points");
+		//////Debug.Log ("Looking for points");
 		StartCoroutine ("findPointsRoundPlayer");
 	}
 
@@ -115,14 +115,14 @@ public class FindPointsAroundPlayer : MonoBehaviour {
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading,Vector3.Distance(this.transform.position,target));
 
 		if (ray.collider == null) {
-			Debug.DrawRay (origin, heading,Color.green);
+			//Debug.DrawRay (origin, heading,Color.green);
 
 			return true;
 		} else {
 			if (ray.collider.gameObject.tag == "Player") {
 				return true;
 			}
-			Debug.DrawRay (origin, heading,Color.red);
+			//Debug.DrawRay (origin, heading,Color.red);
 
 			return false;
 		}

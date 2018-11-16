@@ -18,7 +18,7 @@ public class GearSlotUI : MonoBehaviour {
 
 	public void setItem(Item i)
 	{
-		//////Debug.Log ("Item set " + i.gameObject.name);
+		////////Debug.Log ("Item set " + i.gameObject.name);
 
 		if (itemEquiped == null) {
 

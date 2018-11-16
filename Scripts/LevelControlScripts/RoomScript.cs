@@ -10,7 +10,7 @@ public class RoomScript : MonoBehaviour {
 	
 	public string roomName;
 	public List<roomRect> rectsInRoom;
-	public bool shootOnSight,traspassing;
+	public bool shootOnSight,traspassing,closed;
 	public List<Item> itemsInRoomAtStart;
 	public List<GameObject> pointsInRoom;
 	// Use this for initialization
@@ -28,6 +28,16 @@ public class RoomScript : MonoBehaviour {
 	public int distFromSwatFormUp = 0;
 
 	public bool isOutdoors=false;
+
+    public bool traspassingInRoom()
+    {
+        if(traspassing==true||closed==true)
+        {
+            return true;
+        }
+        return false;
+    }
+
 	void Awake()
 	{
 		pointsInRoom = new List<GameObject> ();
@@ -89,7 +99,7 @@ public class RoomScript : MonoBehaviour {
 		
 		itemsInRoomAtStart = itemsInRoom ();
 		setPointsToGoTo ();
-		distFromSwatFormUp = Pathfinding.me.getPathCost(entrances[0].gameObject,PoliceController.me.swatFormUpPoint.gameObject);
+		//distFromSwatFormUp = Pathfinding.me.getPathCost(entrances[0].gameObject,PoliceController.me.swatFormUpPoint.gameObject);
 
 	}
 

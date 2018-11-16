@@ -35,7 +35,7 @@ public class PersonHealth : MonoBehaviour {
 		//Player is invincible in editor for convinience
 		if (this == playerHealth && Application.isEditor==true && playerInvinvible==true|| Application.isEditor==true && amIInvincible==true) {
 
-			healthValue = 5200.0f;
+			//healthValue = 5200.0f;
 		}
 		if (healthValue <= 0) {
 			if (dead == false) {
@@ -153,6 +153,10 @@ public class PersonHealth : MonoBehaviour {
 			} else {
 				Destroy (npc.myHalo);
 			}
+           // if (LoadingDataStore.me.loadingDone==true)
+           // {
+                LevelIncidentController.me.addIncident("Murder", this.transform.position);
+          //  }
 		}
 
 		SpriteRenderer[] srs = this.gameObject.GetComponentsInChildren<SpriteRenderer> ();
@@ -186,7 +190,7 @@ public class PersonHealth : MonoBehaviour {
 	public void dealMeleeDamage(int damage,bool chanceOfBleed)
 	{
 		
-
+         
 		if (pwc == null) {
 			pwc = this.gameObject.GetComponent<PersonWeaponController> ();
 		}
@@ -203,11 +207,19 @@ public class PersonHealth : MonoBehaviour {
 				this.gameObject.GetComponent<AudioController> ().playSound (SFXDatabase.me.bladedImpact);
 			}
 		}
-
+		float modifier = 1.0f;
+        if (EffectsManager.me != null)
+        {
+            foreach (EffectBase eb in EffectsManager.me.effectsOnPlayer)
+            {
+                modifier += eb.damageMod;
+            }
+        }
+		float dam = damage * modifier;
 		if (pwc.blocking == true) {
-			dealDamage (damage / 5, false);
+			dealDamage (Mathf.RoundToInt(dam) / 5, false);
 		} else {
-			dealDamage (damage, true);
+			dealDamage (Mathf.RoundToInt(dam), true);
 		}
 
 
@@ -215,11 +227,19 @@ public class PersonHealth : MonoBehaviour {
 
 	public void dealDamage(int damage,bool chanceOfBleed)
 	{
-		if (this == playerHealth && Application.isEditor==true) {
-		//return;
+		if (this == playerHealth &&  playerInvinvible==true) {
+		// return;
 		}
 		float modifier = armourValue / 100;
 		modifier /= 2;
+        if (EffectsManager.me != null)
+        {
+            foreach (EffectBase eb in EffectsManager.me.effectsOnPlayer)
+            {
+                modifier += eb.damageMod;
+            }
+        }
+		//Debug.Log ("Modifier for player damage was " + modifier);
 		//modifier++;
 		float finalVal = damage * (1-modifier);
 		healthValue -= finalVal;

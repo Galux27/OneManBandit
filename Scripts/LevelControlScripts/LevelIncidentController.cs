@@ -61,7 +61,7 @@ public class LevelIncidentController : MonoBehaviour {
 			datesOfIncidents = new List<DateTimeStore> ();
 		}
 
-		Debug.LogError ("Incident " + name + " re added");
+		//Debug.LogError ("Incident " + name + " re added");
 		incidents.Add (name);
 		incidentPositions.Add (position);
 

@@ -142,11 +142,14 @@ public class CCTVCamera : MonoBehaviour {
 						sentAlert = true;
 					}
 				}
+				if (PlayerVisible.me.isPlayersFaceHidden () == false) {
+					CrimeRecordScript.me.playerSpottedByCCTV = true;
+				}
 			}
 
 			if (LevelController.me.suspects.Contains (t.gameObject)) {
 				if (sentAlert == false) {
-//					//////Debug.LogError ("Camera has seen suspect " + t.gameObject.ToString ());
+//					////////Debug.LogError ("Camera has seen suspect " + t.gameObject.ToString ());
 					CCTVController.me.cameraAlert (this);
 					sentAlert = true;
 				}

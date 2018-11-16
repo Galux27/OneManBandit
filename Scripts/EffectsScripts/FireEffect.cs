@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class FireEffect : MonoBehaviour {
+
+    public static List<FireEffect> instances;
 	//TODO smoke,damage to entities, affecting pathfinding, spreading, potentially fading
 	// Use this for initialization
 
@@ -17,9 +19,15 @@ public class FireEffect : MonoBehaviour {
 	public int fireToCreate = 10;
 	public GameObject fireEffect;
 	void Start () {
+        if(FireEffect.instances==null)
+        {
+            FireEffect.instances = new List<FireEffect>();
+        }
+        FireEffect.instances.Add(this);
 		mySmoke = new List<GameObject> ();
 		createFire ();
 		this.GetComponent<AudioController> ().playSoundOnLoop (SFXDatabase.me.fire);
+        LevelIncidentController.me.addIncident("Fire", this.transform.position);
 	}
 
 
@@ -29,7 +37,10 @@ public class FireEffect : MonoBehaviour {
 			return;
 		}
 
-
+        if(FireEffect.instances.Count>25)
+        {
+            Destroy(FireEffect.instances[0].gameObject);
+        }
 
 		if (pathInitialised == false) {
 			changeNodesNearMe ();
@@ -45,7 +56,7 @@ public class FireEffect : MonoBehaviour {
 			smokeTimer -= Time.deltaTime;
 		} else {
 
-			if (mySmoke.Count < 5) {
+			if (mySmoke.Count ==0) {
 				GameObject g = (GameObject)Instantiate (CommonObjectsStore.me.smokeEffect, getPosForSmoke (), Quaternion.Euler (0, 0, 0));
 				SmokeEffect s = g.GetComponent<SmokeEffect> ();
 				s.myManager = this.GetComponent<SmokeManager> ();
@@ -113,12 +124,19 @@ public class FireEffect : MonoBehaviour {
 
 	void OnTriggerStay2D(Collider2D other)
 	{
-		Debug.Log ("Fire triggered by " + other.gameObject.name);
+		//Debug.Log ("Fire triggered by " + other.gameObject.name);
 		PersonHealth ph = other.gameObject.transform.root.GetComponent<PersonHealth> ();
 		if (ph == null) {
 
 		} else {
 			ph.dealDamageFromFire ();
+		}
+
+		PlayerCarController pcc = other.GetComponent<PlayerCarController> ();
+		if (pcc == null) {
+
+		} else {
+			pcc.dealDamage (10);
 		}
 	}
 
@@ -141,8 +159,12 @@ public class FireEffect : MonoBehaviour {
 
 	void countdownSpreadTimer()
 	{
-		spreadTimer -= Time.deltaTime;
-		if (spreadTimer <= 0) {
+        if(oddsOfSpread>0)
+        {
+            spreadTimer -= Time.deltaTime;
+
+        }
+        if (spreadTimer <= 0) {
 			int r = Random.Range (0, 100);
 			if (r < oddsOfSpread) {
 				//spread
@@ -151,11 +173,11 @@ public class FireEffect : MonoBehaviour {
 				oddsOfSpread -= 10;
 			} else {
 				//put out
-				setNodesToNormal();
-				foreach (GameObject g in mySmoke) {
-					g.GetComponent<SmokeEffect> ().enabled = false;
-				}
-				Destroy (this.gameObject);
+				//setNodesToNormal();
+				//foreach (GameObject g in mySmoke) {
+				//	g.GetComponent<SmokeEffect> ().enabled = false;
+				//}
+				//Destroy (this.gameObject);
 			}
 		}
 	}
@@ -170,19 +192,19 @@ public class FireEffect : MonoBehaviour {
 				WorldTile wt = WorldBuilder.me.worldTiles [pos.gridX + x, pos.gridY + y].GetComponent<WorldTile>();
 
 				if (wt.walkable == true) {
-					//Debug.Log (wt.gameObject.name + " set to unwalkable");
+					////Debug.Log (wt.gameObject.name + " set to unwalkable");
 					wt.GetComponent<SpriteRenderer> ().color = Color.blue;
 					//wt.walkable = false;
 
 					float modifier = 100 + (1000- (Vector2.Distance (this.transform.position, wt.gameObject.transform.position) * 100));
-					Debug.Log (modifier);
+					//Debug.Log (modifier);
 					wt.tempModifiers = Mathf.RoundToInt (modifier);
 					//nodesISetToUnwalkable.Add (wt);
 					try{
 						ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].tempModifiers = Mathf.RoundToInt (modifier);
 					}
 					catch{
-						Debug.LogError ("Could not find threaded tiles");
+						//Debug.LogError ("Could not find threaded tiles");
 						continue;
 					}
 				}
@@ -200,7 +222,7 @@ public class FireEffect : MonoBehaviour {
 				WorldTile wt = WorldBuilder.me.worldTiles [pos.gridX + x, pos.gridY + y].GetComponent<WorldTile>();
 
 				if (wt.walkable == true) {
-					//Debug.Log (wt.gameObject.name + " set to unwalkable");
+					////Debug.Log (wt.gameObject.name + " set to unwalkable");
 					wt.GetComponent<SpriteRenderer> ().color = Color.white;
 					//wt.walkable = false;
 					float modifier = 100  + (1000- (Vector2.Distance (this.transform.position, wt.gameObject.transform.position) * 100));
@@ -229,4 +251,9 @@ public class FireEffect : MonoBehaviour {
 			}
 		}
 	}
+
+    private void OnDestroy()
+    {
+        FireEffect.instances.Remove(this);
+    }
 }

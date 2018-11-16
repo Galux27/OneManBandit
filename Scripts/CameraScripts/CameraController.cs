@@ -124,7 +124,11 @@ public class CameraController : MonoBehaviour {
 
 	void followPlayer()
 	{
-		Vector3 newPos = new Vector3 (CommonObjectsStore.player.transform.position.x + cameraRecoilOffset.x, CommonObjectsStore.player.transform.position.y + cameraRecoilOffset.y, -10);
+		float z = -10;
+		if (PlayerCarController.inCar == true) {
+			z = -20;
+		}
+		Vector3 newPos = new Vector3 (CommonObjectsStore.player.transform.position.x + cameraRecoilOffset.x, CommonObjectsStore.player.transform.position.y + cameraRecoilOffset.y, z);
 		this.transform.position = newPos;//Vector3.Slerp (this.transform.position,newPos,5*Time.deltaTime);// new Vector3 (CommonObjectsStore.player.transform.position.x + cameraRecoilOffset.x, CommonObjectsStore.player.transform.position.y + cameraRecoilOffset.y, -10);
 	}
 
@@ -171,16 +175,16 @@ public class CameraController : MonoBehaviour {
 		foreach (RaycastHit2D hit in hits) {
 
 
-			Debug.DrawRay (plPos, dir, Color.green);
+			//Debug.DrawRay (plPos, dir, Color.green);
 			if (hit.collider == null) {
 				
 			} else if (hit.collider.gameObject.tag == "Building"|| hit.collider.gameObject.transform.root.tag=="Building") {
-				Debug.Log ("Hit building");
+				//Debug.Log ("Hit building");
 				this.gameObject.transform.position = Vector3.Slerp (new Vector3(CommonObjectsStore.player.transform.position.x,CommonObjectsStore.player.transform.position.y,-10), new Vector3 (hit.point.x, hit.point.y, -10), 0.5f); //new Vector3 (hit.point.x - (dir.x*2), hit.point.y-(dir.y*2), -10);
 				return;
 			}
 			else if (Vector2.Distance (plPos, mp) >= 8.0f && hit.collider != null &&hit.collider.tag!="Player" || hit.collider != null&&hit.collider.tag!="Player" ) {
-				Debug.Log (hit.collider.gameObject.tag + " || " + hit.collider.gameObject.name);
+				//Debug.Log (hit.collider.gameObject.tag + " || " + hit.collider.gameObject.name);
 
 				this.gameObject.transform.position = new Vector3 (hit.point.x, hit.point.y, -10);
 				return;

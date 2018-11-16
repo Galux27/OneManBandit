@@ -52,7 +52,7 @@ public class NPCBehaviour_RaiseAlarm : NPCBehaviour {
 		if (myController.memory.objectThatMadeMeSuspisious == null) {
 
 		} else {
-			if (myController.memory.objectThatMadeMeSuspisious.tag == "Player" || myController.memory.objectThatMadeMeSuspisious.tag == "NPC") {
+			if (myController.memory.objectThatMadeMeSuspisious.tag == "Player" && PlayerVisible.me.isPlayersFaceHidden() == false || myController.memory.objectThatMadeMeSuspisious.tag == "NPC") {
 				LevelController.me.suspects.Add (myController.memory.objectThatMadeMeSuspisious);
 			}
 		}
@@ -63,7 +63,7 @@ public class NPCBehaviour_RaiseAlarm : NPCBehaviour {
 		myController.memory.objectThatMadeMeSuspisious = null;
 		radioMessageOnFinish ();
 		Destroy (this);
-		//////Debug.Log ("Set off global alarm");
+		////////Debug.Log ("Set off global alarm");
 	}
 
 	public override void radioMessageOnStart ()

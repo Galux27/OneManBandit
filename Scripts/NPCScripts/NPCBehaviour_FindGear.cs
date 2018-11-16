@@ -17,19 +17,19 @@ public class NPCBehaviour_FindGear : NPCBehaviour {
 	public override void OnUpdate ()
 	{
 		if (isInitialised == false) {
-			//////Debug.Log ("LOOKING FOR GEAR");
+			////////Debug.Log ("LOOKING FOR GEAR");
 			Initialise ();
 		}
 
 		if (toPickUp.Count == 0 || toPickUp==null) {
-			//////Debug.Log ("No weapon, attacking with bear hands");
+			////////Debug.Log ("No weapon, attacking with bear hands");
 			//could not find a weapon
 			NPCBehaviour_AttackTarget newBehaviour = this.gameObject.AddComponent<NPCBehaviour_AttackTarget>();
 			myController.currentBehaviour = newBehaviour;
 			myController.currentBehaviour.passInGameobject (CommonObjectsStore.player);//need to find some way of keeping track of who an enemy is targeting outside of the behaviours, maybe work it into the suspision system
 			myController.skipAiCheckOnFrame=true;
 			Destroy (this);
-			//////Debug.Break ();
+			////////Debug.Break ();
 		} else {
 			if (toPickUp [0].activeInHierarchy == true) {
 				goToWeapon ();
@@ -64,7 +64,7 @@ public class NPCBehaviour_FindGear : NPCBehaviour {
 			target = toPickUp [0];
 
 		if (target.activeInHierarchy == false) {
-			//////Debug.LogError ("Weapon was null,finding new one");
+			////////Debug.LogError ("Weapon was null,finding new one");
 			toPickUp = ItemMoniter.me.findAWeapon (this.gameObject.transform.position);
 		} else
 		{

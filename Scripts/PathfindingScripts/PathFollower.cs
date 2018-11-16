@@ -20,7 +20,7 @@ public class PathFollower : MonoBehaviour {
 	public Vector3 pathOrigin = Vector3.zero;
 	Vector3 myPos;
 	public bool askedForNewPath=false;
-
+	public bool addedLast=false;
 	// Use this for initialization
 	void Start () {
 		myController = this.GetComponent<NPCController> ();
@@ -50,7 +50,21 @@ public class PathFollower : MonoBehaviour {
 		distToNextPoint = Vector3.Distance (this.transform.position, getCurrentPoint ());
 		myPos = this.transform.position;
 
-	
+		if (waitingForPath==false) {
+
+		} else {
+			if (addedLast == false) {
+				if (target == null) {
+				} else if (target.tag == "Player" || target.tag == "NPC") {
+
+				} else {
+					currentPath.Add (target.transform.position);
+//					//Debug.Log ("Added " + target.transform.position + " to path for " + this.gameObject.name);
+					////Debug.Break ();
+				}
+				addedLast = true;
+			}
+		}
 
 		if (useMultiThreading == false) {
 			if (followPath == true) {
@@ -81,6 +95,7 @@ public class PathFollower : MonoBehaviour {
 				}
 			}
 		}
+
 
 	}
 
@@ -118,8 +133,11 @@ public class PathFollower : MonoBehaviour {
 		if (target == null) {
 			target = WorldBuilder.me.findNearestWorldTile (end.transform.position).gameObject;
 		}
-		////Debug.Log (this.gameObject.name + " wants a path ");
-		ThreadedPathfindInterface.me.jobsToDo.Add (new ThreadedPathfindJob (e, this));
+		waitingForPath = true;
+		ThreadedPathfindInterface.me.addPathJob (target, this);
+
+		//////Debug.Log (this.gameObject.name + " wants a path ");
+		//ThreadedPathfindInterface.me.jobsToDo.Add (new ThreadedPathfindJob (e, this));
 	}
 
 	public void threaded_GetPath(Vector3 start, Vector3 end)
@@ -128,7 +146,9 @@ public class PathFollower : MonoBehaviour {
 		if (target == null) {
 			target = WorldBuilder.me.findNearestWorldTile (end).gameObject;
 		}
-		ThreadedPathfindInterface.me.jobsToDo.Add (new ThreadedPathfindJob (target, this));
+		waitingForPath = true;
+		ThreadedPathfindInterface.me.addPathJob (target, this);
+		//ThreadedPathfindInterface.me.jobsToDo.Add (new ThreadedPathfindJob (target, this));
 	
 	}
 
@@ -167,7 +187,7 @@ public class PathFollower : MonoBehaviour {
 
 	public void getPath(Vector3 start,Vector3 end)
 	{
-
+		addedLast = false;
 		if (Vector2.Distance (this.transform.position, end) < 1.0f) {
 			return;
 		}
@@ -211,7 +231,7 @@ public class PathFollower : MonoBehaviour {
 			counter = tempCount;
 
 
-			//////Debug.Break ();
+			////////Debug.Break ();
 		}
 	}
 	public int stuckCounter = 0;
@@ -238,12 +258,25 @@ public class PathFollower : MonoBehaviour {
 		}
 	}
 
+	public void ForceNewPath()
+	{
+		if (target == null) {
+			return;
+		}
+
+		followPath = true;
+		threaded_GetPath (this.transform.position , target.transform.position);
+		pathOrigin = target.transform.position;
+		waitingForPath = true;
+
+	}
+
 	public void getPath(GameObject start,GameObject end)
 	{
 		if (end == null || start == null || Vector2.Distance (this.transform.position, end.transform.position) < 1.0f) {
 			return;
 		}
-
+		addedLast = false;
 
 		if (useMultiThreading == true) {
 			target = end;
@@ -277,7 +310,7 @@ public class PathFollower : MonoBehaviour {
 				}
 			}
 			counter = tempCount;
-			//////Debug.Break ();
+			////////Debug.Break ();
 		}
 	}
 
@@ -290,7 +323,7 @@ public class PathFollower : MonoBehaviour {
 			Vector3 heading = currentPath [i] - this.transform.position;
 			float distance = heading.magnitude;
 			if ((i - curIndex) > 3) {
-				Debug.DrawRay (this.transform.position,(heading/distance)*Vector2.Distance(this.transform.position,currentPath[i]), Color.cyan,20.0f);
+				//Debug.DrawRay (this.transform.position,(heading/distance)*Vector2.Distance(this.transform.position,currentPath[i]), Color.cyan,20.0f);
 
 				break;
 			}
@@ -302,7 +335,7 @@ public class PathFollower : MonoBehaviour {
 			if (ray.collider==null) {
 				newIndex = i;
 			} else {
-				Debug.DrawRay (this.transform.position,(heading/distance)*Vector2.Distance(this.transform.position,currentPath[i]), Color.red,20.0f);
+				//Debug.DrawRay (this.transform.position,(heading/distance)*Vector2.Distance(this.transform.position,currentPath[i]), Color.red,20.0f);
 			
 				break;
 			}
@@ -338,14 +371,14 @@ public class PathFollower : MonoBehaviour {
 				if (counter == currentPath.Count - 1) {
 					pathTimer = 0.0f;
 				}
-				//////Debug.Break ();
+				////////Debug.Break ();
 			}
 		} else {
 			if (Vector2.Distance (this.transform.position, getCurrentPoint ()) < 0.4f) {
 				if (counter < currentPath.Count-1) {
 					smoothPath ();
 					//counter++;
-//					//////Debug.LogError ("Incrementing counter to " + counter);
+//					////////Debug.LogError ("Incrementing counter to " + counter);
 
 				} else {
 					counter = currentPath.Count - 1;
@@ -461,7 +494,7 @@ public class PathFollower : MonoBehaviour {
 	void rayWallCollider()
 	{
 		RaycastHit2D rayForward = Physics2D.Raycast (this.transform.position, transform.up, 1.0f,wallMask);
-		Debug.DrawRay (this.transform.position, transform.up*1.0f, Color.cyan);
+		//Debug.DrawRay (this.transform.position, transform.up*1.0f, Color.cyan);
 
 		if (rayForward.collider == null) {
 
@@ -502,6 +535,33 @@ public class PathFollower : MonoBehaviour {
 			counter = tempCount;
 		}
 	}
+
+    public void workOutPositionOnPath()
+    {
+        int tempCount = 0;
+        if (Vector2.Distance(this.transform.position, getCurrentPoint()) < 0.7f)
+        {
+            for (int x = counter + 1; x < currentPath.Count - 1; x++)
+            {
+                if (myController.detect.lineOfSightToTargetWithNoColliderForPathfin(currentPath[x]) == true)
+                {
+                    if (counter < currentPath.Count - 1)
+                    {
+                        tempCount++;
+                    }
+                    else
+                    {
+                        tempCount = currentPath.Count - 1;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+            counter = tempCount;
+        }
+    }
 
 	public void workOutPositionOnNewPath()
 	{

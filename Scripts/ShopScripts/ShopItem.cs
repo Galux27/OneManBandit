@@ -59,6 +59,15 @@ public class ShopItem : MonoBehaviour {
 		}
 	}
 
+	bool isThisInventoryItem()
+	{
+		if (ShopUI.me.displayBasket == false) {
+			return ShopUI.me.basketUIs.Contains (this);
+		} else {
+			return false;
+		}
+	}
+
 	public void setItem(Item item, int quantity)
 	{
 		i=item;
@@ -76,6 +85,28 @@ public class ShopItem : MonoBehaviour {
 
 
 		itemQuantity = quantity;
+
+
+		if (isThisInventoryItem () == true) {
+			if (ShopUI.me.myShop.canIBuyItem (i.itemName) == false) {
+				itemPrice.text = "Does not buy.";
+				returnItemButton.gameObject.SetActive (false);
+				takeItemButton.gameObject.SetActive (false);
+			} else {
+				returnItemButton.gameObject.SetActive (true);
+				takeItemButton.gameObject.SetActive (false);
+
+				returnItemButton.gameObject.GetComponentInChildren<Text> ().text = "Sell";
+			}
+		} else if (isThisShopItem () == true) {
+			returnItemButton.gameObject.SetActive (false);
+			takeItemButton.gameObject.SetActive (true);
+		} else if (isThisBasketItem () == true) {
+			returnItemButton.gameObject.SetActive (true);
+			returnItemButton.gameObject.GetComponentInChildren<Text> ().text = "Return";
+
+			takeItemButton.gameObject.SetActive (false);
+		}
 	}
 
 	public void setItem(string itemName,int quantity)

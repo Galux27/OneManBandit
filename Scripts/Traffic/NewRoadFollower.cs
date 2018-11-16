@@ -8,29 +8,61 @@ using UnityEngine;
 /// They also increase the weight of nearby nodes to help civilians avoid them. 
 /// </summary>
 public class NewRoadFollower : MonoBehaviour {
+	public bool hasDriver=true;
 	NewRoad r;
 	NewRoadJunction nr;
 	Rigidbody2D rid;
 	NewRoadJunction nextJunct;
 	public float CarSpeed = 0,maxSpeed=5.0f;
 	public List<Transform> carRayPoints;
+
+    public bool ignoreObstacles = false;
 	// Use this for initialization
 	void Start () {
+		if (hasDriver == false) {
+			foreach (Light l in headlights) {
+				l.enabled = false;	
+			}
+
+			foreach (Light l in brakelights) {
+				l.enabled = false;
+			}
+		}
 		r = FindObjectOfType<NewRoad> ();
 		rid = this.GetComponent<Rigidbody2D> ();
 		nr = r.getNearestRoad (this.transform.position);
 		nextJunct = nr.potentialPoints [Random.Range (0, nr.potentialPoints.Count)];
 	}
-	
+
+
+
 	// Update is called once per frame
 	void Update () {
-		speedControl ();
-		setNodesNearMeToUnwalkable ();
-		if (Vector2.Distance (this.transform.position, nextJunct.startPoint.position) < 1.0f) {
-			atPosition ();
-		} else {
-			moveToDirection (nextJunct.startPoint.position);
+		if (hasDriver == true && crashed == false) {
+			speedControl ();
+			if (Vector2.Distance (this.transform.position, nextJunct.startPoint.position) < 1.0f) {
+				atPosition ();
+			} else {
+				moveToDirection (nextJunct.startPoint.position);
+			}
+			headlightControls ();
+		} else if (hasDriver == true && crashed==true) {
+			rid.velocity = Vector2.zero;
+			crashedReset ();
 		}
+
+
+
+		setNodesNearMeToUnwalkable ();
+
+	}
+
+	public bool areBothJunctionsPlayerAccessable()
+	{
+		if (nr.playerCarSpawn == true && nextJunct.playerCarSpawn == true) {
+			return true;
+		}
+		return false;
 	}
 
 	void atPosition()
@@ -45,7 +77,7 @@ public class NewRoadFollower : MonoBehaviour {
 		if (pos == null || pos == Vector3.zero) {
 			return;
 		}
-		//////Debug.Log (this.gameObject.name + " is moving at " + getMovementSpeed ().ToString());
+		////////Debug.Log (this.gameObject.name + " is moving at " + getMovementSpeed ().ToString());
 		Vector3 dir = pos - transform.position;
 		//dirToMove = dir;
 		rid.velocity = new Vector2(dir.normalized.x * carSpeed(),dir.normalized.y*carSpeed());
@@ -73,16 +105,27 @@ public class NewRoadFollower : MonoBehaviour {
 	void rayObjectDetect()
 	{
 		raysHitAnything = false;
-		foreach (Transform t in carRayPoints) {
-			RaycastHit2D ray = Physics2D.Raycast (t.position, t.position - (t.position - transform.up),5.0f);
-			Debug.DrawRay (t.position, t.position - (t.position - transform.up), Color.cyan);
-			if (ray.collider == null) {
-			} else {
-				if (ray.collider.gameObject.tag == "Car" || ray.collider.gameObject.GetComponent<PersonMovementController>()==true) {
-					raysHitAnything = true;
-				}
-			}
-		}
+
+        if(ignoreObstacles==false)
+        {
+        
+            foreach (Transform t in carRayPoints)
+            {
+                RaycastHit2D ray = Physics2D.Raycast(t.position, t.position - (t.position - transform.up), 5.0f);
+                //Debug.DrawRay(t.position, t.position - (t.position - transform.up), Color.cyan);
+                if (ray.collider == null)
+                {
+                }
+                else
+                {
+                    if (ray.collider.gameObject.tag == "Car" || ray.collider.gameObject.GetComponent<PersonMovementController>() == true || ray.collider.gameObject.layer == 29)
+                    {
+                        raysHitAnything = true;
+                    }
+                }
+            }
+        }
+
 	}
 
 	void speedControl()
@@ -106,10 +149,12 @@ public class NewRoadFollower : MonoBehaviour {
 	{
 		foreach (WorldTile wt in nodesISetToUnwalkable) {
 			wt.GetComponent<SpriteRenderer> ().color = Color.cyan;
-			if (wt.modifier >= 10000) {
-				wt.modifier -= 10000;
+			if (wt.modifier >= 100000) {
+				wt.modifier -= 100000;
+				//wt.walkable = true;
 				try{
 					ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].modifier -=10000;
+					//ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].walkable=true;
 				}
 				catch{
 
@@ -134,17 +179,98 @@ public class NewRoadFollower : MonoBehaviour {
 					WorldTile wt = WorldBuilder.me.worldTiles [pos.gridX + x, pos.gridY + y].GetComponent<WorldTile>();
 
 					if (wt.walkable == true) {
-						//Debug.Log (wt.gameObject.name + " set to unwalkable");
+						////Debug.Log (wt.gameObject.name + " set to unwalkable");
 						wt.GetComponent<SpriteRenderer> ().color = Color.blue;
-						wt.modifier += 10000;
+						wt.modifier += 100000;
+						//wt.walkable = false;
+
 						nodesISetToUnwalkable.Add (wt);
-						ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].modifier +=10000;
+						ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].modifier +=100000;
+					//	ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].walkable=false;
+
 					}
 				}
 			}
 		}
 		catch{
 			resetNodes ();
+		}
+	}
+
+	bool crashed=false;
+
+	float crashTimer = 5.0f;
+
+	void crashedReset()
+	{
+		crashTimer -= Time.deltaTime;
+		if (crashTimer <= 0) {
+			crashed = false;
+		}
+	}
+
+	void OnCollisionEnter2D(Collision2D col)
+	{
+		crashTimer = 5.0f;
+		crashed = true;
+	}
+
+
+	public Light[] headlights,brakelights;
+
+	bool shouldLightsBeOn()
+	{
+		if (Vector2.Distance (CommonObjectsStore.player.transform.position, Camera.main.transform.position) > 12) {
+			return false;
+		}
+		return true;
+	}
+
+	bool lightsOn=false;
+	void headlightControls()
+	{
+		if (shouldLightsBeOn () == true) {
+			if (TimeScript.me.hour > 20 || TimeScript.me.hour < 6) {
+				if (lightsOn == false) {
+					foreach (Light l in headlights) {
+						l.enabled = true;
+					}
+					lightsOn = true;
+				}
+
+			} else {
+				if (lightsOn == true) {
+					foreach (Light l in headlights) {
+						l.enabled = false;
+					}
+					lightsOn = false;
+				}
+			}
+			breakLightsControl ();
+		} else {
+			if (lightsOn == true) {
+				foreach (Light l in headlights) {
+					l.enabled = false;
+				}
+
+				foreach (Light l in brakelights) {
+					l.enabled = false;
+				}
+				lightsOn = false;
+			}
+		}
+	}
+
+	void breakLightsControl()
+	{
+		if (crashed == true || raysHitAnything == true) {
+			foreach (Light l in brakelights) {
+				l.enabled = true;
+			}
+		} else {
+			foreach (Light l in brakelights) {
+				l.enabled = false;
+			}
 		}
 	}
 }

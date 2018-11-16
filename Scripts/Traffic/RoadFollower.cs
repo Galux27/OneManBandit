@@ -135,7 +135,7 @@ public class RoadFollower : MonoBehaviour {
 			}
 
 			if (possibleJunctions.Count == 0) {
-				Debug.LogError ("Could not find any junctions horizontal");
+				//Debug.LogError ("Could not find any junctions horizontal");
 				float dist = 999999.0f;
 				RoadJunction nearest = null;
 				foreach (RoadJunction j in currentRoad.myJunctions) {
@@ -170,7 +170,7 @@ public class RoadFollower : MonoBehaviour {
 				}
 			}
 			if (possibleJunctions.Count == 0) {
-				Debug.LogError ("Could not find any junctions horizontal");
+				//Debug.LogError ("Could not find any junctions horizontal");
 				float dist = 999999.0f;
 				RoadJunction nearest = null;
 				foreach (RoadJunction j in currentRoad.myJunctions) {
@@ -196,7 +196,7 @@ public class RoadFollower : MonoBehaviour {
 		if (pos == null || pos == Vector3.zero) {
 			return;
 		}
-		//////Debug.Log (this.gameObject.name + " is moving at " + getMovementSpeed ().ToString());
+		////////Debug.Log (this.gameObject.name + " is moving at " + getMovementSpeed ().ToString());
 		Vector3 dir = pos - transform.position;
 		//dirToMove = dir;
 		rid.velocity = new Vector2(dir.normalized.x * carSpeed(),dir.normalized.y*carSpeed());
@@ -242,7 +242,7 @@ public class RoadFollower : MonoBehaviour {
 		raysHitAnything = false;
 		foreach (GameObject g in pointsToRaycastFrom) {
 			RaycastHit2D ray = Physics2D.Raycast (g.transform.position, g.transform.position - (g.transform.position - transform.up),15.0f);
-			Debug.DrawRay (g.transform.position, g.transform.position - (g.transform.position - transform.up), Color.cyan);
+			//Debug.DrawRay (g.transform.position, g.transform.position - (g.transform.position - transform.up), Color.cyan);
 			if (ray.collider == null) {
 
 			} else {
@@ -280,7 +280,7 @@ public class RoadFollower : MonoBehaviour {
 				WorldTile wt = WorldBuilder.me.worldTiles [pos.gridX + x, pos.gridY + y].GetComponent<WorldTile>();
 
 				if (wt.walkable == true) {
-					//Debug.Log (wt.gameObject.name + " set to unwalkable");
+					////Debug.Log (wt.gameObject.name + " set to unwalkable");
 					wt.GetComponent<SpriteRenderer> ().color = Color.blue;
 					wt.walkable = false;
 					nodesISetToUnwalkable.Add (wt);

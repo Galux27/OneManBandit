@@ -66,13 +66,22 @@ public class BleedingEffect : MonoBehaviour {
 					createBlood ();
 				}
 
+				if (currentBloodEffect == null) {
+					return;
+				}
+
 
 				if (currentBloodEffect.transform.localScale.x < 1) {
 					currentBloodEffect.transform.localScale = new Vector3 (currentBloodEffect.transform.localScale.x + 0.01f, currentBloodEffect.transform.localScale.y + 0.01f, 1);
 				}
 				ph.healthValue -= Random.Range (1, 5);
 				increaseSizeTimer = Random.Range(0.2f,0.3f);
+                int r = Random.RandomRange(0, 5200);
 
+                if(r>ph.healthValue)
+                {
+                    bleeding = false;
+                }
 			}
 			setBleedingOutAlpha ();
 
@@ -93,7 +102,11 @@ public class BleedingEffect : MonoBehaviour {
 
 	void createBlood()
 	{
-		currentBloodEffect = (GameObject) Instantiate (CommonObjectsStore.me.bloodEffects [Random.Range( 0, CommonObjectsStore.me.bloodEffects.Length)], this.transform.position, this.transform.rotation);
+		if (this.gameObject.tag == "Player" && PlayerCarController.inCar == true) {
+
+		} else {
+			currentBloodEffect = (GameObject)Instantiate (CommonObjectsStore.me.bloodEffects [Random.Range (0, CommonObjectsStore.me.bloodEffects.Length)], this.transform.position, this.transform.rotation);
+		}
 	}
 
 	public void bloodImpact(Vector3 pos,Quaternion rot)

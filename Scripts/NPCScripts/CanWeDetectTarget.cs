@@ -155,29 +155,29 @@ public class CanWeDetectTarget : MonoBehaviour {
 			lowAngle = (int)angle;
 		}
 
-//		//////Debug.Log ("Angle " + (int)angle);
+//		////////Debug.Log ("Angle " + (int)angle);
 	}
 
 	public bool hostageTest(GameObject target)
 	{
 		//if(target.tag=="Player" && PlayerAction.currentAction.getType()==
-		//////Debug.LogError ("Target is " + target.gameObject);
+		////////Debug.LogError ("Target is " + target.gameObject);
 
 		if (target.transform.parent == null && target.tag != "Player") {
-			//////Debug.LogError (" target was a mistake ");
+			////////Debug.LogError (" target was a mistake ");
 			return false;
 		} else {
 			if (target.transform.parent == null) {
-				//////Debug.LogError ("targets parent was null ");
+				////////Debug.LogError ("targets parent was null ");
 
 				if (target.tag == "Player" && lineOfSightToTargetWithHostage (target) && areWeNearTarget (target)) {
-					//////Debug.LogError ("target was player and in range");
+					////////Debug.LogError ("target was player and in range");
 
 					return true;
 				} else {
-					//////Debug.LogError ("tag was "+target.tag == "Player" );
-					//////Debug.LogError ("line of sight "+lineOfSightToTargetWithHostage (target));
-					//////Debug.LogError ("near target "+areWeNearTarget (target));
+					////////Debug.LogError ("tag was "+target.tag == "Player" );
+					////////Debug.LogError ("line of sight "+lineOfSightToTargetWithHostage (target));
+					////////Debug.LogError ("near target "+areWeNearTarget (target));
 
 
 					return false;
@@ -185,7 +185,7 @@ public class CanWeDetectTarget : MonoBehaviour {
 			} else {
 				if (target.transform.parent.gameObject.tag == "Player") {
 					if (lineOfSightToTarget (target) == true && areWeNearTarget (target) == true) {
-						//////Debug.LogError ("target was hostage and in range");
+						////////Debug.LogError ("target was hostage and in range");
 
 						return true;
 					} else {
@@ -221,13 +221,13 @@ public class CanWeDetectTarget : MonoBehaviour {
 
 		Vector3 heading = target.transform.position - origin;
 		RaycastHit2D[] rays = Physics2D.RaycastAll (origin, heading,Vector3.Distance(this.transform.position,target.transform.position));
-		//Debug.DrawRay (origin, heading,Color.cyan);
+		////Debug.DrawRay (origin, heading,Color.cyan);
 
 		foreach (RaycastHit2D ray in rays) {
 			if (ray.collider == null) {
 
 			} else {
-				//////Debug.LogError ("Ray hit object with tag " + ray.collider.gameObject.name);
+				////////Debug.LogError ("Ray hit object with tag " + ray.collider.gameObject.name);
 				if (ray.collider.gameObject == target ) {
 					continue;
 				} else {
@@ -248,8 +248,6 @@ public class CanWeDetectTarget : MonoBehaviour {
 
 	public bool lineOfSightToTarget(GameObject target)
 	{
-		
-
 		Vector3 origin = Vector3.zero;
 		if (myController == null) {
 			origin = head.transform.position;
@@ -271,12 +269,12 @@ public class CanWeDetectTarget : MonoBehaviour {
 
 		Vector3 heading = target.transform.position - origin;
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading);
-		Debug.DrawRay (origin, heading,Color.cyan);
+		//Debug.DrawRay (origin, heading,Color.cyan);
 
 		if (ray.collider == null) {
 
 		} else {
-//			//////Debug.Log ("Ray hit object with tag " + ray.collider.gameObject.tag);
+//			////////Debug.Log ("Ray hit object with tag " + ray.collider.gameObject.tag);
 			if (ray.collider.gameObject == target) {
 				return true;
 			}
@@ -306,13 +304,16 @@ public class CanWeDetectTarget : MonoBehaviour {
 
 		Vector3 heading = target.transform.position - origin;
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading,Vector3.Distance(this.transform.position,target.transform.position));
-		Debug.DrawRay (origin, heading,Color.cyan);
+		//Debug.DrawRay (origin, heading,Color.cyan);
 
 		if (ray.collider == null) {
-//			//////Debug.Log ("No ray hit");
+//			////////Debug.Log ("No ray hit");
 			return true;
 		} else {
-			////Debug.Log (ray.collider.gameObject.name);
+			if (ray.collider.gameObject == target) {
+				return true;
+			}
+			//////Debug.Log (ray.collider.gameObject.name);
 			return false;
 		}
 	}
@@ -341,17 +342,17 @@ public class CanWeDetectTarget : MonoBehaviour {
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading,Vector3.Distance(this.transform.position,target));
 
 		if (ray.collider == null) {
-			//			//////Debug.Log ("No ray hit");
-			Debug.DrawRay (origin, heading,Color.cyan);
+			//			////////Debug.Log ("No ray hit");
+			//Debug.DrawRay (origin, heading,Color.cyan);
 
 			return true;
 		} else {
 
 			if (ray.collider.gameObject.tag == "WallCollider") {
-				//////Debug.Log ("We hit a wall " + ray.collider.gameObject.name);
+				////////Debug.Log ("We hit a wall " + ray.collider.gameObject.name);
 			}
 
-			////////Debug.Log (ray.collider.gameObject.name);
+			//////////Debug.Log (ray.collider.gameObject.name);
 			return false;
 		}
 	}

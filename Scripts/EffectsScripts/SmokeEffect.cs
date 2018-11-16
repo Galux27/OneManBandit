@@ -40,6 +40,10 @@ public class SmokeEffect : MonoBehaviour {
 
 	void shouldWeCreateMoreSmoke()
 	{
+		if (myManager == null) {
+			return;
+		}
+
 		if (myManager.canWeCreateSmoke()==false) {
 			return;
 		}

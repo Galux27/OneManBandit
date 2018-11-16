@@ -13,7 +13,7 @@ public class NPCBehaviour_SwatInvestigatePoint : NPCBehaviour {
 		point.transform.position = PoliceController.me.pointToInvestigate;
 		myController.pf.getPath (this.gameObject,point);
 		PhoneTab_RadioHack.me.setNewText ("SWAT Team investigating disturbance standby. ",radioHackBand.swat);
-		Debug.Break ();
+		////Debug.Break ();
 		isInitialised = true;
 	}
 
@@ -33,11 +33,17 @@ public class NPCBehaviour_SwatInvestigatePoint : NPCBehaviour {
 	void facePosition()
 	{
 		if (pos == Vector3.zero) {
-			roomRect r = PoliceController.me.currentRoomSwat.getRectIAmIn (this.transform.position);
-			if (r == null) {
-				pos = PoliceController.me.currentRoomSwat.getCenter ();
+
+			if (PoliceController.me.currentRoomSwat == null) {
+				pos = CommonObjectsStore.player.transform.position;
 			} else {
-				pos = r.getCenterPoint ();
+
+				roomRect r = PoliceController.me.currentRoomSwat.getRectIAmIn (this.transform.position);
+				if (r == null) {
+					pos = PoliceController.me.currentRoomSwat.getCenter ();
+				} else {
+					pos = r.getCenterPoint ();
+				}
 			}
 		}
 		myController.pmc.rotateToFacePosition (pos);
@@ -46,6 +52,10 @@ public class NPCBehaviour_SwatInvestigatePoint : NPCBehaviour {
 
 	public bool areWeAtPosition()
 	{
+		if (point == null) {
+			return true;
+		}
+
 		if (Vector3.Distance (this.transform.position, point.transform.position) > 2.0f) {
 			return false;
 		} else {
@@ -61,9 +71,10 @@ public class NPCBehaviour_SwatInvestigatePoint : NPCBehaviour {
 			} else {
 				if (LevelController.me.suspects.Contains (t.gameObject) == true) {
 					return t.gameObject;
-				} 
-				else if (t.gameObject == CommonObjectsStore.player) {
+				} else if (t.gameObject == CommonObjectsStore.player) {
 					return t.gameObject;
+				} else if (t.gameObject.layer == 29) {
+					return CommonObjectsStore.player;
 				}
 
 			}

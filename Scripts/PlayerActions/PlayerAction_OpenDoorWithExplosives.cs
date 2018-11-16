@@ -23,7 +23,7 @@ public class PlayerAction_OpenDoorWithExplosives : PlayerAction {
 	void Update(){
 		if (explosivePlaced == true) {
 			timer -= Time.deltaTime;
-			//////Debug.Log ("Explosive Beep");
+			////////Debug.Log ("Explosive Beep");
 			if (timer <= 0) {
 				Instantiate (CommonObjectsStore.me.explosion, this.transform.position, this.transform.rotation);
 				myDoor.locked = false;
@@ -62,7 +62,7 @@ public class PlayerAction_OpenDoorWithExplosives : PlayerAction {
 			return false;
 		}
 		if (explosivePlaced == false) {
-			////////Debug.Log ("Does player have explosives = " + Inventory.playerInventory.doWeHaveItem ("Explosive"));
+			//////////Debug.Log ("Does player have explosives = " + Inventory.playerInventory.doWeHaveItem ("Explosive"));
 			if (Vector3.Distance (this.transform.position, CommonObjectsStore.player.transform.position) < 2 && Inventory.playerInventory.doWeHaveItem ("Explosive")==true) {
 				return true;
 			} else {

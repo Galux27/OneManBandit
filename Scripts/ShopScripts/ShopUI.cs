@@ -22,6 +22,13 @@ public class ShopUI : MonoBehaviour {
 
 	}
 
+	void resetBasketOnClose()
+	{
+		foreach (string st in itemsInBasket) {
+			increaseQuantityOfItem (st);
+		}
+	}
+
 	public void buyItems()
 	{
 		if (canWeBuy () == true) {
@@ -67,7 +74,7 @@ public class ShopUI : MonoBehaviour {
 	{
 		myShop = s;
 		getEndPoints ();
-
+		itemsInBasket.Clear ();
 		setUIs ();
 		shopParent.SetActive (true);
 	}
@@ -216,7 +223,7 @@ public class ShopUI : MonoBehaviour {
 
 	void incrementInvEndPoint()
 	{
-		Debug.Log (Inventory.playerInventory.inventoryItems.Count);
+		//Debug.Log (Inventory.playerInventory.inventoryItems.Count);
 		if (playerInvEndPoint + 1 < Inventory.playerInventory.inventoryItems.Count) {
 			playerInvEndPoint++;
 		}
@@ -314,6 +321,7 @@ public class ShopUI : MonoBehaviour {
 
 	public void closeUI()
 	{
+		resetBasketOnClose ();
 		shopParent.SetActive (false);
 	}
 }

@@ -33,6 +33,14 @@ public class PhoneController : MonoBehaviour {
 	void Start () {
 		activePhoneTabs = new List<PhoneTab> ();
 		openPhone ();
+
+		//if (Application.isEditor == true) {
+			unlockPhoneTab ("Map");
+			unlockPhoneTab ("RadioHack");
+			unlockPhoneTab ("CCTVView");
+			unlockPhoneTab ("WorldMap");
+
+		//}
 		//PhoneAlert.me.setMessageText ("Press the button to open & close the phone");
 	}
 	
@@ -41,7 +49,7 @@ public class PhoneController : MonoBehaviour {
 		runTab ();
 		tabMoniter ();
 
-		if (Application.isEditor == true) {
+		/*if (Application.isEditor == true) {
 			//if (Input.GetKeyDown (KeyCode.T)) {
 				foreach (PhoneTab t in allPhoneTabs) {
 					if (activePhoneTabs.Contains (t) == false) {
@@ -49,12 +57,17 @@ public class PhoneController : MonoBehaviour {
 					}
 				}
 		//	}
-		}
+		}*/
 	}
 
 	void tabMoniter()
 	{
 		foreach (PhoneTab t in activePhoneTabs) {
+			if (t == null) {
+				activePhoneTabs.Remove (t);
+				return;
+			}
+
 			if (t.active == true && currentTab != t) {
 				t.disablePhoneTab ();
 			}
@@ -128,5 +141,18 @@ public class PhoneController : MonoBehaviour {
 		if (phoneTabCounter > 0) {
 			phoneTabCounter--;
 		}
+	}
+
+	public void unlockPhoneTab(string toUnlock)
+	{
+		foreach (PhoneTab pt in activePhoneTabs) {
+			if (pt.tabName == toUnlock) {
+				return;
+			}
+		}
+
+		activePhoneTabs.Add (getPhoneTab (toUnlock));
+
+
 	}
 }

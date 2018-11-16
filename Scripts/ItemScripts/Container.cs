@@ -12,6 +12,10 @@ public class Container : MonoBehaviour {
 	public bool locked = false;
 	public bool initialised = false;
 	public AudioClip openSfx;
+
+    public List<string> itemsICouldAdd;
+    public List<float> chanceOfItem;
+
 	void Awake()
 	{
 		sr = this.GetComponent<SpriteRenderer> ();
@@ -22,7 +26,13 @@ public class Container : MonoBehaviour {
 	void Start()
 	{
 		actionsToAdd ();
+        if(initialised==false)
+        {
+            generateInventory();
+            initialised = true;
+        }
 	}
+
 
 	float timer = 0.0f;
 	int counter = 0;
@@ -57,6 +67,10 @@ public class Container : MonoBehaviour {
 	{
 		if (animate == true) {
 			playAnimation ();
+		}
+
+		if (open == true && Inventory.playerInventory.inventoryGUI.activeInHierarchy == false) {
+			closeContainer ();
 		}
 	}
 
@@ -159,4 +173,114 @@ public class Container : MonoBehaviour {
 		i.transform.parent = null;
 		return i;
 	}
+
+    public bool shouldWeSerializeContainer()
+    {
+        if (transform.root.tag == "NPC" || transform.root.tag == "Player" || transform.root.tag == "Dead/Knocked" || transform.root.tag == "Car")
+        {
+            return false;
+        }
+
+        return false;
+    }
+
+    int day=1, month=1, year=1971;
+    public string serializeContainer()
+    {
+        string retVal = "";
+        retVal += day.ToString() + ":";
+        retVal += month.ToString() + ":";
+        retVal += year.ToString() + ":";
+        List<string> itemsToNotKeep = new List<string>();
+        itemsToNotKeep.Add("Key");
+        itemsToNotKeep.Add("Note");
+        itemsToNotKeep.Add("Keycard");
+
+        foreach (Item i in itemsInContainer)
+        {
+            if (itemsToNotKeep.Contains(i.itemName) == false)
+            {
+                retVal += LoadingDataStore.me.serialiseItem(i) + ":";
+            }
+        }
+        return retVal;
+    }
+
+    public void deserializeContainer(string data)
+    {
+        ////Debug.LogError(this.gameObject.name + " Is being deserialized");
+        clearInventory();
+        string[] split = data.Split(':');
+        day = int.Parse(split[0]);
+        month = int.Parse(split[1]);
+        year = int.Parse(split[2]);
+        if (TimeScript.me.howManyHoursHavePassed(0, day, month, year) > 72)
+        {
+            generateInventory();
+        }
+        else
+        {
+            for (int x = 3; x < split.Length; x++)
+            {
+                GameObject g = LoadingDataStore.me.deserialiseItem(split[x]);
+                if (g != null)
+                {
+                    GameObject instance = (GameObject)Instantiate(g, this.transform.position, this.transform.rotation);
+                    addItemToContainer(instance.GetComponent<Item>());
+                }
+
+            }
+        }
+        initialised = true;
+    }
+    void generateInventory()
+    {
+
+
+        if (ItemDatabase.me==null)
+        {
+            ItemDatabase id = FindObjectOfType<ItemDatabase>();
+
+            ItemDatabase.me = id;
+        }
+
+        if(itemsICouldAdd==null)
+        {
+            return;
+        }
+
+        for(int x = 0;x<itemsICouldAdd.Count;x++)
+        {
+            float r = Random.Range(0.0f, 100.0f);
+
+            if (r < chanceOfItem[x])
+            {
+                GameObject instance = ItemDatabase.me.getItem(itemsICouldAdd[x]);
+                if(instance!=null)
+                {
+                    GameObject g = (GameObject)Instantiate(instance, this.transform.position, this.transform.rotation);
+                    addItemToContainer(g.GetComponent<Item>());
+                }
+            }
+        }
+        day = TimeScript.me.day;
+        month = TimeScript.me.month;
+        year = TimeScript.me.year;
+    }
+
+    void clearInventory()
+    {
+        foreach(Item i in itemsInContainer)
+        {
+            Destroy(i.gameObject);
+
+        }
+        itemsInContainer.Clear();
+    }
+
+    public string getFileName()
+    {
+        Vector3 v = new Vector3(Mathf.Round(this.transform.position.x*10), Mathf.Round(this.transform.position.y * 10), Mathf.Round(this.transform.position.z * 10));
+        return v.ToString() + ".txt";
+    }
 }

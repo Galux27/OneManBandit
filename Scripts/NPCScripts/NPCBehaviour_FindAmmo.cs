@@ -36,7 +36,7 @@ public class NPCBehaviour_FindAmmo : NPCBehaviour {
 	{
 		NPCBehaviour_FindGear newBehaviour = this.gameObject.AddComponent<NPCBehaviour_FindGear> ();
 		myController.currentBehaviour = newBehaviour;
-		//////Debug.Log ("No ammo,dropping weapon");
+		////////Debug.Log ("No ammo,dropping weapon");
 		myController.inv.unequipItem (myController.pwc.currentWeapon.ammoItem);
 		myController.inv.dropItem (myController.pwc.currentWeapon.ammoItem);
 
@@ -62,7 +62,7 @@ public class NPCBehaviour_FindAmmo : NPCBehaviour {
 		if (ai == null) {
 
 		} else {
-			//////Debug.Log ("DROPPING EMPTY MAG");
+			////////Debug.Log ("DROPPING EMPTY MAG");
 			myController.inv.dropItem (myController.pwc.currentWeapon.ammoItem);
 		}
 	}

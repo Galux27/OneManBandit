@@ -6,6 +6,7 @@ using UnityEngine;
 /// Class that controls the players input & some movement
 /// </summary>
 public class PlayerInputController : MonoBehaviour {
+	
 	public static PlayerInputController me;
 	PersonMovementController pmc;
 	public PersonWeaponController pwc;
@@ -37,12 +38,14 @@ public class PlayerInputController : MonoBehaviour {
 		}
 
 		if (MapControlScript.me.displayMap == false) {
-			pmc.moveDirSet ();
-			rotateToMouse ();
-			AimDownSight ();
-			fireWeapon ();
-			lookAheadControl ();
-			dropWeapon ();
+			if (PlayerCarController.inCar == false) {
+				pmc.moveDirSet ();
+				rotateToMouse ();
+				AimDownSight ();
+				fireWeapon ();
+				lookAheadControl ();
+				dropWeapon ();
+			}
 			openInventory ();
 			openPhoneShortcut ();
 			debugStuff ();

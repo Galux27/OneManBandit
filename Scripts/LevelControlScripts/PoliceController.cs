@@ -47,15 +47,29 @@ public class PoliceController : MonoBehaviour {
 		if (swatInLevel == null) {
 			swatInLevel = new List<GameObject> ();
 		}
+
+		if (CrimeRecordScript.me.shouldWeSpawnPatrolCops () == true) {
+			for (int x = 0; x < CrimeRecordScript.me.numberOfCopsToSpawn_Patrol (); x++) {
+				Vector3 pos = LevelController.me.pointsToExitLevel [Random.Range (0, LevelController.me.pointsToExitLevel.Count)].position;
+				Instantiate (CommonObjectsStore.me.patrolCop, pos, Quaternion.Euler (0, 0, 0));
+			}
+		}
+
+		if (CrimeRecordScript.me.shouldWeSpawnDetectives () == true) {
+			for (int x = 0; x < CrimeRecordScript.me.numberOfCopsToSpawn_Detective (); x++) {
+				Vector3 pos = LevelController.me.pointsToExitLevel [Random.Range (0, LevelController.me.pointsToExitLevel.Count)].position;
+				Instantiate (CommonObjectsStore.me.patrolCop, pos, Quaternion.Euler (0, 0, 0));
+			}
+		}
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-		if (Input.GetKeyDown (KeyCode.P)) {
-			Debug.Log("Path cost test " + Pathfinding.me.getPathCost(CommonObjectsStore.player,swatFormUpPoint.gameObject));
-		}
-
+		//if (Input.GetKeyDown (KeyCode.P)) {
+			////Debug.Log("Path cost test " + Pathfinding.me.getPathCost(CommonObjectsStore.player,swatFormUpPoint.gameObject));
+		//}
+	//
 		if (swatCalled == true && swatHere==false) {
 			countDownSwat ();
 		}
@@ -90,10 +104,10 @@ public class PoliceController : MonoBehaviour {
 			shouldWeRefreshSWAT ();
 		}
 
-		if (swatHere == true && buildingSurrounded == true || swatHere==true && buildingUnderSiege==null) {
+		//if (swatHere == true && buildingSurrounded == true || swatHere==true && buildingUnderSiege==null) {
 			//swatManager ();
-			newSwatController();
-		}
+			//newSwatController();
+		//}
 	}
 
 	void countDownInvestigation()
@@ -253,7 +267,7 @@ public class PoliceController : MonoBehaviour {
 
 
 		if (buildingUnderSiege==null || buildingUnderSiege.isOutdoors==true) {
-			Debug.Log ("Points set for outdoors");
+			//Debug.Log ("Points set for outdoors");
 			CivilianAction[] cas = FindObjectsOfType<CivilianAction> ();
 			foreach (CivilianAction p in cas) {
 				Transform t = p.positionForAction;
@@ -263,7 +277,7 @@ public class PoliceController : MonoBehaviour {
 			}
 		} else {
 			pointsToSecure = new List<Transform> ();
-			Debug.Log ("Points set for indoors");
+			//Debug.Log ("Points set for indoors");
 
 			foreach (Transform t in buildingUnderSiege.entrances) {
 				WorldTile nearestPoint = WorldBuilder.me.findNearestWorldTile (t.position);
@@ -293,12 +307,16 @@ public class PoliceController : MonoBehaviour {
 		copsHere = true;
 		CarSpawner.me.destroyCars ();
 		int copsSpawned = 0;
-		while (copsSpawned < 4) {
-			GameObject policeCar = copCarsAvailable [Random.Range (0, copCarsAvailable.Count)];
+		//while (copsSpawned < 4) {
+		for(int x = 0;x<CrimeRecordScript.me.numberOfCopsToSpawn_Initial();x+=4){
+			GameObject g = copCarsAvailable [Random.Range (0, copCarsAvailable.Count)];
+			GameObject policeCar = (GameObject)Instantiate (CommonObjectsStore.me.policeBackupCar,  getPosForCreatingPoliceCar(), g.transform.rotation);
 			addCopCar (policeCar);
-			policeCar.SetActive (true);
-			copCarsAvailable.Remove (policeCar);
+			//policeCar.SetActive (true);
+			//copCarsAvailable.Remove (policeCar);
 			copsSpawned=4;
+			policeCar.GetComponent<NewRoadFollower>().hasDriver=true;
+
 		}
 
 	}
@@ -312,12 +330,15 @@ public class PoliceController : MonoBehaviour {
 
 		backupHere = true;
 		int copsSpawned = 0;
-		while (copsSpawned < 12 ) {
-			GameObject policeCar = copCarsAvailable [Random.Range (0, copCarsAvailable.Count)];
-			policeCar.SetActive (true);
+		//while (copsSpawned < 12 ) {
+		for(int x = 0;x<CrimeRecordScript.me.numberOfCopsToSpawn_Backup();x+=4){
+			GameObject g = copCarsAvailable [Random.Range (0, copCarsAvailable.Count)];
+			GameObject policeCar = (GameObject)Instantiate (CommonObjectsStore.me.policeBackupCar, getPosForCreatingPoliceCar(), g.transform.rotation);
+		//	policeCar.SetActive (true);
 			addCopCar (policeCar);
+			policeCar.GetComponent<NewRoadFollower>().hasDriver=true;
 
-			copCarsAvailable.Remove (policeCar);
+		//	copCarsAvailable.Remove (policeCar);
 			copsSpawned+=4;
 		}
 	}
@@ -331,17 +352,21 @@ public class PoliceController : MonoBehaviour {
 		CarSpawner.me.destroyCars ();
 
 		int copsSpawned = 0;
-		while (copsSpawned < 6) {
-			GameObject policeCar = copCarsAvailable [Random.Range (0, copCarsAvailable.Count)];
-			PoliceController.me.swatFormUpPoint = policeCar.GetComponent<PoliceCarScript> ().copSpawnPoints [0];
-			policeCar.GetComponent<PoliceCarScript> ().swat = true;
-			policeCar.SetActive (true);
+		for(int x = 0;x<CrimeRecordScript.me.numberOfCopsToSpawn_Swat();x+=4){
+			GameObject g = copCarsAvailable [Random.Range (0, copCarsAvailable.Count)];
+			GameObject policeCar = (GameObject)Instantiate (CommonObjectsStore.me.swatVan, getPosForCreatingPoliceCar(), g.transform.rotation);
+			PoliceController.me.swatFormUpPoint = policeCar.GetComponent<PlayerCarController> ().driversDoor.transform;
+//			policeCar.GetComponent<PoliceCarScript> ().swat = true;
+			policeCar.GetComponent<NewRoadFollower>().hasDriver=true;
+			//policeCar.SetActive (true);
 			addCopCar (policeCar);
 
-			copCarsAvailable.Remove (policeCar);
+			//copCarsAvailable.Remove (policeCar);
 			copsSpawned+=4;
 		}
 	}
+
+
 
 	float buildingSurroundTimer = 40.0f;
 	void setBuildingSurrounded()
@@ -364,6 +389,49 @@ public class PoliceController : MonoBehaviour {
 		return t;
 	}
 
+	NewRoad r;
+	Vector3 getPosForCreatingPoliceCar()
+	{
+		if (r == null) {
+			r = FindObjectOfType<NewRoad> ();
+		}
+
+        NewRoadJunction rj = r.sectionsInTheRoad[Random.Range(0, r.sectionsInTheRoad.Count)];
+
+        Vector3 start = rj.startPoint.position;
+        Vector3 end = rj.potentialPoints[Random.Range(0, rj.potentialPoints.Count)].transform.position;
+
+        Vector3 dir = end - start;
+        return start + (Random.Range(0.0f,1.0f)*dir.normalized);
+
+
+        bool junctionUnavailable = false;
+		//if (copCarsAvailable.Count > 0) {
+		foreach (GameObject g in copCarsInWorld) {
+			if (Vector2.Distance (rj.startPoint.position, g.transform.position) < 4 && Vector2.Distance(rj.startPoint.transform.position,CommonObjectsStore.player.transform.position)<12) {
+					junctionUnavailable = true;
+					//int r2 = Random.Range (0, copCarsAvailable.Count);
+					//Vector3 p = copCarsAvailable [r2].transform.position;
+					//copCarsAvailable.RemoveAt (r2);
+					//return p;
+			}
+		}
+			//}
+			if (junctionUnavailable == false) {
+				return rj.startPoint.position;
+			} else {
+				return getPosForCreatingPoliceCar ();
+			}
+
+		
+		return rj.startPoint.position;
+
+		//List<NewRoadJunction> candidates = new List<NewRoadJunction> ();
+		//foreach (NewRoadJunction rj in r.sectionsInTheRoad) {
+			//if(rj.playerCarSpawn==true)
+		//	{
+		//}
+	}
 
 	public RoomScript currentRoomSwat;
 	public List<GameObject> pointsToGoTo,pointsBeenTo;
@@ -548,7 +616,7 @@ public class PoliceController : MonoBehaviour {
 			}
 
 			if (npc.npcB.myType == AIType.swat) {
-				Debug.Log (npc.gameObject.name+ " Fount swat with " + npc.myHealth.healthValue);
+				//Debug.Log (npc.gameObject.name+ " Fount swat with " + npc.myHealth.healthValue);
 
 				if (npc.gameObject.tag == "Dead/Knocked" && npc.myHealth.healthValue <=0 ) {
 					refresh = true;
@@ -557,7 +625,7 @@ public class PoliceController : MonoBehaviour {
 		}
 
 		if (refresh == true) {
-			Debug.Log ("Refreshing swat");
+			//Debug.Log ("Refreshing swat");
 			List<NPCController> swatAvailable = new List<NPCController> ();
 
 
@@ -766,7 +834,7 @@ public class PoliceController : MonoBehaviour {
 						} else {
 							seenHostile = true;
 						}
-					} else {
+					} else if(swatGoingToCurrentPoint!=null){
 						if (seenHostile == false) {
 
 							NPCController npc = swatInvestigating.GetComponent < NPCController> ();
@@ -804,7 +872,7 @@ public class PoliceController : MonoBehaviour {
 			}
 		} else {
 			if (buildingSurrounded == true && areWeFormedUp () == true && areAllSwatSpawned()==true) {
-				Debug.Log ("Swat surrounded building and are formed up");
+				//Debug.Log ("Swat surrounded building and are formed up");
 				if (investigatePoint == false && seenHostile == false) {
 
 					if (roomsToGoTo == null || roomsToGoTo.Count == 0) {
@@ -858,7 +926,7 @@ public class PoliceController : MonoBehaviour {
 
 
 						if (nb == null && goingToRoom==false) {
-						Debug.Log ("Not going to room");
+						//Debug.Log ("Not going to room");
 							currentPoint = pointsToGoTo [0];
 							if (swatGoingToCurrentPoint == null || swatGoingIn.Count == 0) {
 								swatGoingToCurrentPoint = getFreeSwatNearPoint (currentPoint.transform.position);
@@ -892,7 +960,7 @@ public class PoliceController : MonoBehaviour {
 								npc.currentBehaviour = nb;
 							}
 						} else if(nb == null && goingToRoom==true){
-						Debug.Log ("Going to room");
+						//Debug.Log ("Going to room");
 							if (goToEntrance == null || goToEntrance.Count == 0) {
 								goToEntrance = new List<NPCBehaviour_SwatGoToRoomEntrance> ();
 								foreach (GameObject g in swatInLevel) {

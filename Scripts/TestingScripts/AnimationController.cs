@@ -145,9 +145,9 @@ public class AnimationController : MonoBehaviour {
 
 		}
 
-//		//////Debug.Log("Is player running " +  myAnimator.GetBool("IsRunning"));
-		////////Debug.Log ("Is player moving " + myAnimator.GetBool ("IsMoving"));
-		////////Debug.Log ("Player blood " + myAnimator.GetFloat ("Blood"));
+//		////////Debug.Log("Is player running " +  myAnimator.GetBool("IsRunning"));
+		//////////Debug.Log ("Is player moving " + myAnimator.GetBool ("IsMoving"));
+		//////////Debug.Log ("Player blood " + myAnimator.GetFloat ("Blood"));
 	}
 
 	public void setStandingTied()
@@ -165,7 +165,7 @@ public class AnimationController : MonoBehaviour {
 	public void punch()
 	{
 		int r = Random.Range (0, 300);
-		////////Debug.Log ("Punch value was " + r);
+		//////////Debug.Log ("Punch value was " + r);
 		myAnimator.SetInteger ("UnarmedMeleeDecide", r);
 		myAnimator.SetBool ("IsUnarmedAttacking", true);
 		punching = true;

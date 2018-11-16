@@ -18,7 +18,7 @@ public class NPCBehaviour_GuardCorpse : NPCBehaviour {
 		person = myController.memory.objectThatMadeMeSuspisious;
 
 		if (doesCorpseNeedGuarding()==false) {
-			//////Debug.Log (this.gameObject.name + " Tried to guard an already guarded corpse");
+			////////Debug.Log (this.gameObject.name + " Tried to guard an already guarded corpse");
 			corpseAlreadyGuarded ();
 		}
 		//corpseDisplay = objectsThatAreGuarded;
@@ -86,7 +86,7 @@ public class NPCBehaviour_GuardCorpse : NPCBehaviour {
 		myController.npcB.suspisious = false;
 		myController.memory.suspisious = false;
 		myController.memory.objectThatMadeMeSuspisious = null;
-		//////Debug.Break ();
+		////////Debug.Break ();
 		Destroy (this);
 	}
 
@@ -109,10 +109,14 @@ public class NPCBehaviour_GuardCorpse : NPCBehaviour {
 	{
 		if (guarded == false) {
 			//objectsThatAreGuarded.Remove (person);
+
+			if (person == null) {
+				return;
+			}
 			NPCManager.me.corpsesInWorld.Add (person);
 
 			person.gameObject.tag = "Dead/Knocked";
-			//////Debug.Log ("reseting corpse tag");
+			////////Debug.Log ("reseting corpse tag");
 		}
 	}
 

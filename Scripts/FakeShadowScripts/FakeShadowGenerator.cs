@@ -47,7 +47,7 @@ public class FakeShadowGenerator : MonoBehaviour {
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading,Vector3.Distance(source.transform.position,target.transform.position));
 
 		if (this.gameObject.tag == "Player") {
-			Debug.DrawRay (origin, heading,Color.cyan);
+			//Debug.DrawRay (origin, heading,Color.cyan);
 		}
 
 		//foreach (RaycastHit2D ray in rays) {

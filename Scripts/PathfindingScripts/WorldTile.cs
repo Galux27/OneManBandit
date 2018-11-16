@@ -14,6 +14,7 @@ public class WorldTile : MonoBehaviour {
 	public WorldTile parent;
 	public int modifier = 10;
 	public int tempModifiers = 0;
+	public bool isOptimised=false;
 	public int getModifier()
 	{
 		return modifier + tempModifiers;

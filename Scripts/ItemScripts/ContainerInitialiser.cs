@@ -13,10 +13,10 @@ public class ContainerInitialiser : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		if (c.initialised == false) {
-			createItems ();
-			c.initialised = true;
-		}
+		//if (c.initialised == false) {
+		//	createItems ();
+		//	c.initialised = true;
+		//}
 	}
 
 	// Update is called once per frame

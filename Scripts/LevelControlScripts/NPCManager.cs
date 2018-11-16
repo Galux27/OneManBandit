@@ -47,6 +47,18 @@ public class NPCManager : MonoBehaviour {
 			maxUpdatePerFrame = npcControllers.Count - 1;
 		}
 
+        if (maxUpdatePerFrame <= 0)
+        {
+            if(npcControllers.Count>5)
+            {
+                maxUpdatePerFrame = 5;
+            }
+            else
+            {
+                maxUpdatePerFrame = npcControllers.Count - 1;
+            }
+        }
+
 		//if (startedUpdating == false) {
 		//	StartCoroutine ("npcUpdate");
 		//	startedUpdating = true;
@@ -70,7 +82,7 @@ public class NPCManager : MonoBehaviour {
 			}
 			if (numberOfUpdatesThisFrame < maxUpdatePerFrame) {
 				npc.npcB.OnUpdate ();
-				//Debug.Log ("Calling update for " + npc.gameObject.name);
+
 				numberOfUpdatesThisFrame++;
 			} else {
 				if (x >= npcControllers.Count - 1) {
@@ -89,7 +101,7 @@ public class NPCManager : MonoBehaviour {
 		/*foreach (NPCController npc in npcControllers) {
 			if (numberOfUpdatesThisFrame < 5) {
 				npc.npcB.OnUpdate ();
-				//Debug.Log ("Calling update for " + npc.gameObject.name);
+				////Debug.Log ("Calling update for " + npc.gameObject.name);
 				numberOfUpdatesThisFrame++;
 			} else {
 				break;

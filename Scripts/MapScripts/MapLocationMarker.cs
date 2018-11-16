@@ -53,8 +53,13 @@ public class MapLocationMarker : MonoBehaviour {
 
 	public void loadLevel()
 	{
-		LoadScreen.loadScreen.loadGivenScene (sceneName);
-		MapControlScript.me.displayMap = false;
+		if(LevelController.me.canWeLeaveLevel()==true){
+			LoadScreen.loadScreen.loadGivenScene (sceneName);
+			MapControlScript.me.displayMap = false;
+		}else{
+			PhoneAlert.me.setMessageText ("You need to be by a level exit to escape on foot.");
+
+		}
 	}
 
 	string getLocationInfo()

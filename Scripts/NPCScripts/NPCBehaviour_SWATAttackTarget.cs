@@ -44,7 +44,7 @@ public class NPCBehaviour_SWATAttackTarget : NPCBehaviour {
 				myController.memory.noiseToInvestigate = target.transform.position;
 				if (myController.pwc.currentWeapon == null) {
 
-					//////Debug.Log ("ACTUALLY TRYING TO ATTACK WITH BARE HANDS");
+					////////Debug.Log ("ACTUALLY TRYING TO ATTACK WITH BARE HANDS");
 					//rotateToTarget ();
 					meleeMoveToTarget();
 					if (Vector3.Distance (this.transform.position, target.transform.position)<1.0f) {
@@ -163,12 +163,12 @@ public class NPCBehaviour_SWATAttackTarget : NPCBehaviour {
 
 		Vector3 heading = transform.forward - origin;
 		RaycastHit2D ray = Physics2D.Raycast (origin, transform.up,12.0f);
-		Debug.DrawRay (origin, transform.up*12.0f,Color.green);
+		//Debug.DrawRay (origin, transform.up*12.0f,Color.green);
 
 		if (ray.collider == null) {
 			return false;
 		} else {
-//			//////Debug.Log (ray.collider.gameObject);
+//			////////Debug.Log (ray.collider.gameObject);
 			if (ray.collider.gameObject == target || ray.collider.gameObject.tag=="Projectile") {
 				return true;
 			} else {

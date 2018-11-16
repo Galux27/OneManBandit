@@ -132,7 +132,7 @@ public class ArtemAnimationController : MonoBehaviour {
 		bool hasSomethingChanged = false;
 
 		//if (pwc.aimDownSight != lastFrameADS) {
-		//	Debug.Log ("Changing ADS State");
+		//	//Debug.Log ("Changing ADS State");
 		//	hasSomethingChanged = true;
 		//	changeGunState ();
 		//	lastFrameADS = pwc.aimDownSight;
@@ -373,7 +373,7 @@ public class ArtemAnimationController : MonoBehaviour {
 
 	void redFlash()
 	{
-		Debug.Log ("Doing red flash for " + this.gameObject.transform.root.name);
+		//Debug.Log ("Doing red flash for " + this.gameObject.transform.root.name);
 		alphaCountdown += Time.deltaTime;
 
 		Color c = new Color (1, alphaCountdown, alphaCountdown, 1);

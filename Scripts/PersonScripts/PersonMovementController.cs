@@ -52,7 +52,7 @@ public class PersonMovementController : MonoBehaviour {
 		} else {
 			movedThisFrame = false;
 		}
-
+        throttleRigidbodyVelocity();
 	}
 
 	void throttleRigidbodyVelocity()
@@ -120,17 +120,22 @@ public class PersonMovementController : MonoBehaviour {
 			} else {
 				startVal += PlayerAction.currentAction.getMoveModForAction ();
 			}
+			foreach (EffectBase eb in EffectsManager.me.effectsOnPlayer) {
+				startVal += eb.getMoveMod ();
+			}
 		}
 		if (slowedMovement == true) {
 			startVal -= 3.5f;
 		}
+
+	
 
 		if (startVal <= 0 ) {
 			startVal = 0.1f;
 		}
 
 
-
+//		//Debug.Log ("Player movement mod was " + startVal);
 		movementMod = startVal;
 	}
 
@@ -173,15 +178,23 @@ public class PersonMovementController : MonoBehaviour {
 	public void rotateToFacePosition(Vector3 pos)
 	{
 		if (this.gameObject.tag != "Player") {
+			//if (this.GetComponent<NPCBehaviourDecider> ().myType == AIType.shopkeeper) {
+			//	//Debug.Log ("SHOPKEEPER IS FACING " + pos.ToString ());
+			//}
+
 			if (pl == null) {
 
 			} else {
 
 				if (pos == null || pos == Vector3.zero || frozen==true || pl.waitingForPath==true) {
-					
+					//if (this.GetComponent<NPCBehaviourDecider> ().myType == AIType.shopkeeper) {
+						////Debug.Log ("SHOPKEEPER RETURNED NULL");
+					//}
 					return;
 				}
 			}
+
+		
 		}
 			hc.rotateToFacePosition (pos);
 
@@ -192,6 +205,9 @@ public class PersonMovementController : MonoBehaviour {
 			rid.transform.rotation =Quaternion.Euler(rot);//Quaternion.Slerp(this.transform.rotation,Quaternion.Euler(rot),getRotationSpeed()*Time.deltaTime);
 		} else {
 			if (pl.obstacle == true) {
+				//if (this.GetComponent<NPCBehaviourDecider> ().myType == AIType.shopkeeper) {
+					////Debug.Log ("SHOPKEEPER RETURNED NULL 2");
+				//}
 				return;
 
 			}

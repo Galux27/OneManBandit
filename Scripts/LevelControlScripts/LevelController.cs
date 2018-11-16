@@ -29,6 +29,7 @@ public class LevelController : MonoBehaviour {
 	public FloorScript playerFloor;
 	public BuildingScript[] buildings;
 	public List<Container> containersForEssentialItems;
+	public List<Transform> pointsToExitLevel;
 	void Awake()
 	{
 		me = this;
@@ -65,7 +66,7 @@ public class LevelController : MonoBehaviour {
 			PhoneTab_RadioHack.me.setNewText ("Police ETA: " + Mathf.RoundToInt (copSpawnTimer) + " seconds",radioHackBand.cop);
 		}
 
-		////////Debug.Log ("Time till cops = " + copSpawnTimer.ToString ());
+		//////////Debug.Log ("Time till cops = " + copSpawnTimer.ToString ());
 		if (copSpawnTimer <= 0) {
 			for(int x = 0;x<8;x++)
 			{
@@ -80,7 +81,7 @@ public class LevelController : MonoBehaviour {
 	void countDownSwatTimer()
 	{
 		swatSpawnTimer -= Time.deltaTime;
-		////////Debug.Log ("Time till Swat = " + swatSpawnTimer.ToString ());
+		//////////Debug.Log ("Time till Swat = " + swatSpawnTimer.ToString ());
 		if (Mathf.RoundToInt (swatSpawnTimer) % 25 == 0) {
 			PhoneTab_RadioHack.me.setNewText ("Armed Response ETA: " + Mathf.RoundToInt (copSpawnTimer) + " seconds",radioHackBand.cop);
 		}
@@ -201,11 +202,11 @@ public class LevelController : MonoBehaviour {
 
 		foreach (GameObject g in phonesInLevel) {
 
-			if (PoliceController.me.underSiege == true) {
-				if (PoliceController.me.buildingUnderSiege.isPosInRoom (g.transform.position)) {
-					continue;
-				}
-			}
+			//if (PoliceController.me.underSiege == true) {
+			//	if (PoliceController.me.buildingUnderSiege.isPosInRoom (g.transform.position)) {
+			//		continue;
+			//	}
+			//}
 
 			float dist2 = Vector3.Distance(this.transform.position,pos);
 
@@ -235,5 +236,25 @@ public class LevelController : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	public bool canWeLeaveLevel(){
+	/*	if (PoliceController.me.copsHere == true || PoliceController.me.backupHere == true || PoliceController.me.swatHere == true) {
+			if (PlayerCarController.inCar == true) {
+				return true;
+			} else {
+				foreach (Transform t in pointsToExitLevel) {
+					if (Vector2.Distance (t.transform.position, CommonObjectsStore.player.transform.position) < 10) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+		} else {
+			return true;
+		}*/
+		return true;
 	}
 }

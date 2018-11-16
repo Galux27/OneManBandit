@@ -24,7 +24,7 @@ public class LightSource : MonoBehaviour {
 	public List<TileBase> tilesInRangeOfLight;
 	public List<Vector3> shadowPoints;
 	public Sprite bulbOn, bulbOff;
-
+    public static bool powerCut = false;
 
 	public void setSwitches()
 	{
@@ -84,6 +84,10 @@ public class LightSource : MonoBehaviour {
 	/// </summary>
 	public static void UpdateLightMeshes()
 	{
+        if(LightSource.powerCut==true)
+        {
+            return;
+        }
 		FindObjectOfType<LightSource> ().StartCoroutine ("updateMesh");
 	}
 

@@ -84,7 +84,7 @@ public class Shadow : MonoBehaviour {
 	void Update () {
 		if (staticShadow == false) {
 			if (shouldWeCalculateShadows ()) {
-				//Debug.Log (this.gameObject.name + " is looking for a new shadow source");
+				////Debug.Log (this.gameObject.name + " is looking for a new shadow source");
 			
 				if (currentLightSource == null) {
 					currentLightSource = LightSource.sun;

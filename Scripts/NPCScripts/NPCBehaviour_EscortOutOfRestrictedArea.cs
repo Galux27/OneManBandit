@@ -94,7 +94,7 @@ public class NPCBehaviour_EscortOutOfRestrictedArea : NPCBehaviour {
 			return true;
 		}
 
-		if (newRoom != roomStartedIn && newRoom.traspassing == true) {
+		if (newRoom != roomStartedIn && newRoom.traspassingInRoom() == true) {
 			return true;
 		} else {
 			return false;
@@ -108,7 +108,7 @@ public class NPCBehaviour_EscortOutOfRestrictedArea : NPCBehaviour {
 		}
 
 
-		if (newRoom != roomStartedIn && newRoom.traspassing == false) {
+		if (newRoom != roomStartedIn && newRoom.traspassingInRoom() == false) {
 			return true;
 		} else {
 			return false;

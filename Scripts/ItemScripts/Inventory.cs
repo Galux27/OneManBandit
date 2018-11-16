@@ -15,6 +15,11 @@ public class Inventory : MonoBehaviour {
 		}
 	}
 
+	void Start()
+	{
+		inventoryGUI = InventoryUI.me.gameObject;
+	}
+
 	void Update()
 	{
 		decideCapacityMod ();
@@ -563,7 +568,7 @@ public class Inventory : MonoBehaviour {
 		if (inventoryItems.Contains (i) == false) {
 			return;
 		}
-		//////Debug.Log ("Dropping item " + i.itemName);
+		////////Debug.Log ("Dropping item " + i.itemName);
 		if (this == playerInventory) {
 			unequipItem (i);
 		}
@@ -608,7 +613,7 @@ public class Inventory : MonoBehaviour {
 			if (ai == null) {
 				continue;
 			} else {
-				//////Debug.Log (ai.gunsAmmoFitsIn [0]);
+				////////Debug.Log (ai.gunsAmmoFitsIn [0]);
 				if (ai.canWeUseAmmoInWeapon (curWep)==true) {
 					return true;
 				}

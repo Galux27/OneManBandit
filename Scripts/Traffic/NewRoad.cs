@@ -27,6 +27,8 @@ public class NewRoad : MonoBehaviour {
 /// Class that is a base for a single road section. 
 /// </summary>
 public class NewRoadSection : MonoBehaviour{
+	public bool playerCarSpawn = false;
+
 	public Transform startPoint;
 	public NewRoadSection nextPoint;
 

@@ -57,7 +57,7 @@ public class PlayerActionUI : MonoBehaviour {
 		if (availableActions.Count > 0) {
 
 			if (availableActions[val].canDo () == true) {
-				//////Debug.Log ("Doing action");
+				////////Debug.Log ("Doing action");
 				PlayerAction.currentAction = availableActions[val];
 				PlayerAction.currentAction.doAction ();
 				myDropdown.gameObject.transform.parent.gameObject.SetActive (false);

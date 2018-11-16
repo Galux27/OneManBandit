@@ -41,6 +41,7 @@ public class Stash : MonoBehaviour {
 			myContainer.removeItemFromContainer (hi);
 			Destroy (hi.gameObject);
 		}
+
 	}
 
 }

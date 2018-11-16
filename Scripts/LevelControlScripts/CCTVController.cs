@@ -81,7 +81,7 @@ public class CCTVController : MonoBehaviour {
 		}
 
 		if (finalCandidate == null) {
-			////////Debug.Log ("No guard to invesitgate camera");
+			//////////Debug.Log ("No guard to invesitgate camera");
 		} else {
 			finalCandidate.memory.noiseToInvestigate = c.gameObject.transform.position;
 			finalCandidate.npcB.suspisious = true;
@@ -91,7 +91,7 @@ public class CCTVController : MonoBehaviour {
 			npc.memory.noiseToInvestigate = c.gameObject.transform.position;
 			npc.npcB.suspisious = true;
 
-			////////Debug.LogError ("Setting cop " + npc.gameObject.ToString () + " to investigate " + c.gameObject.ToString ());
+			//////////Debug.LogError ("Setting cop " + npc.gameObject.ToString () + " to investigate " + c.gameObject.ToString ());
 		}
 
 		if (PoliceController.me.swatHere == true && PoliceController.me.seenHostile==false) {

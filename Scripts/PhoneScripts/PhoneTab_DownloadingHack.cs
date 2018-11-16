@@ -81,7 +81,7 @@ public class PhoneTab_DownloadingHack :PhoneTab{
 				signalStrength = 100;
 			}
 
-//			//////Debug.Log(signalStrength);
+//			////////Debug.Log(signalStrength);
 
 			hackProgress += Mathf.RoundToInt(signalStrength);
 			if (hackProgress >= hackSize) {
@@ -95,7 +95,7 @@ public class PhoneTab_DownloadingHack :PhoneTab{
 	}
 
 	public void OnComplete(){
-		//////Debug.Log ("Hack downloaded");
+		////////Debug.Log ("Hack downloaded");
 		hackProgress=0;
 		if (hackDownloading == "CCTVView") {
 

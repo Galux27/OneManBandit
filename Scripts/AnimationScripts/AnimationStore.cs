@@ -22,7 +22,7 @@ public class AnimationStore : MonoBehaviour {
 	{
 		foreach (SpriteAnimation a in allAnimations) {
 			if (a.animWereLookingFor (_ID, _AnimName)==true) {
-				////////Debug.Log (a.ID + "||" + a.AnimName); 
+				//////////Debug.Log (a.ID + "||" + a.AnimName); 
 				return a;
 			}
 		}

@@ -67,15 +67,15 @@ public class PersonWeaponController : MonoBehaviour {
 		} else {
 			if (currentWeapon.ammoItem == null) {
 				reloading = true;
-				Debug.Log ("Reloading true 1");
+				//Debug.Log ("Reloading true 1");
 			} else {
 				if (currentWeapon.ammoItem.gameObject.transform.parent == null) {
 					currentWeapon.ammoItem = null;
 					reloadTimer = currentWeapon.reloadTime;
 					reloading = true;
-					Debug.Log ("Reloading true 2");
+					//Debug.Log ("Reloading true 2");
 
-					//////Debug.LogError ("Ammo item was not in inventory, setting to null");
+					////////Debug.LogError ("Ammo item was not in inventory, setting to null");
 				}
 			}
 		}
@@ -143,7 +143,7 @@ public class PersonWeaponController : MonoBehaviour {
 	void newMeleeDealDamage(GameObject g)
 	{
 		if (g.tag == this.gameObject.tag) {
-			Debug.Log ("hit freindly, returning");
+			//Debug.Log ("hit freindly, returning");
 			return;
 		}
 
@@ -152,46 +152,48 @@ public class PersonWeaponController : MonoBehaviour {
 			//foreach (GameObject g in objectsRayHitInSwing) {
 				PersonHealth ph = g.GetComponent<PersonHealth> ();
 				if (ph == null) {
-					if (g.tag == "Door") {
-						Debug.Log ("Melee hit " + g.gameObject.name);
-						DoorScript ds = g.GetComponent<DoorScript> ();
-						if (ds == null) {
-							if (g.transform.parent == null) {
-								Debug.Log ("Could not find door script in parent");
-
-							} else {
-								ds = g.transform.root.gameObject.GetComponent<DoorScript> ();
-							}
-						}
-
-
-						if (ds == null) {
-							Debug.Log ("Could not find door script");
-						} else {
-							ds.kickInDoor ();
-						}
-						//////Debug.Log ("Door " + ds.gameObject + " kicked in");
-						return;
-					} else if (g.tag == "Window") {
-						Window w = g.GetComponent<Window> ();
-						Debug.Log (g.name);
-						if (w == null) {
+				if (g.tag == "Door") {
+					//Debug.Log ("Melee hit " + g.gameObject.name);
+					DoorScript ds = g.GetComponent<DoorScript> ();
+					if (ds == null) {
+						if (g.transform.parent == null) {
+							//Debug.Log ("Could not find door script in parent");
 
 						} else {
-							w.smashWindow ();
+							ds = g.transform.root.gameObject.GetComponent<DoorScript> ();
 						}
+					}
 
-						WindowNew w2 = g.GetComponentInParent<WindowNew> ();
-						if (w2 == null) {
-						} else {
-							w2.destroyWindow ();
-						}
+
+					if (ds == null) {
+						//Debug.Log ("Could not find door script");
+					} else {
+						ds.kickInDoor ();
+					}
+					////////Debug.Log ("Door " + ds.gameObject + " kicked in");
+					return;
+				} else if (g.tag == "Window") {
+					Window w = g.GetComponent<Window> ();
+					//Debug.Log (g.name);
+					if (w == null) {
+
+					} else {
+						w.smashWindow ();
+					}
+
+					WindowNew w2 = g.GetComponentInParent<WindowNew> ();
+					if (w2 == null) {
+					} else {
+						w2.destroyWindow ();
+					}
 
 					return;
-					} else if (g == this.gameObject) {
+				} else if (g == this.gameObject) {
 					return;
 
-					} 
+				}  else {
+
+				}
 				} else {
 					if (g == this.gameObject || ph.healthValue <= 0) {
 					return;
@@ -243,7 +245,7 @@ public class PersonWeaponController : MonoBehaviour {
 						}
 							ph.setAttacked (this.gameObject);
 						npc.stunTimer = 3.0f;
-							//////Debug.Break ();
+							////////Debug.Break ();
 						}
 
 						//if (inFront == true) {
@@ -263,11 +265,11 @@ public class PersonWeaponController : MonoBehaviour {
 			PersonHealth ph = g.GetComponent<PersonHealth> ();
 			if (ph == null) {
 				if (g.tag == "Door") {
-					Debug.Log ("Melee hit " + g.gameObject.name);
+					//Debug.Log ("Melee hit " + g.gameObject.name);
 					DoorScript ds = g.GetComponent<DoorScript> ();
 					if (ds == null) {
 						if (g.transform.parent == null) {
-							Debug.Log ("Could not find door script in parent");
+							//Debug.Log ("Could not find door script in parent");
 
 						} else {
 							ds = g.transform.root.gameObject.GetComponent<DoorScript> ();
@@ -276,16 +278,16 @@ public class PersonWeaponController : MonoBehaviour {
 
 
 					if (ds == null) {
-						Debug.Log ("Could not find door script");
+						//Debug.Log ("Could not find door script");
 					} else {
 						ds.kickInDoor ();
 					}
-					//////Debug.Log ("Door " + ds.gameObject + " kicked in");
+					////////Debug.Log ("Door " + ds.gameObject + " kicked in");
 					return;
 
 				} else if (g.tag == "Window") {
 					Window w = g.GetComponent<Window> ();
-					Debug.Log (g.name);
+					//Debug.Log (g.name);
 					if (w == null) {
 
 					} else {
@@ -300,11 +302,14 @@ public class PersonWeaponController : MonoBehaviour {
 
 					return;
 
+				}else if (g.GetComponent<PlayerCarController> () == true) {
+					g.GetComponent<PlayerCarController> ().dealDamage (500);
+					return;
 				}
 				else if (g == this.gameObject) {
 					return;
 
-				} 
+				}
 			} else {
 				if (g== this.gameObject || ph.healthValue<=0) {
 					return;
@@ -334,7 +339,7 @@ public class PersonWeaponController : MonoBehaviour {
 						}
 						ph.setAttacked (this.gameObject);
 
-						//////Debug.Break ();
+						////////Debug.Break ();
 					}
 
 					//if (inFront == true) {
@@ -356,6 +361,33 @@ public class PersonWeaponController : MonoBehaviour {
 
 	}
 	bool stopAttack=false;
+	Vector3 getMeleeDirection()
+	{
+		if (currentWeapon == null) {
+			return (this.transform.position - ac.rightHand.transform.position)*-1;
+		} else if (currentWeapon.melee == true) {
+			return (this.transform.position -currentWeapon.transform.position)*-1;
+		} else {
+			return Vector3.zero;
+		}
+	}
+
+	float getRayDistance()
+	{
+		if (currentWeapon == null) {
+			return 1.5f;
+		} else {
+			if (currentWeapon.WeaponName == "Hammer") {
+				return 2.0f;
+			} else if (currentWeapon.WeaponName == "Knife") {
+				return 1.5f;
+			} else if (currentWeapon.WeaponName == "Baton") {
+				return 2.0f;
+			}
+		}
+		return 0.0f;
+	}
+
 	void newMelee()
 	{
 		
@@ -364,17 +396,17 @@ public class PersonWeaponController : MonoBehaviour {
 				objectsRayHitInSwing = new List<GameObject> ();
 			}
 			if (currentWeapon == null) {
-				Vector3 rayDir =  transform.up;
+				Vector3 rayDir = getMeleeDirection ();
 
-				RaycastHit2D[] rays = Physics2D.RaycastAll (this.transform.position, rayDir.normalized, 1.5f,CommonObjectsStore.me.maskForMelee);
-				Debug.DrawRay (this.transform.position, rayDir.normalized * 1.5f, Color.red,10.0f);
+				RaycastHit2D[] rays = Physics2D.RaycastAll (this.transform.position, rayDir.normalized, getRayDistance(),CommonObjectsStore.me.maskForMelee);
+				//Debug.DrawRay (this.transform.position, rayDir.normalized * getRayDistance(), Color.red,10.0f);
 
 				int i = 0;
 				foreach (RaycastHit2D ray in rays) {
 					if (ray.collider == null) {
 
 					} else {
-						Debug.LogError ("Punch hit "  + ray.collider.gameObject.name + i.ToString ());
+						////Debug.LogError ("Punch hit "  + ray.collider.gameObject.name + i.ToString ());
 						i++;
 					}
 				}
@@ -394,15 +426,15 @@ public class PersonWeaponController : MonoBehaviour {
 							} else if (ray.collider.GetComponent<DoorScript> () == true) {
 								newMeleeDealDamage (ray.collider.gameObject);
 								stopAttack = true;
-							} else if (ray.collider.tag=="Window") {
+							} else if (ray.collider.tag == "Window") {
 								newMeleeDealDamage (ray.collider.gameObject);
 								stopAttack = true;
-							}
+							} 
 							else{
 
 
 								
-								Debug.LogError ("Melee hit " + ray.collider.gameObject.name + " stopping melee attack");
+								////Debug.LogError ("Melee hit " + ray.collider.gameObject.name + " stopping melee attack");
 								stopAttack = true;
 							}
 						}
@@ -410,9 +442,9 @@ public class PersonWeaponController : MonoBehaviour {
 				}
 
 			} else {
-				Vector3 rayDir = transform.up;
-				RaycastHit2D[] rays = Physics2D.RaycastAll (this.transform.position, rayDir.normalized, 1.5f,CommonObjectsStore.me.maskForMelee);
-				Debug.DrawRay (this.transform.position, rayDir.normalized * 1.5f, Color.red,10.0f);
+				Vector3 rayDir = getMeleeDirection ();
+				RaycastHit2D[] rays = Physics2D.RaycastAll (this.transform.position, rayDir.normalized, getRayDistance(),CommonObjectsStore.me.maskForMelee);
+				//Debug.DrawRay (this.transform.position, rayDir.normalized * getRayDistance(), Color.red,10.0f);
 				foreach (RaycastHit2D ray in rays) {
 					if (ray.collider == null) {
 
@@ -430,8 +462,11 @@ public class PersonWeaponController : MonoBehaviour {
 							} else if (ray.collider.tag=="Window") {
 								newMeleeDealDamage (ray.collider.gameObject);
 								stopAttack = true;
+							}else if (ray.collider.gameObject.layer == 28) {
+								newMeleeDealDamage (ray.collider.gameObject);
+								stopAttack = true;
 							}else {
-								Debug.LogError ("Melee hit " + ray.collider.gameObject.name + " stopping melee attack");
+								////Debug.LogError ("Melee hit " + ray.collider.gameObject.name + " stopping melee attack");
 
 								stopAttack = true;
 							}
@@ -466,7 +501,7 @@ public class PersonWeaponController : MonoBehaviour {
 			}
 		} else {
 			if (currentWeapon.melee == false) {
-				Debug.Log ("Trying to fire gun");
+				//Debug.Log ("Trying to fire gun");
 				if (canWeFireWeapon () == false) {
 					//fireRateTimer -= Time.deltaTime;
 					if (this.gameObject.tag == "NPC") {
@@ -480,7 +515,7 @@ public class PersonWeaponController : MonoBehaviour {
 									playGunClick ();
 
 									reloading = true;
-									Debug.Log ("Reloading true 3");
+									//Debug.Log ("Reloading true 3");
 								}
 							}
 						}
@@ -492,10 +527,10 @@ public class PersonWeaponController : MonoBehaviour {
 					playGunClick ();
 					if (myInv.canWeReloadGun (currentWeapon.WeaponName) || this.gameObject.tag=="NPC") {
 						reloading = true;
-						Debug.Log ("Reloading true 4");
+						//Debug.Log ("Reloading true 4");
 
 					}
-					//Debug.Break ();
+					////Debug.Break ();
 					return;
 					//currentWeapon.ammoItem = myInv.getAmmoForGun (currentWeapon.WeaponName);
 				}
@@ -549,7 +584,7 @@ public class PersonWeaponController : MonoBehaviour {
 						}
 						reloadTimer = currentWeapon.reloadTime;
 						reloading = true;
-						Debug.Log ("Reloading true 5");
+						//Debug.Log ("Reloading true 5");
 
 					}
 				}
@@ -566,7 +601,7 @@ public class PersonWeaponController : MonoBehaviour {
 
 					startedAttack = true;
 
-					//////Debug.Break ();
+					////////Debug.Break ();
 				}
 				//meleeAttack ();
 			}
@@ -576,7 +611,7 @@ public class PersonWeaponController : MonoBehaviour {
 	float lastPlayedTimer = 0.0f;
 	void playGunClick()
 	{
-		Debug.Log ("Calling gun click");
+		//Debug.Log ("Calling gun click");
 			lastPlayedTimer -= Time.deltaTime;
 
 		if (lastPlayedTimer <= 0) {
@@ -590,7 +625,7 @@ public class PersonWeaponController : MonoBehaviour {
 	public void reload()
 	{
 		if (currentWeapon == null) {
-			Debug.LogError ("reloading set false 1");
+			//Debug.LogError ("reloading set false 1");
 			reloading = false;
 			return;
 		}
@@ -605,7 +640,7 @@ public class PersonWeaponController : MonoBehaviour {
 					playedReloadAnim = true;
 				}
 
-				////////Debug.Log ("Reloading");
+				//////////Debug.Log ("Reloading");
 				if (reloadTimer <= 0) {
 					//need to add some kind of timer, have it on update and just have the ammo reaching 0 setting the bool to start reloading to true
 					if (this.gameObject.tag == "NPC") {
@@ -623,16 +658,16 @@ public class PersonWeaponController : MonoBehaviour {
 					} else {
 						currentWeapon.ammoItem = myInv.getAmmoForGun (currentWeapon.WeaponName);
 					}
-					//////Debug.Log ("Setting new ammo to be " + currentWeapon.ammoItem.getItemName ());
+					////////Debug.Log ("Setting new ammo to be " + currentWeapon.ammoItem.getItemName ());
 					reloading = false;
-					Debug.LogError ("reloading set false 2");
+					//Debug.LogError ("reloading set false 2");
 					reloadTimer = currentWeapon.reloadTime;
 					playedReloadAnim = false;
 				}
 			} else {
-				//////Debug.Log ("Couldnt find ammo for weapon, cancelling reload");
+				////////Debug.Log ("Couldnt find ammo for weapon, cancelling reload");
 				reloading = false;
-				Debug.LogError ("reloading set false 3");
+				//Debug.LogError ("reloading set false 3");
 
 			}
 		} else {
@@ -642,7 +677,7 @@ public class PersonWeaponController : MonoBehaviour {
 				playedReloadAnim = true;
 			}
 
-			////////Debug.Log ("Reloading");
+			//////////Debug.Log ("Reloading");
 			if (reloadTimer <= 0) {
 				//need to add some kind of timer, have it on update and just have the ammo reaching 0 setting the bool to start reloading to true
 				if (this.gameObject.tag == "NPC") {
@@ -661,7 +696,7 @@ public class PersonWeaponController : MonoBehaviour {
 					currentWeapon.ammoItem = myInv.getAmmoForGun (currentWeapon.WeaponName);
 				}
 				reloading = false;
-				Debug.LogError ("reloading set false 2");
+				//Debug.LogError ("reloading set false 2");
 				reloadTimer = currentWeapon.reloadTime;
 				playedReloadAnim = false;
 			}
@@ -673,7 +708,7 @@ public class PersonWeaponController : MonoBehaviour {
 	{
 		reloadTimer -= Time.deltaTime;
 		reloading = true;
-		Debug.Log ("Reloading true 6");
+		//Debug.Log ("Reloading true 6");
 
 		if (playedReloadAnim == false) {
 			playedReloadAnim = true;
@@ -694,9 +729,9 @@ public class PersonWeaponController : MonoBehaviour {
 			} else {
 				currentWeapon.ammoItem = ai;
 			}
-			//////Debug.Log ("Setting new ammo to be " + currentWeapon.ammoItem.getItemName ());
+			////////Debug.Log ("Setting new ammo to be " + currentWeapon.ammoItem.getItemName ());
 			reloading = false;
-			Debug.LogError ("reloading set false 2");
+			//Debug.LogError ("reloading set false 2");
 			reloadTimer = currentWeapon.reloadTime;
 			playedReloadAnim = false;
 			ai.gameObject.GetComponent<SpriteRenderer> ().enabled = true;

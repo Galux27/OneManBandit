@@ -26,7 +26,7 @@ public class ItemUI : MonoBehaviour {
 		icon.sprite = i.itemTex;
 		itemDescription.text = i.getBriefDescription();
 
-		if (equip == null) {
+		if (equip == null ) {
 			return;
 		}
 		if (i.itemTex.texture.width > 70) {

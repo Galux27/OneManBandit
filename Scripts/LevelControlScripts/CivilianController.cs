@@ -50,6 +50,10 @@ public class CivilianController : MonoBehaviour {
 	float timeBetweenCivilians=1.0f;
 	void spawnCivilians()
 	{
+		if (ThreadedPathfindInterface.me.jobsToDo.Count > 5) {
+			return;
+		}
+
 		if (timeBetweenCivilians <= 0) {
 			if (pointsForSpawn == null) {
 				return;
@@ -97,19 +101,27 @@ public class CivilianController : MonoBehaviour {
 
 	IEnumerator setCivilianPositions()
 	{
-		for (int x = -17; x < 17; x++) {
-			for (int y = -17; y < 17; y++) {
+		float minDistance = 10.0f;
+		float maxDistance = 25.0f;
+
+		if (PlayerCarController.inCar == true) {
+			minDistance = 25.0f;
+			maxDistance = 50.0f;
+		}
+
+		for (int x = -25; x < 25; x++) {
+			for (int y = -25; y < 25; y++) {
 				
 					Vector3 pos = CommonObjectsStore.player.transform.position + new Vector3 (x, y, 0);
 					float d = Vector2.Distance (pos, CommonObjectsStore.player.transform.position);
-					if (d > 7) {
+				    if (d > minDistance && d<maxDistance) {
 						if (pointsForSpawn.Contains (new Vector3Int(Mathf.RoundToInt(pos.x),Mathf.RoundToInt(pos.y),0)) == false) {
 							try{
 									WorldTile wt = WorldBuilder.me.getNearest (pos);//add a check for whether its in a forbiddon room
-									if (wt == null || wt.walkable == false || wt.modifier > 100) {
+								    if (wt == null || wt.walkable == false || wt.modifier > 100 || isNodeValid(wt)==false) {
 										continue;
 									} else {
-										pointsForSpawn.Add (new Vector3Int(Mathf.RoundToInt(pos.x),Mathf.RoundToInt(pos.y),0));
+										pointsForSpawn.Add (new Vector3Int(Mathf.RoundToInt(wt.transform.position.x),Mathf.RoundToInt(wt.transform.position.y),0));
 									}
 							}
 							catch{
@@ -128,9 +140,20 @@ public class CivilianController : MonoBehaviour {
 		StartCoroutine (setCivilianPositions ());
 	}
 
+	bool isNodeValid( WorldTile wt)
+	{
+		foreach (WorldTile n in wt.myNeighbours) {
+			if (n.walkable == false) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 	void RemoveCivilianPositions()
 	{
+		
 		for (int x = 0; x < pointsForSpawn.Count; x++) {
 			Vector2 p = new Vector2(pointsForSpawn[x].x,pointsForSpawn[x].y);
 			float d = Vector2.Distance (p, CommonObjectsStore.player.transform.position);
@@ -143,15 +166,26 @@ public class CivilianController : MonoBehaviour {
 
 	void cullCivilians()
 	{
+		float maxDistance = 35.0f;
+
+		if (PlayerCarController.inCar == true) {
+			maxDistance = 60.0f;
+		}
+
 		foreach (NPCController npc in NPCManager.me.npcControllers) {
 			if (npc.npcB.myType == AIType.civilian) {
-				if (npc.memory.beenAttacked == true || npc.npcB.alarmed == true || npc.memory.peopleThatHaveAttackedMe.Contains (CommonObjectsStore.player) || npc.npcB.doing == whatAiIsDoing.raisingAlarm || npc.pf.waitingForPath==true) {
+				if (npc.currentBehaviour == null) {
+					continue;
+				}
+
+				if (npc.memory.beenAttacked == true && npc.currentBehaviour.myType!=behaviourType.exitLevel|| npc.npcB.alarmed == true && npc.currentBehaviour.myType!=behaviourType.exitLevel && npc.currentBehaviour.myType!=behaviourType.exitLevel || npc.memory.peopleThatHaveAttackedMe.Contains (CommonObjectsStore.player) && npc.currentBehaviour.myType!=behaviourType.exitLevel|| npc.npcB.doing == whatAiIsDoing.raisingAlarm) {
 					continue;
 				} else {
 					float d = Vector2.Distance (Camera.main.transform.position, npc.gameObject.transform.position);
-					if (d > 30.0f) {
+					if (d > maxDistance) {
 						NPCManager.me.npcControllers.Remove (npc);
 						NPCManager.me.npcsInWorld.Remove (npc.gameObject);
+						ThreadedPathfindInterface.me.removePathIWanted (npc.pf);
 						Destroy (npc.gameObject);
 						return;
 					}

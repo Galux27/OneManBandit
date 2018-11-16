@@ -5,170 +5,107 @@ using UnityEngine.UI;
 
 public class PhoneTab_RadioHack : PhoneTab {
 	public static PhoneTab_RadioHack me;
-	public List<RadioHackText> myDisplays;
-
-	public List<string> messagesToDisplaySWAT,messagesToDisplayPrivate,messagesToDisplayCop;
-
-	public Button b1, b2;
-	public Image bg;
-	public Text channelDisplay;
-
+	public Text infoDisplay,channelDisplay;
 	public radioHackBand myBand;
-
+	public Button b1, b2;
 	void Awake()
 	{
 		me = this;
-
 	}
-
-	// Use this for initialization
-	void Start () {
-		nextBand ();
-		foreach (RadioHackText r in myDisplays) {
-			r.stopDisplaying ();
-		}
-	}
-	
 	// Update is called once per frame
 	public override void onUpdate(){
-		
+		setText ();
 	}
 
 	public void setNewText(string newText,radioHackBand type)
 	{
-		if (messagesToDisplaySWAT == null) {
-			messagesToDisplaySWAT = new List<string> ();
+		if (me == null) {
+			me = this;
 		}
 
-		if (messagesToDisplayPrivate == null) {
-			messagesToDisplayPrivate = new List<string> ();
-		}
+		return;
 
-		if (messagesToDisplayCop == null) {
-			messagesToDisplayCop = new List<string> ();
-		}
-
-		if (type == radioHackBand.swat) {
-			if (messagesToDisplaySWAT.Count >= 5) {
-				messagesToDisplaySWAT.Remove (messagesToDisplaySWAT [0]);
-			}
-
-			messagesToDisplaySWAT.Add (newText);
-		} else if (type == radioHackBand.buisness) {
-			if (messagesToDisplayPrivate.Count >= 5) {
-				messagesToDisplayPrivate.Remove (messagesToDisplayPrivate [0]);
-			}
-			messagesToDisplayPrivate.Add (newText);
-		} else {
-			if (messagesToDisplayCop.Count >= 5) {
-				messagesToDisplayCop.Remove (messagesToDisplayCop [0]);
-			}
-			messagesToDisplayCop.Add (newText);
-		}
-
-		setText ();
+		//setText ();
 	}
 
 	public void setText()
 	{
-		if (PhoneController.me.currentTab == this) {
-			if (myBand == radioHackBand.swat) {
-				int messCount = messagesToDisplaySWAT.Count - 1;
+		string text = "";
 
 
-				for (int x = 0; x < myDisplays.Count; x++) {
-					if (x <= messCount) {
-					myDisplays [x].gameObject.SetActive (true);
+		text += "Civilians: ";
 
-						myDisplays [x].setText (messagesToDisplaySWAT [x], true, Color.blue);
-					} else {
-						myDisplays [x].stopDisplaying ();
-					}
-				}
+		if (areCiviliansAlarmed () == true) {
+			text += "Someone is calling the police";
+		} else {
+			text += "No civilians are alerted.";
+		}
 
+		text += "\n";
 
-				/*for (int x = myDisplays.Count - 1; x >= 0; x--) {
-					if (messCount >= 0) {
-						if (x == myDisplays.Count - 1) {
-							myDisplays [x].gameObject.SetActive (true);
-							myDisplays [x].setText (messagesToDisplaySWAT [messCount], false, Color.red);
-							//messCount--;
-						} else {
-							myDisplays [x].gameObject.SetActive (true);
+		text += "Police: ";
 
-							myDisplays [x].setText (messagesToDisplaySWAT [messCount], true, Color.blue);
-							//messCount--;
+		if (PoliceController.me.copsCalled == true && PoliceController.me.copsHere == false) {
+			text += "First wave on the way, arriving in " + Mathf.RoundToInt (PoliceController.me.policeTimer).ToString ();
+		}
+		else if(PoliceController.me.copsCalled == true && PoliceController.me.copsHere == true)
+		{
+			text += "First wave have arrived,";
 
-						}
-						messCount--;
-					} else {
-						myDisplays [x].stopDisplaying ();
-					//}*/
-				//}
-			} else if (myBand == radioHackBand.buisness) {
-				int messCount = messagesToDisplayPrivate.Count - 1;
-
-				for (int x = 0; x < myDisplays.Count; x++) {
-					if (x <= messCount) {
-					myDisplays [x].gameObject.SetActive (true);
-
-						myDisplays [x].setText (messagesToDisplayPrivate [x], true, Color.blue);
-					} else {
-						myDisplays [x].stopDisplaying ();
-					}
-				}
-				/*for (int x = myDisplays.Count - 1; x >= 0; x--) {
-					if (messCount >= 0) {
-						if (x == myDisplays.Count - 1) {
-							myDisplays [x].gameObject.SetActive (true);
-							myDisplays [x].setText (messagesToDisplayPrivate [messCount], false, Color.red);
-							//messCount--;
-						} else {
-							myDisplays [x].gameObject.SetActive (true);
-
-							myDisplays [x].setText (messagesToDisplayPrivate [messCount], true, Color.blue);
-							//messCount--;
-
-						}
-						messCount--;
-					} else {
-						myDisplays [x].stopDisplaying ();
-					}
-				}*/
+			if (LevelController.me.suspects.Contains (CommonObjectsStore.player) == true) {
+				text += "They are searching for you.";
 			} else {
-				int messCount = messagesToDisplayCop.Count - 1;
-
-				for (int x = 0; x < myDisplays.Count; x++) {
-					if (x <= messCount) {
-					myDisplays [x].gameObject.SetActive (true);
-
-						myDisplays [x].setText (messagesToDisplayCop [x], true, Color.blue);
-					} else {
-						myDisplays [x].stopDisplaying ();
-					}
-				}
-				/*for (int x = myDisplays.Count - 1; x >= 0; x--) {
-					if (messCount >= 0) {
-						if (x == myDisplays.Count - 1) {
-							myDisplays [x].gameObject.SetActive (true);
-							myDisplays [x].setText (messagesToDisplayCop [messCount], false, Color.red);
-							//messCount--;
-						} else {
-							myDisplays [x].gameObject.SetActive (true);
-
-							myDisplays [x].setText (messagesToDisplayCop [messCount], true, Color.blue);
-							//messCount--;
-
-						}
-						messCount--;
-					} else {
-						myDisplays [x].stopDisplaying ();
-					}
-				}*/
+				text += "They are searching the area for trouble.";
 			}
 		}
+		else {
+			text += "No police are alerted.";
+		}
+		text += "\n";
+
+		if (PoliceController.me.backupCalled == false) {
+
+		} else if (PoliceController.me.backupCalled == true && PoliceController.me.backupHere == false) {
+			text += "Police have called for backup, arriving in " + Mathf.RoundToInt (PoliceController.me.policeBackup).ToString ();
+		} else if (PoliceController.me.backupHere == true) {
+			text += "Police backup has arrived";
+		}
+
+		text += "\n";
+		text += "SFCO: ";
+
+		if (PoliceController.me.swatCalled == false) {
+
+		} else if (PoliceController.me.swatCalled == true && PoliceController.me.swatHere == false) {
+			text += "Armed police have been called, arriving in " + Mathf.RoundToInt (PoliceController.me.swatTimer).ToString ();
+
+		} else if (PoliceController.me.swatHere == true) {
+			text += "Armed police have arrived";
+
+		} else {
+			text += "No Armed police are here.";
+		}
+
+		infoDisplay.text = text;
 	}
 
+
+	bool areCiviliansAlarmed()
+	{
+		foreach (NPCController npc in NPCManager.me.npcControllers) {
+
+			if (npc.npcB.myType == AIType.civilian) {
+				if (npc.currentBehaviour == null) {
+					continue;
+				}
+
+				if (npc.currentBehaviour.myType == behaviourType.raiseAlarm || npc.npcB.alarmed == true) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	public void nextBand()
 	{
@@ -207,26 +144,20 @@ public class PhoneTab_RadioHack : PhoneTab {
 
 	public override void disablePhoneTab()
 	{
-		//disable all the UI elements needed
-		b1.gameObject.SetActive(false);
-		b2.gameObject.SetActive (false);
 		channelDisplay.gameObject.SetActive (false);
-		bg.gameObject.SetActive (false);
-
-		foreach (RadioHackText r in myDisplays) {
-			r.stopDisplaying ();
-		}
+		b1.gameObject.SetActive (false);
+		b2.gameObject.SetActive (false);
+		infoDisplay.gameObject.SetActive (false);
 		active = false;
 	}
 
 	public override void enablePhoneTab()
 	{
-		//enable all ui elements
-		b1.gameObject.SetActive(true);
-		b2.gameObject.SetActive (true);
 		channelDisplay.gameObject.SetActive (true);
-		bg.gameObject.SetActive (true);
 
+		b1.gameObject.SetActive (true);
+		b2.gameObject.SetActive (true);
+		infoDisplay.gameObject.SetActive (true);
 
 		setText();
 		active = true;

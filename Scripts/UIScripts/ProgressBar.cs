@@ -25,7 +25,7 @@ public class ProgressBar : MonoBehaviour {
 		}
 
 	//	if (Application.isEditor == true) {
-		//	debugProgress ();
+		//	//DebugProgress ();
 	//	}
 	}
 
@@ -36,7 +36,7 @@ public class ProgressBar : MonoBehaviour {
 		}
 	}
 
-	void debugProgress()
+	void DebugProgress()
 	{
 		maxValue = 100;
 		if (currentValue < maxValue) {

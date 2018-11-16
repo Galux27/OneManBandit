@@ -94,7 +94,7 @@ public class LevelTilemapController : MonoBehaviour {
 					
 				} else {
 					//
-					////////Debug.Log("Found tile");
+					//////////Debug.Log("Found tile");
 					if (roomTileIsIn==null) {
 						
 						//if (walls.GetTile (pos) == null) {
@@ -115,7 +115,7 @@ public class LevelTilemapController : MonoBehaviour {
 							}
 						//}
 					} 	
-						//Debug.Log (b.buildingName);
+						////Debug.Log (b.buildingName);
 						
 
 						//if (walls.GetTile (pos) == null) {
@@ -125,7 +125,7 @@ public class LevelTilemapController : MonoBehaviour {
 								RoomScript r = LevelController.me.getRoomPosIsIn (l.gameObject.transform.position);
 								//took out raycast check && r == roomTileIsIn
 									if (lineOfSightToLightSoruce (new Vector3 (x, y, 0), l.gameObject.transform.position) == true ) {
-											//////Debug.Log ("Calculating lighting");
+											////////Debug.Log ("Calculating lighting");
 
 											l.addTileToLightsource (t);
 											l.lightingTilePositions.Add (new Vector3 (x, y, 0));
@@ -172,7 +172,7 @@ public class LevelTilemapController : MonoBehaviour {
 	/// <param name="pos">Position.</param>
 	public bool areWeLit(Vector3 pos)
 	{
-		TileBase t = lighting.GetTile (new Vector3Int ((int)pos.x, (int)pos.y, 0));
+	TileBase t = lighting.GetTile (lighting.WorldToCell(pos));
 		if (t == null) {
 			return true;
 		} else if (t == lit || t==outdoorLight && LightSource.sun.lightOn==true) {

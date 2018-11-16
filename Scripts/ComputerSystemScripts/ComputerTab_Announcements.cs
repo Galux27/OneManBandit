@@ -20,7 +20,7 @@ public class ComputerTab_Announcements : ComputerTab {
 		int ind = 0;
 		foreach (DoorScript ds in doorsInLevel) {
 			if (ind >= myAnnouncements.Length) {
-				//////Debug.LogError ("Too many keys to fit in announcements");
+				////////Debug.LogError ("Too many keys to fit in announcements");
 			} else {
 
 				if (ds.myKey == null && ds.myCode == null) {

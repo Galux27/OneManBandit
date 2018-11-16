@@ -18,16 +18,12 @@ public class CraftingUIItem : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		try{
-			if (myItem == null) {
-				if (potentialItems.value == 0) {
-					resetItem ();
-				} else {
-					setItem (Inventory.playerInventory.inventoryItems [getVal()]);
-				}
-			} else {
-				if (Inventory.playerInventory.inventoryItems [getVal()] != myItem) {
-					setItem( Inventory.playerInventory.inventoryItems [getVal()]);
-				}
+			
+			if(potentialItems.value==0 || potentialItems.value == potentialItems.options.Count-1)
+			{
+				resetItem();
+			}else{
+				setItem (Inventory.playerInventory.getItem(potentialItems.options[potentialItems.value].text));
 			}
 		}catch{
 			resetItem ();
@@ -36,7 +32,7 @@ public class CraftingUIItem : MonoBehaviour {
 
 	int getVal()
 	{
-		int retVal = potentialItems.value - 1;
+		int retVal = potentialItems.value;
 		if (retVal < 0 ) {
 			resetItem ();
 			return 0;
@@ -57,19 +53,42 @@ public class CraftingUIItem : MonoBehaviour {
 		List<string> items = new List<string> ();
 		items.Add ("None");
 		foreach (Item i in Inventory.playerInventory.inventoryItems) {
-			if (myItem == null) {
+			bool addItem = true;
+
+
+			if (items.Contains(i.itemName)==true || CraftingUIParent.me.isItemBeingUsed(i.itemName)) {
+				addItem = false;
+			} 
+
+			if (addItem == true) {
+				items.Add (i.itemName);
+			}
+
+
+
+			/*if (myItem == null) {
 				items.Add (i.itemName);
 			} else if (myItem == i || CraftingUIParent.me.isItemInUse(i)==true) {
 
 			} else {
 				items.Add (i.itemName);
-			}
+			}*/
 		}
-		items.Add ("");
-
+		//items.Add ("");
+		items.Add ("None");
 		potentialItems.ClearOptions ();
 		potentialItems.AddOptions (items);
 
+	}
+
+	bool isItemInDropdown(string st)
+	{
+		for (int x = 0; x < potentialItems.options.Count; x++) {
+			if (potentialItems.options [x].text == st) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void setItem(Item i)
@@ -83,7 +102,8 @@ public class CraftingUIItem : MonoBehaviour {
 
 
 		itemImage.sprite = i.itemTex;
-		populateDropdown ();
+		//populateDropdown ();
+		//CraftingUIParent.me.resetAllUIButGiven(this);
 	}
 
 	public void resetItem()
@@ -92,6 +112,6 @@ public class CraftingUIItem : MonoBehaviour {
 		itemName.text ="None";
 		itemImage.sprite = null;
 		potentialItems.value = 0;
-		populateDropdown ();
+		//populateDropdown ();
 	}
 }

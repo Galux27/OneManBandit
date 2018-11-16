@@ -64,7 +64,7 @@ public class DoorScript : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		if (initialised == false) {
-		//	Debug.Log ("DOOR " + this.gameObject.name + " WASNT INITILISED");
+		//	//Debug.Log ("DOOR " + this.gameObject.name + " WASNT INITILISED");
 			myID = IDManager.me.getID ();
 			initialiseLockActions ();
 			initialised = true;
@@ -117,7 +117,7 @@ public class DoorScript : MonoBehaviour {
 				toSpawnIn = LevelController.me.containersForEssentialItems [Random.Range (0, LevelController.me.containersForEssentialItems.Count)];
 			}
 			toSpawnIn.addItemToContainer (i);
-			//////Debug.Log ("Spawned key in " + toSpawnIn.gameObject.name);
+			////////Debug.Log ("Spawned key in " + toSpawnIn.gameObject.name);
 			myKey = key;
 			i.itemDescription += myRoomText;
 			this.gameObject.AddComponent<PlayerAction_UnlockWithKey> ();
@@ -148,7 +148,7 @@ public class DoorScript : MonoBehaviour {
 			i.securityClearance = securityTier;
 			//i.itemDescription += myRoomText;
 
-			//////Debug.Log ("Spawned keycard in " + toSpawnIn.gameObject.name);
+			////////Debug.Log ("Spawned keycard in " + toSpawnIn.gameObject.name);
 			myKey = key;
 			this.gameObject.AddComponent<PlayerAction_OpenWithKeycard> ();
 			//key.transform.position =  new Vector3 (0, 0, 0);
@@ -162,7 +162,7 @@ public class DoorScript : MonoBehaviour {
 			}
 
 			//create note for door
-			//////Debug.Log ("Keycode number was " + keycodeNumber);
+			////////Debug.Log ("Keycode number was " + keycodeNumber);
 			this.gameObject.AddComponent<PlayerAction_OpenDoorWithKeycode> ();
 
 			GameObject g = (GameObject)Instantiate (CommonObjectsStore.me.noteBase, Vector3.zero, Quaternion.Euler (0, 0, 0));
@@ -188,7 +188,7 @@ public class DoorScript : MonoBehaviour {
 			toSpawnIn.addItemToContainer (i);
 			//g.transform.position = new Vector3 (0, 0, 0);
 
-			//////Debug.Log ("Created note with passcode in " + toSpawnIn.name);
+			////////Debug.Log ("Created note with passcode in " + toSpawnIn.name);
 		}
 		else if(wayIAmLocked == lockedWith.vaultDoor)
 		{
@@ -258,12 +258,12 @@ public class DoorScript : MonoBehaviour {
 
 		Vector3 heading = center.transform.position - CommonObjectsStore.player.transform.position;
 		RaycastHit2D[] rays= Physics2D.RaycastAll ( CommonObjectsStore.player.transform.position, heading,Vector3.Distance(this.transform.position,CommonObjectsStore.player.transform.position));
-		Debug.DrawRay (CommonObjectsStore.player.transform.position, heading,Color.cyan);
+		//Debug.DrawRay (CommonObjectsStore.player.transform.position, heading,Color.cyan);
 		foreach (RaycastHit2D ray in rays) {
 			if (ray.collider == null) {
 				//return true;
 			} else {
-				//////Debug.Log (ray.collider.gameObject);
+				////////Debug.Log (ray.collider.gameObject);
 
 				if (ray.collider.gameObject.tag == "Player") {
 					continue;
@@ -328,6 +328,61 @@ public class DoorScript : MonoBehaviour {
 		}
 
 		this.enabled = false;
+	}
+
+	public void largeImpactOnDoor(int damage)
+	{
+		doorHealth-=damage;
+		foreach (GameObject g in NPCManager.me.npcsInWorld) {
+			if (g == null) {
+				continue;
+			}
+			NPCController npc = g.GetComponent<NPCController> ();
+			npc.setHearedGunshot (this.transform.position, 7.0f);
+		}
+		PoliceController.me.setNoiseHeard (this.transform.position, 7.0f);
+		if (doorHealth > 0) {
+			this.gameObject.GetComponent<AudioController> ().playSound (impact);
+
+		} else if (doorHealth <= 0) {
+
+			if (doorIncidentName == "") {
+
+			} else {
+				LevelIncidentController.me.addIncident (doorIncidentName, this.transform.position);
+			}
+
+			this.gameObject.GetComponent<AudioController> ().playSound (doorDestroyed);
+
+			foreach (GameObject g in NPCManager.me.npcsInWorld) {
+				if (g == null) {
+					continue;
+				}
+				NPCController npc = g.GetComponent<NPCController> ();
+				npc.setHearedGunshot (this.transform.position, 14.0f);
+			}
+			PoliceController.me.setNoiseHeard (this.transform.position, 14.0f);
+
+			Destroy (endLeft);
+			Destroy (endRight);
+			center.GetComponent<SpriteRenderer> ().sprite = fallenSprite;
+			center.GetComponent<SpriteRenderer> ().sortingOrder = 0;
+			Quaternion q = doorMesh.transform.rotation;
+			doorMesh.SetActive (false);
+			SpriteRenderer sr = this.gameObject.AddComponent<SpriteRenderer> ();
+			sr.sprite = fallenSprite;
+			sr.flipX = true;
+			this.transform.rotation = q;
+			this.transform.position = new Vector3 (this.transform.position.x, this.transform.position.y, 0);
+			this.gameObject.GetComponent<Collider2D> ().enabled = false;
+
+			PlayerAction[] actions = this.gameObject.GetComponents<PlayerAction> ();
+			for (int x = 0; x < actions.Length; x++) {
+				Destroy (actions [x]);
+			}
+			this.enabled = false;
+
+		}
 	}
 
 	public void kickInDoor()
@@ -479,7 +534,7 @@ public class DoorScript : MonoBehaviour {
 				toSpawnIn = LevelController.me.containersForEssentialItems [Random.Range (0, LevelController.me.containersForEssentialItems.Count)];
 			}
 			toSpawnIn.addItemToContainer (i);
-			//////Debug.Log ("Spawned key in " + toSpawnIn.gameObject.name);
+			////////Debug.Log ("Spawned key in " + toSpawnIn.gameObject.name);
 			myKey = key;
 
 			//key.transform.position = new Vector3 (0, 0, 0);
@@ -506,7 +561,7 @@ public class DoorScript : MonoBehaviour {
 			i.securityClearance = securityTier;
 			//i.itemDescription += myRoomText;
 
-			//////Debug.Log ("Spawned keycard in " + toSpawnIn.gameObject.name);
+			////////Debug.Log ("Spawned keycard in " + toSpawnIn.gameObject.name);
 			myKey = key;
 			//key.transform.position =  new Vector3 (0, 0, 0);
 		}
@@ -517,7 +572,7 @@ public class DoorScript : MonoBehaviour {
 			}
 
 			//create note for door
-			//////Debug.Log ("Keycode number was " + keycodeNumber);
+			////////Debug.Log ("Keycode number was " + keycodeNumber);
 
 			GameObject g = (GameObject)Instantiate (CommonObjectsStore.me.noteBase, Vector3.zero, Quaternion.Euler (0, 0, 0));
 			myCode = g;
@@ -542,7 +597,7 @@ public class DoorScript : MonoBehaviour {
 			toSpawnIn.addItemToContainer (i);
 			//g.transform.position = new Vector3 (0, 0, 0);
 
-			//////Debug.Log ("Created note with passcode in " + toSpawnIn.name);
+			////////Debug.Log ("Created note with passcode in " + toSpawnIn.name);
 		}
 		else if(wayIAmLocked == lockedWith.vaultDoor)
 		{

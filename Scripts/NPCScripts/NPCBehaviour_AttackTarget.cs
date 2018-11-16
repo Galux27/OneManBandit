@@ -112,7 +112,7 @@ public class NPCBehaviour_AttackTarget : NPCBehaviour {
 					lostTarget = false;
 				}
 
-				if (myController.pf.target != marker) {
+				if (myController.pf.target != marker && myController.pf.waitingForPath==false) {
 					myController.pf.getPath (this.gameObject, marker);
 				}
 
@@ -158,13 +158,21 @@ public class NPCBehaviour_AttackTarget : NPCBehaviour {
 		if (pointNearTarget == null) {
 			pointNearTarget = FindPointsAroundPlayer.me.getRandomPoint ();
 		} else {
-			if (myController.pf.target != pointNearTarget) {
-				myController.pf.getPath (this.gameObject, pointNearTarget);
+			if (myController.detect.fov.visibleTargts.Contains (target.transform) == false) {
+				
+				if (myController.pf.target != pointNearTarget && myController.pf.waitingForPath == false) {
+					myController.pf.getPath (this.gameObject, pointNearTarget);
+				}
+				if (Vector3.Distance (this.transform.position, pointNearTarget.transform.transform.position) > 1.0f) {
+					myController.pmc.moveToDirection (myController.pf.getCurrentPoint ());
+				}
+				myController.pmc.rotateToFacePosition (target.transform.position);
+			} else {
+				if (Vector3.Distance (this.transform.position, pointNearTarget.transform.transform.position) > 1.0f) {
+					myController.pmc.moveToDirection (pointNearTarget.transform.position);
+				}
+				myController.pmc.rotateToFacePosition (target.transform.position);
 			}
-			if (Vector3.Distance (this.transform.position, pointNearTarget.transform.transform.position) > 1.0f) {
-				myController.pmc.moveToDirection (myController.pf.getCurrentPoint ());
-			}
-			myController.pmc.rotateToFacePosition (target.transform.position);
 
 			if (Vector3.Distance (target.transform.position, pointNearTarget.transform.position) > 5.0f) {
 				pointNearTarget = FindPointsAroundPlayer.me.getRandomPoint ();
@@ -223,7 +231,7 @@ public class NPCBehaviour_AttackTarget : NPCBehaviour {
 		}
 
 		if (myController.detect.fov.visibleTargts.Contains(target.transform) == true || myController.detect.lineOfSightToTarget(target) && Vector2.Distance(this.transform.position,target.transform.position)<7) {
-			//////Debug.Log ("Melee move 1");
+			////////Debug.Log ("Melee move 1");
 				myController.pf.currentPath.Clear ();
 
 			myController.pmc.rotateToFacePosition (target.transform.position);
@@ -234,7 +242,7 @@ public class NPCBehaviour_AttackTarget : NPCBehaviour {
 			if (myController.pf.followPath == false || myController.pf.currentPath == null || myController.pf.currentPath.Count==0) {
 				myController.pf.getPath (this.gameObject, target);
 			}
-			//////Debug.Log ("Melee move 2");
+			////////Debug.Log ("Melee move 2");
 
 			myController.pmc.rotateToFacePosition (myController.pf.getCurrentPoint());
 			myController.pmc.moveToDirection (myController.pf.getCurrentPoint());
@@ -286,7 +294,7 @@ public class NPCBehaviour_AttackTarget : NPCBehaviour {
 
 		Vector3 heading = transform.forward - origin;
 		RaycastHit2D ray = Physics2D.Raycast (origin, transform.up,6.0f);
-		Debug.DrawRay (origin, transform.up*6.0f,Color.green);
+		//Debug.DrawRay (origin, transform.up*6.0f,Color.green);
 
 		if (ray.collider == null) {
 			return false;

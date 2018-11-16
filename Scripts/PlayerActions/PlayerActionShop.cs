@@ -33,7 +33,7 @@ public class PlayerActionShop  : PlayerAction {
 		if (myBuilding == null) {
 
 		} else {
-			if (myBuilding.traspassing == true || myBuilding.buildingClosed==true) {
+			if (myBuilding.traspassing == true || myBuilding.buildingClosed==true||myShop.robbed==true) {
 				return false;
 			}
 		}
@@ -79,6 +79,6 @@ public class PlayerActionShop  : PlayerAction {
 
 	public override string getDescription()
 	{
-		return "Buy items from the shop.";
+		return "Buy & Sell items.";
 	}
 }

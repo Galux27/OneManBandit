@@ -184,7 +184,7 @@ public class PlayerAction_HumanShield: PlayerAction {
 				this.gameObject.transform.parent = null;
 				this.gameObject.transform.position = CommonObjectsStore.player.transform.position + (CommonObjectsStore.player.transform.up / 2);
 				this.gameObject.transform.parent = CommonObjectsStore.player.transform;
-				Debug.LogError ("resetting human shield action");
+				//Debug.LogError ("resetting human shield action");
 			} else if (PlayerAction.currentAction.getType () == "Release Hostage") {
 				onComplete ();
 			}

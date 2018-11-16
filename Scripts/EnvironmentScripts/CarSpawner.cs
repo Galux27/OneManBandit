@@ -10,22 +10,27 @@ public class CarSpawner : MonoBehaviour {
 
 	public GameObject carPrefab;
 	public List<GameObject> carsInWorld;
+	public List<GameObject> patrolCarsInWorld;
 	public static CarSpawner me;
 	bool carRespawn=false;
-	public float timerForCarRespawn=30.0f;
+	public float timerForCarRespawn=20.0f;
 
-	[Range(1,100)]
+	[Range(0,100)]
 	public int carDensity = 30;
 	NewRoad r;
+    float carRespawnTimer = 0.0f;
+	PlayerCarController[] carsAtStart;
 	void Awake()
 	{
 		me = this;
 		carsInWorld = new List<GameObject> ();
+		patrolCarsInWorld = new List<GameObject> ();
 		r = FindObjectOfType<NewRoad> ();
 	}
 
 	// Use this for initialization
 	void Start () {
+		carsAtStart = FindObjectsOfType<PlayerCarController> ();
 		newSpawnCars ();
 		//SpawnCars ();
 	}
@@ -46,24 +51,57 @@ public class CarSpawner : MonoBehaviour {
 	void newSpawnCars()
 	{
 		foreach (NewRoadJunction rj in r.sectionsInTheRoad) {
-			int ran = Random.Range (0, 100);
-			if (ran <carDensity) {
-				if (rj.startPoint == null) {
-
+			if (CrimeRecordScript.me.shouldWeSpawnPatrolCars () == true) {
+				if (patrolCarsInWorld.Count < CrimeRecordScript.me.numberOfCopsToSpawn_PatrolCars ()) {
+					GameObject g = (GameObject)Instantiate (CommonObjectsStore.me.policePatrolCar, rj.startPoint.position, Quaternion.Euler (0, 0, 90));
+					g.GetComponent<NewRoadFollower> ().hasDriver = true;
+					patrolCarsInWorld.Add (g);
+					carsInWorld.Add (g);
 				} else {
-					Debug.Log ("The start point for " + rj.ToString () + " was null");
-				}
-				bool spawnCar = true;
-				foreach (GameObject g2 in carsInWorld) {
-					if (Vector2.Distance (g2.transform.position, rj.startPoint.position) < 20.0f) {
-						spawnCar = false;
+					int ran = Random.Range (0, 100);
+					if (ran < carDensity) {
+						if (rj.startPoint == null) {
+
+						} else {
+							//					Debug.Log ("The start point for " + rj.ToString () + " was null");
+						}
+						bool spawnCar = true;
+						foreach (GameObject g2 in carsInWorld) {
+							if (Vector2.Distance (g2.transform.position, rj.startPoint.position) < 20.0f || Vector2.Distance (g2.transform.position, CommonObjectsStore.player.transform.position) < 10) {
+								spawnCar = false;
+							}
+						}
+						if (spawnCar == true) {
+							GameObject g = (GameObject)Instantiate (CommonObjectsStore.me.getRandomCar (), rj.startPoint.position, Quaternion.Euler (0, 0, 90));
+							g.GetComponent<NewRoadFollower> ().hasDriver = true;
+							carsInWorld.Add (g);
+						}
 					}
 				}
-				if (spawnCar == true) {
-					GameObject g = (GameObject)Instantiate (carPrefab, rj.startPoint.position, Quaternion.Euler (0, 0, 90));
-					carsInWorld.Add (g);
+			} else {
+				int ran = Random.Range (0, 100);
+				if (ran < carDensity) {
+					if (rj.startPoint == null) {
+
+					} else {
+						//					Debug.Log ("The start point for " + rj.ToString () + " was null");
+					}
+					bool spawnCar = true;
+					foreach (GameObject g2 in carsInWorld) {
+						if (Vector2.Distance (g2.transform.position, rj.startPoint.position) < 20.0f || Vector2.Distance (g2.transform.position, CommonObjectsStore.player.transform.position) < 10) {
+							spawnCar = false;
+						}
+					}
+					if (spawnCar == true) {
+						GameObject g = (GameObject)Instantiate (CommonObjectsStore.me.getRandomCar (), rj.startPoint.position, Quaternion.Euler (0, 0, 90));
+						g.GetComponent<NewRoadFollower> ().hasDriver = true;
+						carsInWorld.Add (g);
+					}
 				}
 			}
+		}
+		foreach (PlayerCarController g in carsAtStart) {
+			carsInWorld.Add (g.gameObject);
 		}
 	}
 		
@@ -81,7 +119,7 @@ public class CarSpawner : MonoBehaviour {
 			}
 		}
 		carsInWorld = new List<GameObject> ();
-		newSpawnCars ();
+		//newSpawnCars ();
 		//RoadFollower[] roads = FindObjectsOfType<RoadFollower> ();
 		///foreach (RoadFollower r in roads) {
 		//	carsInWorld.Add (r.gameObject);

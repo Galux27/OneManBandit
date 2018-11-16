@@ -70,13 +70,13 @@ public class PhoneTab_Map : PhoneTab {
 					if (setWhite == false) {
 						if (t.GetTile (new Vector3Int (x, y, 0)) == null) {
 							if (xInd < sizeX && yInd < sizeY) {	
-								//							//////Debug.Log ("x = " + xInd + " y = " + yInd);
+								//							////////Debug.Log ("x = " + xInd + " y = " + yInd);
 								colors [xInd, yInd] = Color.blue;
 								//break;
 							}
 						} else {
 							if (xInd < sizeX && yInd < sizeY) {	
-								////////Debug.Log ("x = " + xInd + " y = " + yInd);
+								//////////Debug.Log ("x = " + xInd + " y = " + yInd);
 								colors [xInd, yInd] = Color.white;
 								setWhite = true;
 								//break;
@@ -123,7 +123,7 @@ public class PhoneTab_Map : PhoneTab {
 					sample2.SetPixel (x2, y2, Color.blue);
 				}
 				y2++;
-				////////Debug.Log (xInd + " || " + yInd);
+				//////////Debug.Log (xInd + " || " + yInd);
 			}
 			x2++;
 			y2 = 0;

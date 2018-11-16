@@ -21,7 +21,7 @@ public class NPCBehaviour_ArrestTarget : NPCBehaviour {
 				NPCController npc = myController.memory.objectThatMadeMeSuspisious.GetComponent<NPCController> ();
 				if (myController.npcB.freindlyIDs.Contains (npc.npcB.myID) == true || myController.npcB.myID != npc.npcB.myID) {
 					myController.npcB.suspisious = false;
-					//////Debug.LogError ("NPC " + this.gameObject.name + " wanted to set alert on freindly npc " + myController.memory.objectThatMadeMeSuspisious);
+					////////Debug.LogError ("NPC " + this.gameObject.name + " wanted to set alert on freindly npc " + myController.memory.objectThatMadeMeSuspisious);
 
 					myController.memory.objectThatMadeMeSuspisious = null;
 					Destroy (this);

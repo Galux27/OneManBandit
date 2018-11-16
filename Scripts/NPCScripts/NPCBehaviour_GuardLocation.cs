@@ -33,7 +33,7 @@ public class NPCBehaviour_GuardLocation : NPCBehaviour {
 
 	public override void OnUpdate ()
 	{
-		////////Debug.LogError ("Calling guard location on Update");
+		//////////Debug.LogError ("Calling guard location on Update");
 		if (isInitialised == false) {
 			Initialise ();
 			isInitialised = true;
@@ -41,7 +41,7 @@ public class NPCBehaviour_GuardLocation : NPCBehaviour {
 		}
 			
 		if (areWeNearGuardPos () == false) {
-			////////Debug.LogError ("Not near location to guard, moving to");
+			//////////Debug.LogError ("Not near location to guard, moving to");
 			if (myController.pf.currentPath == null ||myController.pf.target!=marker ) {
 				myController.pf.getPath (this.gameObject, marker);
 

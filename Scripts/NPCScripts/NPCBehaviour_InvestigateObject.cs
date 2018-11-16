@@ -128,7 +128,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 		//add some kind of progress moniter to the investigating of the item
 		/*if (atTarget == false) {
 			if (Vector3.Distance (target.transform.position, this.transform.position) < 1.2f) {
-				////////Debug.Log ("Near target to investigate");
+				//////////Debug.Log ("Near target to investigate");
 
 				if (lookedAtObject == false) {
 					if (target.gameObject.tag == "Dead/Knocked" || target.gameObject.tag == "Dead/Guarded") {
@@ -148,7 +148,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 					
 					} else if (target.gameObject.GetComponent<Weapon> () == true || target.gameObject.GetComponent<AmmoItem> () == true || target.gameObject.GetComponent<HighValueItem> () == true) {
 						//found an item that should set off the alarm,
-						//////Debug.Log ("Found suspious item");
+						////////Debug.Log ("Found suspious item");
 						falseAlarm = true;
 						myController.memory.raiseAlarm = true;
 
@@ -157,7 +157,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 						foreach (Item i in pc.myContainer.itemsInContainer) {
 							if (i.gameObject.GetComponent<Weapon> () == true || i.gameObject.GetComponent<AmmoItem> () == true || i.gameObject.GetComponent<HighValueItem> () == true) {
 								//found an item in a container that should set off the alarm,
-								//////Debug.Log ("Found suspious item");
+								////////Debug.Log ("Found suspious item");
 								falseAlarm = true;
 								myController.memory.raiseAlarm = true;
 							}
@@ -165,7 +165,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 					} else {
 						falseAlarm = true;
 						confiscate = false;
-						//////Debug.Log ("Item was a false alarm");
+						////////Debug.Log ("Item was a false alarm");
 					}
 					lookedAtObject = true;
 				}
@@ -232,13 +232,13 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 	void atItem()
 	{
 		decideWhatToDoWithObject ();
-		//////Debug.Log ("Calling investigate on complete");
+		////////Debug.Log ("Calling investigate on complete");
 		atTarget=true;
 
 		if (falseAlarm == true) {
 			//go back to patrol
 			//LevelController.me.getRoomObjectIsIn (this.gameObject).itemsInRoomAtStart.Add (target.GetComponent<Item>());
-			//////Debug.LogError ("Adding item to room alarm");
+			////////Debug.LogError ("Adding item to room alarm");
 
 			//NPCBehaviour_PatrolRoute newBehaviour = this.gameObject.AddComponent<NPCBehaviour_PatrolRoute>();
 			//myController.currentBehaviour = newBehaviour;
@@ -251,18 +251,18 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 			if (r == null) {
 				confiscate = false;
 				OnComplete ();
-				Debug.Log ("Item result 1");
+				//Debug.Log ("Item result 1");
 
 			} else {
 				if (r.itemsInRoomAtStart.Contains (myController.memory.objectThatMadeMeSuspisious.GetComponent<Item> ()) == false) {
 					myInv = this.gameObject.GetComponent<Inventory> ();
 					myInv.addItemToInventory (target.GetComponent<Item> ());
 					myController.pf.getPath (this.gameObject, LevelController.me.itemDepositLoc.gameObject);
-					Debug.Log ("Item result 3");
+					//Debug.Log ("Item result 3");
 
 				} else {//should hopefully eliminate the case where they would keep picking up the same object when 
 					OnComplete ();
-					Debug.Log ("Item result 2");
+					//Debug.Log ("Item result 2");
 
 				}
 				myController.myText.setText ("Nothing to worry about, better take it to lost & found.");
@@ -272,7 +272,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 
 			//get rid of this when actual behaviours are added
 			//LevelController.me.getRoomObjectIsIn (this.gameObject).itemsInRoomAtStart.Add (target.GetComponent<Item>());
-			//////Debug.LogError ("Item is being confiscated");
+			////////Debug.LogError ("Item is being confiscated");
 			//NPCBehaviour_PatrolRoute newBehaviour = this.gameObject.AddComponent<NPCBehaviour_PatrolRoute>();
 			//myController.currentBehaviour = newBehaviour;
 
@@ -284,7 +284,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 			if (r == null) {
 				confiscate = false;
 				OnComplete ();
-				Debug.Log ("Item result 1");
+				//Debug.Log ("Item result 1");
 			} else {
 				if (r.itemsInRoomAtStart.Contains (myController.memory.objectThatMadeMeSuspisious.GetComponent<Item> ()) == false) {
 					myInv = this.gameObject.GetComponent<Inventory> ();
@@ -292,7 +292,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 					myController.pf.getPath (this.gameObject, LevelController.me.itemDepositLoc.gameObject);
 				} else {//should hopefully eliminate the case where they would keep picking up the same object when 
 					OnComplete ();
-					Debug.Log ("Item result 2");
+					//Debug.Log ("Item result 2");
 
 				}
 				myController.myText.setText ("This shouldn't be here.");
@@ -314,7 +314,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 
 		} else {
 			if (target.GetComponent<PortableContainerItem> () == true) {
-				Debug.Log ("Dropping portable container");
+				//Debug.Log ("Dropping portable container");
 				myController.inv.unequipItem (target.GetComponent<Item> ());
 				myController.inv.dropItem (target.GetComponent<Item> ());
 				//	myController.memory.objectThatMadeMeSuspisious.GetComponent<Item> ().unequipItem ();
@@ -335,7 +335,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 		//myController.npcB.suspisious=false;
 		myController.memory.objectThatMadeMeSuspisious = null;
 		radioMessageOnFinish ();
-		Debug.Log ("destroyed item on finish");
+		//Debug.Log ("destroyed item on finish");
 		Destroy (this);
 
 	}
@@ -343,7 +343,7 @@ public class NPCBehaviour_InvestigateObject : NPCBehaviour {
 	public override void passInGameobject(GameObject passIn)
 	{
 		target = passIn;
-		//////Debug.Log ("Passed in " + passIn.name + " to investigate");
+		////////Debug.Log ("Passed in " + passIn.name + " to investigate");
 	}
 
 	public override void radioMessageOnStart ()

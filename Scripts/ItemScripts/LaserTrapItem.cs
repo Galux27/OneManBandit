@@ -52,7 +52,7 @@ public class LaserTrapItem : Item {
 		
 		this.gameObject.SetActive (true);
 		inUse = true;
-		//////Debug.Log ("Root is " +  this.transform.root.gameObject.name);*/
+		////////Debug.Log ("Root is " +  this.transform.root.gameObject.name);*/
 		AnimationController ac = this.gameObject.transform.parent.gameObject.GetComponentInChildren<AnimationController> ();
 		ac = this.transform.root.gameObject.GetComponentInChildren<AnimationController> ();
 		this.gameObject.transform.parent = ac.rightHand.transform;
@@ -120,7 +120,7 @@ public class LaserTrapItem : Item {
 		if (inUse == true) {
 			if (placed == false) {
 				if (validTrap ()) {
-					//////Debug.Log ("Trap placement is valid");
+					////////Debug.Log ("Trap placement is valid");
 					if (Input.GetMouseButtonDown (0) && PlayerInputController.me.shouldWeBeAbleToClick()) {
 
 						Inventory myInv = this.gameObject.GetComponentInParent<Inventory> ();
@@ -163,11 +163,11 @@ public class LaserTrapItem : Item {
 					lr.endColor = Color.clear;
 				} else {
 					if (hasTrapBeenTriggered () == true) {
-						//////Debug.Log ("Trap triggered");
+						////////Debug.Log ("Trap triggered");
 						detonate ();
 					} else {
 
-						//////Debug.Log ("Trap has not been triggered");
+						////////Debug.Log ("Trap has not been triggered");
 					}
 				}
 
@@ -223,23 +223,23 @@ public class LaserTrapItem : Item {
 		RaycastHit2D ray = Physics2D.Raycast (origin, dirOfLine,lineDist);
 
 		if (ray.collider == null) {
-			//			//////Debug.Log ("No ray hit");
-			Debug.DrawRay (origin,dirOfLine*lineDist,Color.green);
+			//			////////Debug.Log ("No ray hit");
+			//Debug.DrawRay (origin,dirOfLine*lineDist,Color.green);
 
 			return false;
 		} else {
 
 			//if (ray.collider.gameObject.tag == "WallCollider") {
-			//	//////Debug.Log ("We hit a wall " + ray.collider.gameObject.name);
+			//	////////Debug.Log ("We hit a wall " + ray.collider.gameObject.name);
 			//}
 
-			////////Debug.Log (ray.collider.gameObject.name);
+			//////////Debug.Log (ray.collider.gameObject.name);
 			if (ray.collider.gameObject.tag == "NPC") {
-				Debug.DrawRay (origin, dirOfLine*lineDist,Color.red);
+				//Debug.DrawRay (origin, dirOfLine*lineDist,Color.red);
 
 				return true;
 			} else {
-				Debug.DrawRay (origin, dirOfLine*lineDist,Color.green);
+				//Debug.DrawRay (origin, dirOfLine*lineDist,Color.green);
 
 				return false;
 			}
@@ -261,18 +261,18 @@ public class LaserTrapItem : Item {
 		RaycastHit2D[] rays = Physics2D.RaycastAll (origin, dir,5);
 		foreach (RaycastHit2D ray in rays) {
 			if (ray.collider == null || ray.collider.gameObject == CommonObjectsStore.player) {
-				//			//////Debug.Log ("No ray hit");
-				//Debug.DrawRay (origin, dir * 5, Color.green);
+				//			////////Debug.Log ("No ray hit");
+				////Debug.DrawRay (origin, dir * 5, Color.green);
 				//lr.endColor = Color.green;
 				//lr.startColor = Color.green;
 				//return true;
 				endPointOfLine = origin + (dir*5);
 				lineDist = 5.0f;
 			} else {
-				Debug.LogError (ray.collider.gameObject.name + " was in the way of the ray");
+				//Debug.LogError (ray.collider.gameObject.name + " was in the way of the ray");
 				lr.endColor = Color.red;
 				lr.startColor = Color.red;
-				Debug.DrawRay (origin, dir * ray.distance, Color.green);
+				//Debug.DrawRay (origin, dir * ray.distance, Color.green);
 				endPointOfLine = ray.point;
 				lineDist = ray.distance;
 				pos.Add (origin);
@@ -282,10 +282,10 @@ public class LaserTrapItem : Item {
 				lr.startColor = Color.green;
 
 				//if (ray.collider.gameObject.tag == "WallCollider") {
-				//	//////Debug.Log ("We hit a wall " + ray.collider.gameObject.name);
+				//	////////Debug.Log ("We hit a wall " + ray.collider.gameObject.name);
 				//}
 
-				////////Debug.Log (ray.collider.gameObject.name);
+				//////////Debug.Log (ray.collider.gameObject.name);
 
 				return true;
 			}
@@ -297,7 +297,7 @@ public class LaserTrapItem : Item {
 		lr.SetPositions (pos.ToArray ());
 		lr.endColor = Color.green;
 		lr.startColor = Color.green;
-		Debug.DrawRay (origin, dir * 5, Color.green);
+		//Debug.DrawRay (origin, dir * 5, Color.green);
 		return true;
 	}
 	bool validTrap()

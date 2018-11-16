@@ -41,7 +41,7 @@ public class PhoneMessageMarker : MonoBehaviour {
 		Vector3 origin = this.transform.position;
 		Vector3 heading = target.transform.position - origin;
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading);
-		Debug.DrawRay (origin, heading,Color.cyan);
+		//Debug.DrawRay (origin, heading,Color.cyan);
 
 		if (ray.collider == null) {
 

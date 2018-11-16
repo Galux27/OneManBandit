@@ -29,7 +29,7 @@ public class NPCBehaviour_UpdateSuspects : NPCBehaviour {
 				NPCController npc = myController.memory.objectThatMadeMeSuspisious.GetComponent<NPCController> ();
 				if (myController.npcB.freindlyIDs.Contains (npc.npcB.myID) == true || myController.npcB.myID != npc.npcB.myID) {
 					myController.npcB.suspisious = false;
-					//////Debug.LogError ("NPC " + this.gameObject.name + " wanted to set alert on freindly npc " + myController.memory.objectThatMadeMeSuspisious);
+					////////Debug.LogError ("NPC " + this.gameObject.name + " wanted to set alert on freindly npc " + myController.memory.objectThatMadeMeSuspisious);
 
 					myController.memory.objectThatMadeMeSuspisious = null;
 					Destroy (this);
@@ -62,7 +62,7 @@ public class NPCBehaviour_UpdateSuspects : NPCBehaviour {
 		if (myController.memory.objectThatMadeMeSuspisious == null) {
 
 		} else {
-			if (myController.memory.objectThatMadeMeSuspisious.tag == "Player" || myController.memory.objectThatMadeMeSuspisious.tag == "NPC") {
+            if (myController.memory.objectThatMadeMeSuspisious.tag == "Player" && myController.memory.seenSuspectsFace == true || myController.memory.objectThatMadeMeSuspisious.tag == "NPC") {
 				LevelController.me.suspects.Add (myController.memory.objectThatMadeMeSuspisious);
 			}
 		}
@@ -78,7 +78,7 @@ public class NPCBehaviour_UpdateSuspects : NPCBehaviour {
 		myController.npcB.suspisious = false;
 		myController.memory.objectThatMadeMeSuspisious = null;
 		radioMessageOnFinish ();
-		//////Debug.Log ("Set off global alarm");
+		////////Debug.Log ("Set off global alarm");
 	}
 
 	public override void radioMessageOnStart ()

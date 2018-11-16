@@ -89,12 +89,12 @@ public class ComputerUIControl : MonoBehaviour {
 	public void interactWithComputer()
 	{
 		if (computerBeingUsed == false) {
-			//////Debug.Log ("Setting computer on");
+			////////Debug.Log ("Setting computer on");
 
 			myObject.SetActive (true);
 			computerBeingUsed = true;
 		} else {
-			//////Debug.Log ("Setting computer off");
+			////////Debug.Log ("Setting computer off");
 			if (PlayerAction.currentAction == null) {
 
 			} else {

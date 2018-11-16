@@ -13,7 +13,7 @@ public class SpriteAnimation : MonoBehaviour {
 	public bool animWereLookingFor(string _ID,string _AnimName)
 	{
 		if (_ID.CompareTo( ID)==0 && _AnimName.CompareTo( AnimName)==0) {
-			////////Debug.Log("Found Animation " + _ID + " || " + _AnimName);
+			//////////Debug.Log("Found Animation " + _ID + " || " + _AnimName);
 			return true;
 		}
 		return false;

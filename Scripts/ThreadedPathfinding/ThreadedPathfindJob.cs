@@ -17,8 +17,8 @@ public class ThreadedPathfindJob  {
 		sY = wt.gridY;
 
 		//if (wt2 == null || g == null) {
-		//	Debug.Log ("Return to " + returnTo.gameObject.name + " got the path error");
-		//	Debug.Break ();
+		//	//Debug.Log ("Return to " + returnTo.gameObject.name + " got the path error");
+		//	//Debug.Break ();
 		//}
 
 		fX = wt2.gridX;
@@ -39,7 +39,7 @@ public class ThreadedPathfindJob  {
 	{
 		List<ThreadedPathfindNode> nodes = ThreadedPathfindInterface.me.getPath ();
 		getPathAsVectors (nodes);
-//		//////Debug.Log ("Nodes in unconverted path " + nodes.Count);
+//		////////Debug.Log ("Nodes in unconverted path " + nodes.Count);
 		returnPath ();
 	}
 

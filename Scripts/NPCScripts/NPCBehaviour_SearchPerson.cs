@@ -79,7 +79,7 @@ public class NPCBehaviour_SearchPerson : NPCBehaviour {
 
 	public void searchThroughInventory()
 	{
-		//////Debug.Log ("Searching through inventory");
+		////////Debug.Log ("Searching through inventory");
 		Inventory i = personToFind.GetComponent<Inventory> ();
 		PortableContainerItem pt = personToFind.GetComponentInChildren<PortableContainerItem> ();
 
@@ -119,7 +119,7 @@ public class NPCBehaviour_SearchPerson : NPCBehaviour {
 		if (personHadIlligalItem == true || personRunOff == true) {
 			myController.memory.raiseAlarm = true;
 			myController.memory.seenSuspect = true;
-			//////Debug.Log ("Illigal item found");
+			////////Debug.Log ("Illigal item found");
 			myController.myText.setText ("On your knees!");
 
 			Destroy (myProgress.gameObject);
@@ -143,7 +143,7 @@ public class NPCBehaviour_SearchPerson : NPCBehaviour {
 			//nat.passInGameobject (personToFind);
 			//myController.currentBehaviour = nat;
 			//Destroy (myProgress.gameObject);
-			//////Debug.Log ("No illigal items found");
+			////////Debug.Log ("No illigal items found");
 			Destroy (this);
 
 		}

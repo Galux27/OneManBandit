@@ -24,7 +24,7 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 	float timePathStarted=0.0f;
 	public GameObject latestRequestedBy,currentPathRequested;
 
-
+	public List<string> jobsDisplay;
 
 	void Awake()
 	{
@@ -34,6 +34,17 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		jobsToDo = new List<ThreadedPathfindJob> ();
 	}
 
+	void displayJobs()
+	{
+		jobsDisplay = new List<string> ();
+		for (int x = 0; x < jobsToDo.Count; x++) {
+			if (jobsToDo [x].target == null || jobsToDo [x].returnTo == null) {
+				continue;
+			}
+			jobsDisplay.Add (jobsToDo [x].returnTo.name + " GOING TO " + jobsToDo [x].target.name + jobsToDo[x].target.transform.position.ToString());
+
+		}
+	}
 
 	/// <summary>
 	/// When NPCs are destroyed if they have a path request then it gets removed here. 
@@ -78,6 +89,7 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		}
 
 		numberOfJobsToDo = jobsToDo.Count;
+		displayJobs ();
 	}
 
 
@@ -92,11 +104,11 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 
 	ThreadedPathfindJob getJobToDo()
 	{
-		foreach (ThreadedPathfindJob tp in jobsToDo) {
-			if (tp.returnTo.myController.npcB.myType != AIType.civilian) {
-				return tp;
-			}
-		}
+		//foreach (ThreadedPathfindJob tp in jobsToDo) {
+			//if (tp.returnTo.myController.npcB.myType != AIType.civilian) {
+			//	return tp;
+			//}
+		//}
 		return jobsToDo [0];
 	}
 	public bool countTime=false;
@@ -143,11 +155,11 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 					timeLastPathTook = Time.time - timePathStarted;
 					timePathStarted = 0.0f;
 					timer = 0.0f;
-					////////Debug.Log ("Current Job is Done, moving to next");
+					//////////Debug.Log ("Current Job is Done, moving to next");
 					/// 
 					/// 
 					if (timeLastPathTook > 1.0f) {
-						//Debug.Break ();
+						////Debug.Break ();
 					}
 					currentJob = null;
 				}
@@ -167,7 +179,7 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		nodes = new ThreadedPathfindNode[WorldBuilder.me.worldTiles.GetLength (0), WorldBuilder.me.worldTiles.GetLength (1)];
 		for (int x = 0; x < nodes.GetLength (0); x++) {
 			for (int y = 0; y < nodes.GetLength (1); y++) {
-//				//////Debug.Log(nodes.GetLength(0));
+//				////////Debug.Log(nodes.GetLength(0));
 				if (CreateNodesFromTilemaps.me.nodes [x, y] == null) {
 				} else {
 
@@ -278,6 +290,39 @@ public class ThreadedPathfindInterface : MonoBehaviour {
 		if (dstX > dstY)
 			return 14*dstY + 10* (dstX-dstY);
 		return 14*dstX + 10 * (dstY-dstX);
+	}
+
+	//public void checkIfIAlreadyHaveJob(GameObject target, PathFollower returnTo)
+	//{
+
+	//}
+
+	public void removePathIWanted(PathFollower returnTo)
+	{
+		foreach (ThreadedPathfindJob tpj in jobsToDo) {
+			if (tpj.returnTo == returnTo) {
+				if (tpj != currentJob) {
+					jobsToDo.Remove (tpj);
+					return;
+				}
+			}
+		}
+	}
+
+	public void addPathJob(GameObject target, PathFollower returnTo)
+	{
+
+		foreach (ThreadedPathfindJob tpj in jobsToDo) {
+			if (tpj.returnTo == returnTo) {
+				if (tpj != currentJob) {
+					jobsToDo.Remove (tpj);
+					break;
+				}
+			}
+		}
+
+		ThreadedPathfindInterface.me.jobsToDo.Add (new ThreadedPathfindJob (target, returnTo));
+
 	}
 
 }

@@ -12,6 +12,7 @@ public class NPCBehaviour_GuardEntrance : NPCBehaviour {
 	bool requestedPath=false;
 	Rigidbody2D rid;
 	HeadController hc;
+	float distance = 1.0f;
 	public override void Initialise ()
 	{
 		myType = behaviourType.guardEntrance;
@@ -31,7 +32,7 @@ public class NPCBehaviour_GuardEntrance : NPCBehaviour {
 
 		}
 
-
+		distance = Random.Range (1.0f, 5.0f);
 		//rotationToFace = Quaternion.Euler (0, 0, Random.Range(0,360));
 
 
@@ -40,8 +41,23 @@ public class NPCBehaviour_GuardEntrance : NPCBehaviour {
 	}
 
 	void noGuardFallback(){
+
+		List<Transform> potentialPointsToGuard = new List<Transform> ();
+
+		foreach (CivilianAction c in LevelController.me.actionsInWorld) {
+			potentialPointsToGuard.Add (c.positionForAction);
+		}
+
+		foreach (BuildingScript bs in LevelController.me.buildings) {
+			foreach (Transform t in bs.entrances) {
+				potentialPointsToGuard.Add (t);
+			}
+		}
+
+
+
 		//float dist = 999999.0f;
-		//foreach(CivilianAction c in LevelController.me.actionsInWorld)
+		//
 		//{
 		//	float d2 = Vector2.Distance (this.transform.position, c.positionForAction.position);
 		//	if (d2 < dist) {
@@ -49,7 +65,7 @@ public class NPCBehaviour_GuardEntrance : NPCBehaviour {
 				//ca = c;
 		//	}
 		//}
-		locationNode = LevelController.me.getCivilianAction().positionForAction;
+		locationNode = potentialPointsToGuard[Random.Range(0,potentialPointsToGuard.Count)];
 		nearestDoor = locationNode.gameObject;
 	}
 
@@ -82,7 +98,7 @@ public class NPCBehaviour_GuardEntrance : NPCBehaviour {
 
 	public override void OnUpdate ()
 	{
-		////////Debug.LogError ("Calling guard location on Update");
+		//////////Debug.LogError ("Calling guard location on Update");
 		if (isInitialised == false) {
 			Initialise ();
 			isInitialised = true;
@@ -90,7 +106,7 @@ public class NPCBehaviour_GuardEntrance : NPCBehaviour {
 		}
 
 		if (areWeNearGuardPos () == false) {
-			////////Debug.LogError ("Not near location to guard, moving to");
+			//////////Debug.LogError ("Not near location to guard, moving to");
 
 			if (requestedPath == false) {
 				if (myController.pf.currentPath == null || myController.pf.currentPath.Count == 0) {
@@ -109,7 +125,7 @@ public class NPCBehaviour_GuardEntrance : NPCBehaviour {
 
 	bool areWeNearGuardPos()
 	{
-		if (Vector3.Distance (this.transform.position, locationToGuard) < 1.5f) {
+		if (Vector3.Distance (this.transform.position, locationToGuard) < distance) {
 			return true;
 		}
 		return false;

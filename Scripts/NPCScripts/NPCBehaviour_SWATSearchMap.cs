@@ -71,9 +71,9 @@ public class NPCBehaviour_SWATSearchMap : NPCBehaviour {
 			if (npc.npcB.myType == AIType.swat) {
 				RoomScript room = LevelController.me.getRoomObjectIsIn (npc.gameObject);
 				if (room == null) {
-					//////Debug.Log (g.name + " Is not in a room.");
+					////////Debug.Log (g.name + " Is not in a room.");
 				} else {
-					//////Debug.Log (g.name + " Is in room " + room.roomName);
+					////////Debug.Log (g.name + " Is in room " + room.roomName);
 					//if (room != roomToGoTo) {
 					//	return false;
 					//}
@@ -90,7 +90,7 @@ public class NPCBehaviour_SWATSearchMap : NPCBehaviour {
 
 		foreach (NPCBehaviour nb in allSwat) {
 			RoomScript room = LevelController.me.getRoomObjectIsIn (nb.gameObject);
-			//////Debug.Log ("Swat " + nb.gameObject.name + " Is in room " + room.roomName);
+			////////Debug.Log ("Swat " + nb.gameObject.name + " Is in room " + room.roomName);
 			if (room != roomToGoTo) {
 				return false;
 			}

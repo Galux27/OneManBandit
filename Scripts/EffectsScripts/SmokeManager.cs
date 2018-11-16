@@ -37,6 +37,8 @@ public class SmokeManager : MonoBehaviour {
 	}
 
 	public Vector3 getPositionForSmoke(){
-		return smokeOriginPoint + new Vector3 (Random.Range (-2.5f, 2.5f), Random.Range (-2.5f, 2.5f), 0);
+		return this.transform.position + new Vector3 (Random.Range (-2.5f, 2.5f), Random.Range (-2.5f, 2.5f), 0);
+
+		//return smokeOriginPoint + new Vector3 (Random.Range (-2.5f, 2.5f), Random.Range (-2.5f, 2.5f), 0);
 	}
 }

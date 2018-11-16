@@ -28,6 +28,7 @@ public class NPCController : MonoBehaviour {
 	public PersonClothesController pcc;
 	public bool tied = false;
 	public GameObject myHalo;
+	GameObject seenPlayerIcon;
 	void Awake()
 	{
 		pmc = this.GetComponent<PersonMovementController> ();
@@ -65,7 +66,8 @@ public class NPCController : MonoBehaviour {
 		myText = textObj.GetComponentInChildren<PersonTextDisplay> ();
 		myText.toFollow = this.gameObject;
 		textObj.transform.localScale = new Vector3 (1, 1, 1);
-
+		seenPlayerIcon = (GameObject)Instantiate (CommonObjectsStore.me.seenPlayerIcon, this.transform);
+		seenPlayerIcon.transform.localPosition = Vector3.zero;
 		if (NPCManager.me.npcsInWorld.Contains (this.gameObject) == false) {
 			NPCManager.me.npcsInWorld.Add (this.gameObject);
 		}
@@ -306,6 +308,8 @@ public class NPCController : MonoBehaviour {
 		NPCManager.me.npcControllers.Remove (this);
 	}
 
+  
+
 
 }
 public enum AIType{
@@ -315,5 +319,11 @@ public enum AIType{
 	civilian, //walks around and does activities, will flee if they spot something bad, will try to raise alarm if they are far enough from the player
 	swat,
 	hostage,
-	shopkeeper
+	shopkeeper,
+	talk,
+	detective,
+	patrolCop,
+    neutral,
+    uniqueNeutral,
+    uniqueHostile
 }

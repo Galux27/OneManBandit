@@ -19,7 +19,7 @@ public class ClothingItemUI : MonoBehaviour {
 	public ClothingItemSlot mySlot;
 	public void setItem(ClothingItem i)
 	{
-		//////Debug.Log ("Item set " + i.gameObject.name);
+		////////Debug.Log ("Item set " + i.gameObject.name);
 
 		if (itemEquiped == null) {
 

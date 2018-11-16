@@ -10,12 +10,14 @@ public class LevelEditor : MonoBehaviour {
 	public GameObject lightPrefab, lightswitchPrefab;
 	public GameObject cctvPrefab;
 	public List<GameObject> enemies;
+	public List<GameObject> peopleToTalkTo;
 	public List<GameObject> cctvCameras;
 	public List<GameObject> civilianActionsCreated;
 	public List<GameObject> outOfBoundsMarkers;
 
 	public List<GameObject> lightsourcesICreated,lightswitchesICreated;
 	public List<GameObject> objectsForNature,natureObjectsCreated;
+	public List<GameObject> shops;
 	public void addCivilanAction(GameObject g)
 	{
 		if (civilianActionsCreated == null) {
@@ -34,6 +36,13 @@ public class LevelEditor : MonoBehaviour {
 		}
 
 		enemiesCreated.Add (g);
+	}
+
+	public void addToTalkTo(GameObject g){
+		if (peopleToTalkTo == null) {
+			peopleToTalkTo = new List<GameObject> ();
+		}
+		peopleToTalkTo.Add (g);
 	}
 
 	public void addLightSource(GameObject source)
@@ -76,6 +85,14 @@ public class LevelEditor : MonoBehaviour {
 
 		natureObjectsCreated.Add (g);
 	}
+
+	public void addShop(GameObject g)
+	{
+		if (shops == null) {
+			shops = new List<GameObject> ();
+		}
+		shops.Add (g);
+	}
 }
 
 public enum LevelEditorTask{
@@ -88,5 +105,11 @@ public enum LevelEditorTask{
 	lightSources,
 	cctv,
 	outOfBounds,
-	nature
+	nature,
+	conversations,
+	shops,
+    items,
+    teleport,
+    events,
+    background
 }

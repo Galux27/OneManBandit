@@ -97,14 +97,14 @@ public class NPCBehaviour_FreeHostage  : NPCBehaviour {
 			Destroy (this);
 		//}
 
-		////////Debug.Log ("Set off global alarm");
+		//////////Debug.Log ("Set off global alarm");
 
 	}
 
 	public void createProgressBar()
 	{
 		if (myController.knockedDown == false) {
-			myController.myText.setText ("Stay still, I'll untie you.");
+			myController.myText.setText ("Stay still, I'll help you.");
 		} else {
 			myController.myText.setText ("Hey, Wake up.");
 

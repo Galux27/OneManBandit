@@ -32,7 +32,7 @@ public class NPCBehaviour_DoCivilianAction : NPCBehaviour {
 				actionToDo = LevelController.me.getActionOfSameType (actionToDo.actionName);
 			}
 			//if (myController.pf.target != actionToDo.positionForAction.gameObject && myController.pf.waitingForPath==false) {
-			Debug.Log(this.gameObject.name + " is wanting to search for a new path to civilian action!");
+			//Debug.Log(this.gameObject.name + " is wanting to search for a new path to civilian action!");
 			if (myController.pf.target == null || myController.pf.target != actionToDo.positionForAction.gameObject) {
 				myController.pf.getPath (this.gameObject, actionToDo.positionForAction.gameObject);
 			}
@@ -60,7 +60,7 @@ public class NPCBehaviour_DoCivilianAction : NPCBehaviour {
 			} else {
 				if (actionToDo.doingAction == this.gameObject) {
 					if (actionToDo.doWeHaveNPCDoingAnimation == true && actionToDo.doingAction == this.gameObject) {
-						//			//////Debug.Log ("Calling update on civilian action " + actionToDo.gameObject.ToString ());
+						//			////////Debug.Log ("Calling update on civilian action " + actionToDo.gameObject.ToString ());
 						myController.pf.target = null;
 
 						actionToDo.OnUpdate ();
@@ -76,7 +76,7 @@ public class NPCBehaviour_DoCivilianAction : NPCBehaviour {
 
 				}
 			}
-			////////Debug.Log ("Calling update on civilian action in the wrong place " + actionToDo.gameObject.ToString ());
+			//////////Debug.Log ("Calling update on civilian action in the wrong place " + actionToDo.gameObject.ToString ());
 
 		}
 
@@ -108,7 +108,13 @@ public class NPCBehaviour_DoCivilianAction : NPCBehaviour {
 
 	void OnDestroy()
 	{
-		actionToDo.stopAction ();
+		if (actionToDo == null) {
+
+		} else {
+			actionToDo.stopAction ();
+
+		}
+
 	}
 
 }

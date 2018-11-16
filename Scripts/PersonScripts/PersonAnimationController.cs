@@ -57,7 +57,7 @@ public class PersonAnimationController : MonoBehaviour {
 
 		SpriteAnimation anim = AnimationStore.me.getAnimation (ID, _AnimName);
 		if (anim == null) {
-			//////Debug.Log ("Could not find " + ID + " || " + _AnimName);
+			////////Debug.Log ("Could not find " + ID + " || " + _AnimName);
 		} else {
 			animationsToPlay.Add (anim);
 		}
@@ -73,7 +73,7 @@ public class PersonAnimationController : MonoBehaviour {
 	{
 		counter = playing.spritesInAnimation.Length - 1;
 		timer = 0.0f;
-		//////Debug.Break ();
+		////////Debug.Break ();
 	}
 
 	void playAnimation()

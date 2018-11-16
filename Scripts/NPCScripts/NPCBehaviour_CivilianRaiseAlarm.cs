@@ -93,7 +93,7 @@ public class NPCBehaviour_CivilianRaiseAlarm : NPCBehaviour {
 		myController.npcB.suspisious = false;
 		myController.memory.objectThatMadeMeSuspisious = null;
 		Destroy (this);
-		//////Debug.Log ("Set off global alarm");
+		////////Debug.Log ("Set off global alarm");
 
 	}
 

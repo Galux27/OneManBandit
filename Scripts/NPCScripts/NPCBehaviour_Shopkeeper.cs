@@ -12,6 +12,10 @@ public class NPCBehaviour_Shopkeeper: NPCBehaviour {
 		float d = 9999999.0f;
 
 		foreach (Shop s in Shop.shopsInWorld) {
+			if (s == null) {
+				continue;
+			}
+
 			float d2 = Vector2.Distance (s.transform.position, this.transform.position);
 			if (d2 < d) {
 				d = d2;
@@ -20,9 +24,9 @@ public class NPCBehaviour_Shopkeeper: NPCBehaviour {
 		}
 
 		if (Vector2.Distance (this.transform.position, myShop.transform.position) > 2.0f) {
-			myController.pf.getPath (this.gameObject,myShop.gameObject);
+			myController.pf.getPath (this.gameObject, myShop.gameObject);
 		}
-		Debug.Log ("INITIALISED SHOPKEEPER BEHAVIOUR");
+		//Debug.Log ("INITIALISED SHOPKEEPER BEHAVIOUR");
 		isInitialised = true;
 	}
 
@@ -32,16 +36,31 @@ public class NPCBehaviour_Shopkeeper: NPCBehaviour {
 			Initialise ();
 		}
 
-		if (Vector2.Distance (this.transform.position, myShop.transform.position) > 2.0f) {
+		if (areWeAtPosition()==false) {
 			moveToPosition ();
 		} else {
+			//myController.pmc.rotateToFacePosition (CommonObjectsStore.player.transform.position);
+
 			if (ShopUI.me.myShop == myShop) {
 				myController.pmc.rotateToFacePosition (CommonObjectsStore.player.transform.position);
 
-			} else {
+				//Debug.Log ("Shop rotate 1");
+
+
+			} else if(myController.detect.lineOfSightToTarget (CommonObjectsStore.player) == false){
+				//Debug.Log ("Shop rotate 2");
+
 				myController.pmc.rotateToFacePosition (myShop.transform.position);
 
+			}else{
+				//Debug.Log ("Shop rotate 3");
+				myController.pmc.rotateToFacePosition (CommonObjectsStore.player.transform.position);
+
 			}
+		}
+
+		if (PoliceController.me.copsHere == true) {
+			myController.npcB.myType = AIType.civilian;
 		}
 	}
 	public string posImGoingTo = "";

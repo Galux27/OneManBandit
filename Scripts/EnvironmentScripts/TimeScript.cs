@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TimeScript : MonoBehaviour {
 	/// <summary>
@@ -26,7 +27,7 @@ public class TimeScript : MonoBehaviour {
 
 	public int month=0,day=1,year=2010,dayWeekNum=-1;
 	public int[] daysInMonth = new int[] {31,28,31,30,31,30,31,31,30,31,30,31};
-	string[] months = new string[]{"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
+	public string[] months = new string[]{"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 	string[] days = new string[]{"Mon","Tue","Wed","Thu","Fri","Sat","Sun"};
 	string dayName="";
 	public bool initialisedDay = false;
@@ -41,6 +42,7 @@ public class TimeScript : MonoBehaviour {
 		if (initialisedSun == false) {
 			initialiseSunPosition ();
 		}
+        sunLight.intensity = 0.2f;
 
 		if (initialisedDay == false) {
 			initialiseDateTime ();
@@ -55,10 +57,10 @@ public class TimeScript : MonoBehaviour {
 		setDayOfWeek ();
 	}
 
-	void increaseDay()
+	public void increaseDay()
 	{
 		day++;
-		if (day > daysInMonth [month]) {
+		if (day >= daysInMonth [month]) {
 			month++;
 			day = 0;
 		}
@@ -141,14 +143,14 @@ public class TimeScript : MonoBehaviour {
 		if (hour >= 5 && hour < 6) {
 			//night to sunrise
 			sunLight.color =c_sunrise;
-			Debug.Log ("Sun color is sunrise");
+			//Debug.Log ("Sun color is sunrise");
 		//	sunObj.transform.position = sunrise;
 		//	sunObj.transform.rotation = Quaternion.Euler (r_sunrise);
 
 			//sunObj.transform.Translate(
 		} else if (hour >= 6 && hour < 11) {
 			sunLight.color =c_morning;
-			Debug.Log ("Sun color is morning");
+			//Debug.Log ("Sun color is morning");
 
 			//sunObj.transform.position = morning;
 			//sunObj.transform.rotation = Quaternion.Euler (r_morning);
@@ -156,7 +158,7 @@ public class TimeScript : MonoBehaviour {
 			//morning
 		} else if (hour >= 11 && hour < 13) {
 			sunLight.color =c_midday;
-			Debug.Log ("Sun color is midday");
+			//Debug.Log ("Sun color is midday");
 
 			//sunObj.transform.position = midday;
 			//sunObj.transform.rotation = Quaternion.Euler (r_midday);
@@ -164,14 +166,14 @@ public class TimeScript : MonoBehaviour {
 			//midday
 		} else if (hour >= 13 && hour < 19) {
 			sunLight.color =c_afternoon;
-			Debug.Log ("Sun color is afternoon");
+			//Debug.Log ("Sun color is afternoon");
 
 			//sunObj.transform.position = afternoon;
 			//sunObj.transform.rotation = Quaternion.Euler (r_afternoon);
 			//afternoon
 		} else if (hour >= 19 && hour < 22) {
 			sunLight.color =c_evening;
-			Debug.Log ("Sun color is evening");
+			//Debug.Log ("Sun color is evening");
 
 			//sunObj.transform.position = evening;
 			//sunObj.transform.rotation = Quaternion.Euler (r_evening);
@@ -179,7 +181,7 @@ public class TimeScript : MonoBehaviour {
 			//evening
 		} else {
 			sunLight.color = c_midnight;
-			Debug.Log ("Sun color is midnight");
+			//Debug.Log ("Sun color is midnight");
 
 			//sunObj.transform.position = midnight;
 			//sunObj.transform.rotation = Quaternion.Euler (r_midnight);
@@ -191,6 +193,7 @@ public class TimeScript : MonoBehaviour {
 
 	void setSun()
 	{
+       // RenderSettings.ambientSkyColor = getSunColor();
 		LightSource.sun.setSun ();
 		setSunPosition ();
 		if (hour >= 0 && hour < 5) {
@@ -333,8 +336,8 @@ public class TimeScript : MonoBehaviour {
 	{
 		float maxVal = 60 * 24;
 		angle = (((float)(hour * 60) + minute) / maxVal) * 6.288f;
-		//Debug.Log("Sun angle = " + (Mathf.Rad2Deg * angle).ToString());
-		//Debug.Log ("Setting sun position" + angle.ToString ());
+		////Debug.Log("Sun angle = " + (Mathf.Rad2Deg * angle).ToString());
+		////Debug.Log ("Setting sun position" + angle.ToString ());
 		Vector3 offset = new Vector3 (Mathf.Sin (angle*-1), 0,Mathf.Cos (angle*-1))*150;
 		sunObj.transform.position = this.transform.position + offset;
 		sunObj.transform.LookAt (this.transform.position);
@@ -342,11 +345,11 @@ public class TimeScript : MonoBehaviour {
 
 	void setSunPosition()
 	{
-		//Debug.Log("Current sun " + ((float)(hour * 60) + minute).ToString() + " Total " + (60*24).ToString());
+		////Debug.Log("Current sun " + ((float)(hour * 60) + minute).ToString() + " Total " + (60*24).ToString());
 		float maxVal = 60 * 24;
 		angle = (((float)(hour * 60) + minute) / maxVal) * 6.288f;
-		//Debug.Log("Sun angle = " + (Mathf.Rad2Deg * angle).ToString());
-		//Debug.Log ("Setting sun position" + angle.ToString ());
+		////Debug.Log("Sun angle = " + (Mathf.Rad2Deg * angle).ToString());
+		////Debug.Log ("Setting sun position" + angle.ToString ());
 		Vector3 offset = new Vector3 (Mathf.Sin (angle*-1), 0,Mathf.Cos (angle*-1))*150;
 		sunObj.transform.position = Vector3.Slerp(sunObj.transform.position, this.transform.position + offset,Time.deltaTime);
 		sunObj.transform.LookAt (this.transform.position);
@@ -392,7 +395,7 @@ public class TimeScript : MonoBehaviour {
 	Color getColorForSun(Vector3 s,Vector3 f,float t)
 	{
 		Vector3 col = Vector3.Slerp (s, f, t);
-		//Debug.Log("Sun Color Slerp is " + col.ToString());
+		////Debug.Log("Sun Color Slerp is " + col.ToString());
 		return new Color (col.x, col.y, col.z, 1);
 	}
 
@@ -429,4 +432,82 @@ public class TimeScript : MonoBehaviour {
 
 		return retVal;
 	}
+
+    public int howManyHoursHavePassed(int hour,int day,int month,int year)
+    {
+        System.DateTime curDate = new System.DateTime(this.year, this.month, this.day, this.hour, this.minute, 0);
+        System.DateTime CompDate = new System.DateTime(year, month, day, hour, 0, 0);
+        return Mathf.RoundToInt((float)(curDate - CompDate).TotalHours);
+        return (workOutNumberOfDaysSince(0, hour, day, month, year) * 24)+this.hour;
+    }
+
+    int workOutNumberOfDaysSince(int min,int hour,int day,int month,int year)
+    {
+
+        System.DateTime curDate = new System.DateTime(this.year, this.month, this.day, this.hour, this.minute, 0);
+        System.DateTime CompDate = new System.DateTime(year, month, day, hour, 0, 0);
+        int numDays = Mathf.RoundToInt((float)(curDate - CompDate).TotalDays);
+        //Debug.Log("Number of days since effect started is " + numDays);
+        return numDays;
+        /*DateTimeStore date = new DateTimeStore();
+        date.day = day;
+        date.month = month;
+        date.year = year;
+        date.min = 0;
+        date.hour = hour;
+        int numberOfDays = 0;
+        //int month = date.month;
+       // int day = date.day;
+
+
+        if (date.month > this.month)
+        {
+            if (date.year < this.year)
+            {
+                numberOfDays += (date.month + 1) * 30;
+            }
+        }
+
+        if (date.month < month)
+        {
+            while (month != this.month)
+            {
+                numberOfDays += this.daysInMonth[month];
+                day = 0;
+                month++;
+            }
+        }
+
+
+        if (date.month == this.month)
+        {
+            if (day < this.day)
+            {
+                while (day < this.day)
+                {
+                    numberOfDays++;
+                    day++;
+                }
+            }
+        }
+        //Debug.Log("Number of days since effect started is" + numberOfDays);
+        return numberOfDays;*/
+    }
+
+    public void bloodBagSkip()
+	{
+		skipAhead (TimeScript.me.minute, TimeScript.me.hour, TimeScript.me.day + 1, TimeScript.me.month, TimeScript.me.year);
+	}
+
+	public void skipAhead(int min,int hour,int day, int month, int year)
+	{
+		minute = min;
+		this.hour = hour;
+		this.day = day;
+		this.month = month;
+		this.year = year;
+		LoadScreen.loadScreen.loadGivenScene (SceneManager.GetActiveScene ().name);
+	}
+
+
 }

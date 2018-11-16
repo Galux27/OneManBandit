@@ -4,13 +4,24 @@ using UnityEngine;
 
 public class DrugItem :Item {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+	public string drugEffect = "";
+	public override void useItem ()
+	{
+		EffectsManager.me.addEffectToPlayer (drugEffect);
+		Inventory inventoryIAmIn = this.gameObject.GetComponentInParent<Inventory> ();
+		if (myContainer == null) {
+		} else {
+			myContainer.removeItemFromContainer (this);
+		}
+
+
+		if (inventoryIAmIn == null) {
+
+		} else {
+			inventoryIAmIn.removeItemWithoutDrop (this);
+		}
+
+		dropItem ();
+		Destroy (this.gameObject);
 	}
 }

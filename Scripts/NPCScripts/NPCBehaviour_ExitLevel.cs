@@ -13,7 +13,7 @@ public class NPCBehaviour_ExitLevel : NPCBehaviour {
 			exit = LevelController.me.getRandomExit ();
 		}
 		myController.pf.getPath (this.gameObject,exit.gameObject);
-
+		//Debug.LogError ("Initialised Exit Level");
 		isInitialised = true;
 	}
 
@@ -21,6 +21,10 @@ public class NPCBehaviour_ExitLevel : NPCBehaviour {
 	{
 		if (isInitialised == false) {
 			Initialise ();
+		}
+
+		if (myController.pf.target == exit && myController.pf.currentPath.Count > 0) {
+			myController.pf.waitingForPath = false;
 		}
 
 		if (areWeAtPosition () == false) {

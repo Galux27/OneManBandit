@@ -49,7 +49,7 @@ public class AudioController : MonoBehaviour {
 	{
 		AudioSource au = getFreeAudiosource ();
 		au.volume = calculateVolumeOfAudio ();
-	//	Debug.Log ("Volume of " + au.gameObject.name + " is " + au.volume);
+	//	//Debug.Log ("Volume of " + au.gameObject.name + " is " + au.volume);
 		au.clip = sfx;
 		au.loop = true;
 		au.Play ();
@@ -59,7 +59,7 @@ public class AudioController : MonoBehaviour {
 	{
 		AudioSource au = getFreeAudiosource ();
 		au.volume = calculateVolumeOfAudio ();
-	//	Debug.Log ("Volume of " + au.gameObject.name + " is " + au.volume);
+	//	//Debug.Log ("Volume of " + au.gameObject.name + " is " + au.volume);
 		au.clip = sfx;
 		au.loop = false;
 		au.Play ();

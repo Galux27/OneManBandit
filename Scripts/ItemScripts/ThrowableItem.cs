@@ -42,7 +42,7 @@ public class ThrowableItem : Item {
 		inUse = true;
 		this.transform.rotation = ac.rightHand.transform.rotation;
 		this.GetComponent<SpriteRenderer> ().sortingOrder = 3;
-		//////Debug.Log ("Root is " +  this.transform.root.gameObject.name);
+		////////Debug.Log ("Root is " +  this.transform.root.gameObject.name);
 		//ac = this.transform.root.gameObject.GetComponentInChildren<AnimationController> ();
 		thrower = this.transform.parent.root.gameObject;
 		this.gameObject.GetComponent<Collider2D> ().enabled = false;
@@ -254,7 +254,7 @@ public class ThrowableItem : Item {
 
 	void OnCollisionEnter2D(Collision2D col)
 	{
-		Debug.Log ("Molotov hit " + col.collider.name);
+		//Debug.Log ("Molotov hit " + col.collider.name);
 		if (col == null) {
 
 		} else {

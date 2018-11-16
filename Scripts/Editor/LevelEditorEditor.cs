@@ -3,20 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
+
+using System.IO;
 [CustomEditor(typeof(LevelEditor))]
 public class LevelEditorEditor : Editor {
 	LevelEditorTask currentTask;
 	bool edit=false,rotation=false;
 	Vector3 pos;
-	// Use this for initialization
-	void Start () {
-		
-	}
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 
 	public override void OnInspectorGUI ()
 	{
@@ -31,7 +26,7 @@ public class LevelEditorEditor : Editor {
 		pos = SceneView.currentDrawingSceneView.camera.ScreenToWorldPoint (pos);
 
 		Handles.BeginGUI ();
-		menuScroll = GUILayout.BeginScrollView (menuScroll, GUILayout.Width (1000), GUILayout.Height (75));
+		menuScroll = GUILayout.BeginScrollView (menuScroll, GUILayout.Width (500), GUILayout.Height (75));
 		GUILayout.BeginHorizontal ();
 
 		if (GUILayout.Button ("Place Roads", GUILayout.Width (100), GUILayout.Height (25))) {
@@ -74,7 +69,37 @@ public class LevelEditorEditor : Editor {
 			currentTask = LevelEditorTask.nature;
 		}
 
-		GUILayout.EndHorizontal ();
+		if (GUILayout.Button ("Add Conversations", GUILayout.Width (125), GUILayout.Height (25))) {
+			currentTask = LevelEditorTask.conversations;
+		}
+
+
+		if (GUILayout.Button ("Place Shops", GUILayout.Width (125), GUILayout.Height (25))) {
+			currentTask = LevelEditorTask.shops;
+		}
+
+        if(GUILayout.Button("Place Items",GUILayout.Width(125),GUILayout.Height(25)))
+        {
+            currentTask = LevelEditorTask.items;
+        }
+
+        if(GUILayout.Button("Place Teleports", GUILayout.Width(125), GUILayout.Height(25)))
+        {
+            currentTask = LevelEditorTask.teleport;
+        }
+
+        if(button("Add Events", 125, 25))
+        {
+            currentTask = LevelEditorTask.events;
+        }
+
+        if(button("Add lore objects", 125, 25))
+        {
+            currentTask = LevelEditorTask.background;
+        }
+
+
+            GUILayout.EndHorizontal ();
 		GUILayout.EndScrollView ();
 		GUILayout.BeginVertical ();
 		if (currentTask == LevelEditorTask.civActions) {
@@ -99,6 +124,12 @@ public class LevelEditorEditor : Editor {
 
 		} else if (currentTask == LevelEditorTask.nature) {
 			GUILayout.Label ("Placing Nature", GUILayout.Width (300), GUILayout.Height (25));
+
+		} else if (currentTask == LevelEditorTask.conversations) {
+			GUILayout.Label ("Adding Conversations", GUILayout.Width (300), GUILayout.Height (25));
+
+		} else if (currentTask == LevelEditorTask.shops) {
+			GUILayout.Label ("Adding Shops", GUILayout.Width (300), GUILayout.Height (25));
 
 		}
 
@@ -138,7 +169,25 @@ public class LevelEditorEditor : Editor {
 			drawCCTVGUI ();
 		} else if (currentTask == LevelEditorTask.nature) {
 			natureGUI ();	
-		}
+		} else if (currentTask == LevelEditorTask.conversations) {
+			conversationUI ();
+			//conversationHandles ();
+		} else if (currentTask == LevelEditorTask.shops) {
+			shopUI ();
+		}else if(currentTask==LevelEditorTask.items)
+        {
+            GUILayout.Label("Click To Add Items");
+        }else if(currentTask==LevelEditorTask.teleport)
+        {
+            drawTeleportUI();
+        }
+        else if(currentTask==LevelEditorTask.events)
+        {
+            drawEventUI();
+        }else if(currentTask==LevelEditorTask.background)
+        {
+            drawBackgroundUI();
+        }
 	
 
 
@@ -175,8 +224,33 @@ public class LevelEditorEditor : Editor {
 			drawOOBHandles ();
 		}else if (currentTask == LevelEditorTask.nature) {
 			natureHandles ();
+		}else if (currentTask == LevelEditorTask.conversations) {
+			inputDetect ();
 
+			conversationHandles ();
+
+		} else if (currentTask == LevelEditorTask.shops) {
+			inputDetect ();
+            drawShopHandles();
+
+            shopHandles ();
 		}
+        else if(currentTask==LevelEditorTask.items)
+        {
+            inputDetect();
+        }else if(currentTask==LevelEditorTask.teleport)
+        {
+            drawTeleportHandles();
+            inputDetect();
+        }else if(currentTask==LevelEditorTask.events)
+        {
+            drawEventHandles();
+            inputDetect();
+        }else if(currentTask==LevelEditorTask.background)
+        {
+            drawBackgroundHandles();
+            inputDetect();
+        }
 	}
 
 	CivilianAction toEdit;
@@ -445,55 +519,133 @@ public class LevelEditorEditor : Editor {
 		switch (e.type) {
 		case EventType.MouseUp:
 			if (e.button == 1 && e.shift == true) {
-				if (currentTask == LevelEditorTask.civActions) {
-					createCivilianAction ();
-				} else if (currentTask == LevelEditorTask.civSpawns) {
-					createCivilianSpawnPoint ();
-				} else if (currentTask == LevelEditorTask.roads) {
-					createPointForRoad ();
-				} else if (currentTask == LevelEditorTask.police) {
-					if (placingCopRoute == false) {
-						createPoliceCar ();
-					} else {
-						addNewPointToPoliceRoute ();
-					}
-				} else if (currentTask == LevelEditorTask.patrolRoutes) {
-					if (editingRoute == true) {
-						addNewPointToRoute ();
-					} else {
-						createNewPatrolRoute ();
-					}
-				} else if (currentTask == LevelEditorTask.enemies) {
-					if (editingEnemy == false) {
-						placeEnemy ();
-					}
-				} else if (currentTask == LevelEditorTask.lightSources) {
-					if (editingLight == false) {
-						placeLight ();
-					} else {
-						if (lightToEdit.GetComponent<Lightswitch> () == true) {
-							setLightSwitchToSource ();
-						}
-					}
-				} else if (currentTask == LevelEditorTask.cctv) {
-					if (editCCTV == false) {
-						createCCTV ();
-					}
-				} else if (currentTask == LevelEditorTask.outOfBounds) {
-					if (pointsSet == false) {
-						if (pointA == Vector3.zero) {
-							setPointA ();
-						} else {
-							setPointB ();
-						}
-					} else {
-						createOutOfBoundsMarker ();
-					}
-				} else if (currentTask == LevelEditorTask.nature) {
-					if (eraseNature == true) {
-						eraseNatureMethod ();
-					}
-				}
+                    if (currentTask == LevelEditorTask.civActions)
+                    {
+                        createCivilianAction();
+                    }
+                    else if (currentTask == LevelEditorTask.civSpawns)
+                    {
+                        createCivilianSpawnPoint();
+                    }
+                    else if (currentTask == LevelEditorTask.roads)
+                    {
+                        createPointForRoad();
+                    }
+                    else if (currentTask == LevelEditorTask.police)
+                    {
+                        if (placingCopRoute == false)
+                        {
+                            createPoliceCar();
+                        }
+                        else
+                        {
+                            addNewPointToPoliceRoute();
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.patrolRoutes)
+                    {
+                        if (editingRoute == true)
+                        {
+                            addNewPointToRoute();
+                        }
+                        else
+                        {
+                            createNewPatrolRoute();
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.enemies)
+                    {
+                        if (editingEnemy == false)
+                        {
+                            placeEnemy();
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.lightSources)
+                    {
+                        if (editingLight == false)
+                        {
+                            placeLight();
+                        }
+                        else
+                        {
+                            if (lightToEdit.GetComponent<Lightswitch>() == true)
+                            {
+                                setLightSwitchToSource();
+                            }
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.cctv)
+                    {
+                        if (editCCTV == false)
+                        {
+                            createCCTV();
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.outOfBounds)
+                    {
+                        if (pointsSet == false)
+                        {
+                            if (pointA == Vector3.zero)
+                            {
+                                setPointA();
+                            }
+                            else
+                            {
+                                setPointB();
+                            }
+                        }
+                        else
+                        {
+                            createOutOfBoundsMarker();
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.nature)
+                    {
+                        if (eraseNature == true)
+                        {
+                            eraseNatureMethod();
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.conversations)
+                    {
+                        if (addPersonToTalkTo == true)
+                        {
+                            createPersonToTalkTo();
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.shops)
+                    {
+                        if (shopEditing == null)
+                        {
+                            createShop();
+                        }
+                    }
+                    else if (currentTask == LevelEditorTask.items)
+                    {
+                        GameObject g = new GameObject();
+                        g.transform.position = pos;
+                        g.AddComponent<ItemInWorld>();
+                        g.name = "ItemInWorld - ";
+                        g.AddComponent<SpriteRenderer>();
+                        Selection.SetActiveObjectWithContext(g, g);
+                    }
+                    else if(currentTask==LevelEditorTask.teleport)
+                    {
+                        teleportInput();
+                    }else if(currentTask==LevelEditorTask.background)
+                    {
+                        if(lorePrefab==null)
+                        {
+
+                        }
+                        else
+                        {
+                            GameObject g = (GameObject) Instantiate(lorePrefab, pos, Quaternion.Euler(0, 0, 0));
+                            g.transform.position = new Vector3(g.transform.position.x, g.transform.position.y, 0);
+                            g.GetComponent<SpriteRenderer>().sortingOrder = 3;
+                            setBackgroundObjects();
+                        }
+                    }
 			} 
 
 
@@ -1951,4 +2103,1720 @@ public class LevelEditorEditor : Editor {
 		EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
 
 	}
+    NPCID[] ids;
+	GameObject npcConvoToEdit;
+	ConversationManager conversationEditing;
+	ConversationChoice choiceEditing;
+	bool addPersonToTalkTo=false;
+	void conversationHandles()
+	{
+		LevelEditor le = (LevelEditor)target;
+        if (ids == null)
+        {
+            ids = FindObjectsOfType<NPCID>();
+        }
+		if (addPersonToTalkTo == false) {
+			foreach (GameObject g in le.peopleToTalkTo) {
+				Handles.color = Color.red;
+				if (Handles.Button (g.transform.position, Quaternion.Euler (0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap)) {
+					le.peopleToTalkTo.Remove (g);
+					EditorUtility.SetDirty (g);
+					EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+					DestroyImmediate (g);
+				}
+
+				Handles.color = Color.blue;
+				if (Handles.Button (g.transform.position+new Vector3(1.0f,0,0), Quaternion.Euler (0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap)) {
+					npcConvoToEdit = g;
+					conversationEditing = g.GetComponent<ConversationManager> ();
+					addPersonToTalkTo = false;
+				}
+
+			}
+
+            foreach (NPCID npc in ids)
+            {
+                GameObject g = npc.gameObject;
+                Handles.color = Color.red;
+                if (Handles.Button(g.transform.position, Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                {
+                    //le.peopleToTalkTo.Remove(g);
+                   // EditorUtility.SetDirty(g);
+                   // EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                   // DestroyImmediate(g);
+                }
+
+                Handles.color = Color.blue;
+                if (Handles.Button(g.transform.position + new Vector3(1.0f, 0, 0), Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                {
+                    le.peopleToTalkTo.Add(g);
+                    npcConvoToEdit = g;
+                    if (g.GetComponent<ConversationManager>() == null)
+                    {
+                        conversationEditing = g.AddComponent<ConversationManager>();
+                    }
+                    else
+                    {
+                        conversationEditing = g.GetComponent<ConversationManager>();
+
+                    }
+                    addPersonToTalkTo = false;
+                }
+
+            }
+
+            if (npcConvoToEdit != null) {
+				if (rotation == false) {
+					EditorGUI.BeginChangeCheck ();
+
+					Vector3 p1 = Handles.PositionHandle (npcConvoToEdit.transform.position, Quaternion.Euler (0, 0, 0));
+					if (EditorGUI.EndChangeCheck ()) {
+						//Undo.RecordObject (r, "Moved position of " + rs.roomName);
+						npcConvoToEdit.transform.position = p1;
+
+						//EditorUtility.SetDirty (cctvToEdit);
+						//EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+					}
+				} else {
+					EditorGUI.BeginChangeCheck ();
+					Quaternion q = Handles.RotationHandle ( npcConvoToEdit.transform.rotation,npcConvoToEdit.transform.position);
+					if (EditorGUI.EndChangeCheck ()) {
+						//Undo.RecordObject (r, "Moved position of " + rs.roomName);
+						npcConvoToEdit.transform.rotation = q;
+
+						EditorUtility.SetDirty (npcConvoToEdit);
+						EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+					}
+				}
+			}
+		}
+	}
+
+	void createPersonToTalkTo()
+	{
+		LevelEditor le = (LevelEditor)target;
+
+		GameObject g = (GameObject)Instantiate (FindObjectOfType<CommonObjectsStore> ().civilian, getMousePos (), Quaternion.Euler (0, 0, 0));
+		NPCController npc = g.GetComponent<NPCController> ();
+		ConversationManager cm = g.AddComponent<ConversationManager> ();
+		cm.setID ();
+		npc.myType = AIType.talk;
+		NPCBehaviourDecider npcb = g.GetComponent<NPCBehaviourDecider> ();
+		npcb.myType = AIType.talk;
+		le.addToTalkTo (g);
+		EditorUtility.SetDirty (g);
+		EditorUtility.SetDirty (le);
+		EditorUtility.SetDirty (cm);
+		EditorUtility.SetDirty (le.gameObject);
+
+		EditorUtility.SetDirty (npc);
+		EditorUtility.SetDirty (npcb);
+
+		EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+	}
+	Vector2 convoVec = Vector2.zero;
+	void conversationUI()
+	{
+		GUILayout.BeginVertical ();
+		if (addPersonToTalkTo == false) {
+			if (GUILayout.Button ("Add people to talk to",GUILayout.Width (175), GUILayout.Height (25))) {
+				addPersonToTalkTo = true;
+			}
+		} else {
+			if (GUILayout.Button ("Edit people to talk to",GUILayout.Width (175), GUILayout.Height (25))) {
+				addPersonToTalkTo = false;
+			}
+		}
+
+		if (addPersonToTalkTo == false) {
+			if (conversationEditing == null) {
+
+			} else {
+				GUILayout.Label ("___________ MANIP NPC ___________");
+
+				if (rotation == false) {
+					if (GUILayout.Button ("Rotate",GUILayout.Width (125), GUILayout.Height (25))) {
+						rotation = true;
+					}
+				} else {
+					if (GUILayout.Button ("Move",GUILayout.Width (125), GUILayout.Height (25))) {
+						rotation = false;
+					}
+				}
+
+
+				if (choiceEditing == null ) {
+
+					convoVec = GUILayout.BeginScrollView (convoVec, GUILayout.Width (500),GUILayout.Height(500));
+
+					GUILayout.Label ("___________ CONVO START ___________");
+
+					GUILayout.BeginHorizontal ();
+					GUILayout.Label ("Person Speaking To:",GUILayout.Width (175), GUILayout.Height (25));
+					conversationEditing.personSpeakingTo = GUILayout.TextField (conversationEditing.personSpeakingTo,GUILayout.Width (125), GUILayout.Height (25));
+					GUILayout.EndHorizontal ();
+
+					GUILayout.BeginHorizontal ();
+					GUILayout.Label ("Opening Line:",GUILayout.Width (175), GUILayout.Height (25));
+					conversationEditing.openingLine = GUILayout.TextField (conversationEditing.openingLine,GUILayout.Width (125), GUILayout.Height (25));
+					GUILayout.EndHorizontal ();
+					//if (conversationEditing.getChoices().Count < 3) {
+						if (GUILayout.Button ("Add conversation choice",GUILayout.Width (175), GUILayout.Height (25))) {
+							ConversationChoice c = npcConvoToEdit.AddComponent<ConversationChoice> ();
+							conversationEditing.addChoice (c);
+							EditorUtility.SetDirty (c);
+							EditorUtility.SetDirty (conversationEditing);
+
+						}
+					//} else {
+					//	GUILayout.Label ("Can't have more than three options, remove one");
+					//}
+
+					GUILayout.Label ("___________ CHOICES ___________");
+
+					foreach (ConversationChoice c in conversationEditing.getChoices()) {
+						GUILayout.BeginHorizontal ();
+						GUILayout.Label ("Player Text:",GUILayout.Width (175), GUILayout.Height (25));
+						c.playerText = GUILayout.TextField (c.playerText,GUILayout.Width (175), GUILayout.Height (25));
+						GUILayout.EndHorizontal ();
+
+						GUILayout.BeginHorizontal ();
+						GUILayout.Label ("NPC Response:",GUILayout.Width (175), GUILayout.Height (25));
+						c.NPCResponse = GUILayout.TextField (c.NPCResponse,GUILayout.Width (175), GUILayout.Height (25));
+						GUILayout.EndHorizontal ();
+
+						//need to add some condition for adding code triggers.
+
+						if (GUILayout.Button ("Edit Choice",GUILayout.Width (175), GUILayout.Height (25))) {
+							choiceEditing = c;
+						}
+
+						if (GUILayout.Button ("Remove Choice",GUILayout.Width (175), GUILayout.Height (25))) {
+							conversationEditing.initialOptions.Remove (c);
+							DestroyImmediate (c);
+
+							EditorUtility.SetDirty (conversationEditing);
+							EditorUtility.SetDirty (conversationEditing.gameObject);
+						}
+					}
+					GUILayout.EndScrollView ();
+				} else {
+					convoVec = GUILayout.BeginScrollView (convoVec, GUILayout.Width (500),GUILayout.Height(500));
+
+					GUILayout.Label ("___________ EDIT CHOICE ___________");
+
+					GUILayout.BeginHorizontal ();
+					GUILayout.Label ("Player Text:",GUILayout.Width (175), GUILayout.Height (25));
+					choiceEditing.playerText = GUILayout.TextField (choiceEditing.playerText,GUILayout.Width (175), GUILayout.Height (25));
+					GUILayout.EndHorizontal ();
+
+					GUILayout.BeginHorizontal ();
+					GUILayout.Label ("NPC Response:",GUILayout.Width (175), GUILayout.Height (25));
+					choiceEditing.NPCResponse = GUILayout.TextField (choiceEditing.NPCResponse,GUILayout.Width (175), GUILayout.Height (25));
+					GUILayout.EndHorizontal ();
+
+					if (GUILayout.Button ("Choice is repeatable = " + choiceEditing.repeatable.ToString (), GUILayout.Width (175), GUILayout.Height (25))) {
+						choiceEditing.repeatable = !choiceEditing.repeatable;
+						EditorUtility.SetDirty (choiceEditing);
+						EditorUtility.SetDirty (choiceEditing.gameObject);
+					}
+
+					string[] choiceTypes = System.Enum.GetNames (typeof(typeOfTrigger));
+					if (choiceEditing.myTrigger == null) {
+						foreach (string st in choiceTypes) {
+							if (GUILayout.Button ("Set Trigger to " + st, GUILayout.Width (175), GUILayout.Height (25))) {
+								setCurrentChoiceTrigger (st);
+							}
+						}
+					} else {
+						if (GUILayout.Button ("Remove Choice", GUILayout.Width (175), GUILayout.Height (25))) {
+							DestroyImmediate (choiceEditing.myTrigger);
+							EditorUtility.SetDirty (choiceEditing);
+						}
+
+						drawUIForCurrentChoiceTrigger ();
+					}
+
+
+
+					//if(choiceEditing.getChoices().Count<3){
+						if(GUILayout.Button("Add new choice",GUILayout.Width (175), GUILayout.Height (25))){
+							ConversationChoice c = npcConvoToEdit.AddComponent<ConversationChoice> ();
+							choiceEditing.addChoice (c);
+							EditorUtility.SetDirty (c);
+							EditorUtility.SetDirty (choiceEditing);
+						}
+					//}else{
+					//	GUILayout.Label ("Can't have more than 3 choices");
+					//}
+
+					GUILayout.Label ("___________ CHOICES ___________");
+
+
+					foreach (ConversationChoice c in choiceEditing.getChoices()) {
+						GUILayout.BeginHorizontal ();
+						GUILayout.Label ("Player Text:",GUILayout.Width (175), GUILayout.Height (25));
+						c.playerText = GUILayout.TextField (c.playerText,GUILayout.Width (175), GUILayout.Height (25));
+						GUILayout.EndHorizontal ();
+
+						GUILayout.BeginHorizontal ();
+						GUILayout.Label ("NPC Response:",GUILayout.Width (175), GUILayout.Height (25));
+						c.NPCResponse = GUILayout.TextField (c.NPCResponse,GUILayout.Width (175), GUILayout.Height (25));
+						GUILayout.EndHorizontal ();
+
+						//need to add some condition for adding code triggers.
+
+						if (GUILayout.Button ("Edit Choice",GUILayout.Width (175), GUILayout.Height (25))) {
+							choiceEditing = c;
+						}
+
+						if (GUILayout.Button ("Remove Choice",GUILayout.Width (175), GUILayout.Height (25))) {
+							choiceEditing.nextChoices.Remove (c);
+							DestroyImmediate (c);
+
+							EditorUtility.SetDirty (conversationEditing);
+							EditorUtility.SetDirty (conversationEditing.gameObject);
+						}
+					}
+
+					if (GUILayout.Button ("Return to conversation beginning",GUILayout.Width (175), GUILayout.Height (25))) {
+						choiceEditing = null;
+					}
+					EditorUtility.SetDirty (choiceEditing);
+					GUILayout.EndScrollView ();
+
+				}
+
+
+				EditorUtility.SetDirty (conversationEditing);
+				EditorUtility.SetDirty (conversationEditing.gameObject);
+				EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+			}
+		}
+		GUILayout.EndVertical ();
+	}
+
+	void setCurrentChoiceTrigger(string val)
+	{
+		if (choiceEditing.myTrigger == null) {
+
+		} else {
+			DestroyImmediate (choiceEditing.myTrigger);
+		}
+
+		if (val == "None") {
+			
+		} else if (val == "Add_Item") {
+			choiceEditing.myTrigger = choiceEditing.gameObject.AddComponent<ConversationTrigger_AddItem> ();
+			choiceEditing.myTrigger.myType = typeOfTrigger.Add_Item;
+		} else if (val == "Give_Money") {
+			choiceEditing.myTrigger = choiceEditing.gameObject.AddComponent<ConversationTrigger_GiveMoney> ();
+			choiceEditing.myTrigger.myType = typeOfTrigger.Give_Money;
+		} else if (val == "Start_Mission") {
+			choiceEditing.myTrigger = choiceEditing.gameObject.AddComponent<ConversationTrigger_StartMission> ();
+			choiceEditing.myTrigger.myType = typeOfTrigger.Start_Mission;
+		}else if (val == "setIDActive")
+        {
+            choiceEditing.myTrigger = choiceEditing.gameObject.AddComponent<ConversationTrigger_SetNPCIDActive>();
+            choiceEditing.myTrigger.myType = typeOfTrigger.setIDActive;
+        }
+		if (choiceEditing.myTrigger != null) {
+			EditorUtility.SetDirty (choiceEditing.myTrigger);
+		}
+
+		EditorUtility.SetDirty (choiceEditing);
+	}
+	Vector2 itemScroll2 = Vector2.zero;
+	Vector2 allItemScroll = Vector2.zero;
+	Vector2 combScroll = Vector2.zero;
+	void drawUIForCurrentChoiceTrigger()
+	{
+		if (choiceEditing.myTrigger == null) {
+
+		} else if (choiceEditing.myTrigger.myType == typeOfTrigger.Add_Item) {
+			ConversationTrigger_AddItem ctai = (ConversationTrigger_AddItem)choiceEditing.myTrigger;
+			if (id == null) {
+				id = FindObjectOfType<ItemDatabase> ();
+			}
+
+			combScroll = GUILayout.BeginScrollView (combScroll);
+			GUILayout.Label ("Items to be given", GUILayout.Width (175), GUILayout.Height (25));
+			itemScroll2 = GUILayout.BeginScrollView (itemScroll2, GUILayout.Width (300));
+			foreach (string st in ctai.getItemsToAdd()) {
+				GUILayout.BeginHorizontal ();
+
+				GUILayout.Label (st, GUILayout.Width (175), GUILayout.Height (25));
+
+				if (GUILayout.Button ("X", GUILayout.Width (35), GUILayout.Height (25))) {
+					ctai.itemsToAdd.Remove (st);
+					break;
+				}
+				GUILayout.EndHorizontal ();
+			}
+			GUILayout.EndScrollView ();
+			GUILayout.Label ("Items that could be given", GUILayout.Width (175), GUILayout.Height (25));
+			allItemScroll = GUILayout.BeginScrollView (allItemScroll, GUILayout.Width (300));
+
+			foreach (GameObject g in id.items) {
+				Item i = g.GetComponent<Item> ();
+				GUILayout.BeginHorizontal ();
+
+				GUILayout.Label (i.itemName, GUILayout.Width (175), GUILayout.Height (25));
+				if (GUILayout.Button ("Add", GUILayout.Width (75), GUILayout.Height (25))) {
+					ctai.addItem (i.itemName);
+				}
+				GUILayout.EndHorizontal ();
+
+			}
+			GUILayout.EndScrollView ();
+			GUILayout.EndScrollView ();
+			EditorUtility.SetDirty (ctai);
+
+		} else if (choiceEditing.myTrigger.myType == typeOfTrigger.Give_Money) {
+			ConversationTrigger_GiveMoney ctgm = (ConversationTrigger_GiveMoney)choiceEditing.myTrigger;
+
+			GUILayout.BeginHorizontal ();
+			GUILayout.Label ("Money to give:",GUILayout.Width(125),GUILayout.Height(30));
+			ctgm.moneyToAdd = int.Parse (GUILayout.TextField(ctgm.moneyToAdd.ToString(),GUILayout.Width(125),GUILayout.Height(30)));
+			GUILayout.EndHorizontal ();
+			EditorUtility.SetDirty (ctgm);
+
+		}else if(choiceEditing.myTrigger.myType==typeOfTrigger.Start_Mission) {
+			ConversationTrigger_StartMission ctsm = (ConversationTrigger_StartMission)choiceEditing.myTrigger;
+			if (missCont == null) {
+				missCont = FindObjectOfType<MissionController> ();
+			}
+
+			missionScroll = GUILayout.BeginScrollView (missionScroll,GUILayout.Width(400),GUILayout.Height(400));
+
+			foreach (Mission m in missCont.missions) {
+				if (ctsm.missionToStart == m.missionName) {
+					GUILayout.Label ("Current Mission : " + m.missionName, GUILayout.Width (300), GUILayout.Height (30));
+				} else {
+					if (GUILayout.Button (m.missionName, GUILayout.Width (300), GUILayout.Height (30))) {
+						ctsm.missionToStart = m.missionName;
+						EditorUtility.SetDirty (ctsm);
+
+					}
+				}
+			}
+
+			GUILayout.EndScrollView ();
+		}else if(choiceEditing.myTrigger.myType == typeOfTrigger.setIDActive)
+        {
+            drawIDEdit((ConversationTrigger_SetNPCIDActive)choiceEditing.myTrigger);
+        }
+	}
+
+    List<string> IDsCreated;
+    Vector2 idScroll = Vector2.zero;
+
+   List<string> readFile(string fileName)
+    {
+        List<string> retVal = new List<string>();
+        string path = fileName;
+        StreamReader sr = new StreamReader(path);
+        string st = sr.ReadLine();
+        while (st != null)
+        {
+            retVal.Add(st);
+            st = sr.ReadLine();
+        }
+        sr.Close();
+        return retVal;
+    }
+
+    void drawIDEdit(ConversationTrigger_SetNPCIDActive trigger)
+    {
+        if(IDsCreated==null)
+        {
+            string folderPath = Path.Combine(Application.dataPath, "NPCIDData");
+
+            string path = Path.Combine(folderPath, "UniquieNPCData.txt");
+            if (Directory.Exists(folderPath) == false)
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+            if (File.Exists(path) == true)
+            {
+                IDsCreated =readFile(path);
+                //writeIDToFile(folderPath);
+            }
+        }
+
+        if(trigger.idsToAdd==null)
+        {
+            trigger.idsToAdd = new List<int>();
+        }
+        idScroll = GUILayout.BeginScrollView(idScroll,GUILayout.Width(200),GUILayout.Height(200));
+
+        foreach(string st in IDsCreated)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(st, GUILayout.Width(st.Length * 8), GUILayout.Height(30));
+            string[] dat = st.Split(';');
+            int num = int.Parse(dat[0]);
+            if (trigger.idsToAdd.Contains(num) == false)
+            {
+                if (GUILayout.Button("Add"))
+                {
+                    trigger.idsToAdd.Add(num);
+                    EditorUtility.SetDirty(trigger);
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Remove"))
+                {
+                    trigger.idsToAdd.Remove(num);
+                    EditorUtility.SetDirty(trigger);
+
+                }
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.EndScrollView();
+    }
+
+	Vector2 missionScroll = Vector2.zero;
+	MissionController missCont=null;
+
+	void createShop()
+	{
+		LevelEditor le = (LevelEditor)target;
+
+		GameObject g = new GameObject ();
+		g.transform.position = getMousePos ();
+		Shop s = g.AddComponent<Shop> ();
+		g.AddComponent<PlayerActionShop> ();
+		le.addShop (g);
+		EditorUtility.SetDirty (le);
+		EditorUtility.SetDirty (le.gameObject);
+	}
+
+	Shop shopEditing;
+
+	void shopHandles()
+	{
+		LevelEditor le = (LevelEditor)target;
+
+		if (shopEditing == null) {
+			foreach (GameObject g in le.shops) {
+				Handles.color = Color.red;
+				if (Handles.Button (g.transform.position, Quaternion.Euler (0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap)) {
+					le.shops.Remove (g);
+					EditorUtility.SetDirty (g);
+					EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+					DestroyImmediate (g);
+				}
+
+				Handles.color = Color.blue;
+				if (Handles.Button (g.transform.position+new Vector3(1.0f,0,0), Quaternion.Euler (0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap)) {
+					shopEditing = g.GetComponent<Shop> ();
+				}
+			}
+		} else {
+			if (rotation == false) {
+				EditorGUI.BeginChangeCheck ();
+
+				Vector3 p1 = Handles.PositionHandle (shopEditing.transform.position, Quaternion.Euler (0, 0, 0));
+				if (EditorGUI.EndChangeCheck ()) {
+					//Undo.RecordObject (r, "Moved position of " + rs.roomName);
+					shopEditing.transform.position = p1;
+
+					EditorUtility.SetDirty (shopEditing);
+					//EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+				}
+			} else {
+				EditorGUI.BeginChangeCheck ();
+				Quaternion q = Handles.RotationHandle ( shopEditing.transform.rotation,shopEditing.transform.position);
+				if (EditorGUI.EndChangeCheck ()) {
+					//Undo.RecordObject (r, "Moved position of " + rs.roomName);
+					shopEditing.transform.rotation = q;
+
+					EditorUtility.SetDirty (shopEditing);
+					EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+				}
+			}
+		}
+	}
+	ItemDatabase id;
+
+	Vector2 itemScroll = Vector2.zero;
+	void shopUI(){
+		if (id == null) {
+			id = FindObjectOfType<ItemDatabase> ();
+		}
+		GUILayout.BeginVertical ();
+		if (shopEditing == null) {
+
+		} else {
+			if (rotation == false) {
+				if (GUILayout.Button ("Rotate",GUILayout.Width (125), GUILayout.Height (25))) {
+					rotation = true;
+				}
+			} else {
+				if (GUILayout.Button ("Move",GUILayout.Width (125), GUILayout.Height (25))) {
+					rotation = false;
+				}
+			}
+
+			if(GUILayout.Button("Stop editing",GUILayout.Width (125), GUILayout.Height (25))){
+				EditorUtility.SetDirty (shopEditing);
+				EditorUtility.SetDirty (shopEditing.gameObject);
+
+				shopEditing=null;
+
+			}
+
+            if (GUILayout.Button("Should Shop link to existing " + shopEditing.linkedToExisting, GUILayout.Width(155), GUILayout.Height(25)))
+            {
+                shopEditing.linkedToExisting = !shopEditing.linkedToExisting;
+            }
+                GUILayout.BeginHorizontal ();
+			GUILayout.Label ("Chance of shop having an item", GUILayout.Width (175), GUILayout.Height (25));
+			shopEditing.chanceOfHavingItem = GUILayout.HorizontalSlider (shopEditing.chanceOfHavingItem, 1, 100, GUILayout.Width (125), GUILayout.Height (25));
+			GUILayout.Label (shopEditing.chanceOfHavingItem.ToString(), GUILayout.Width (125), GUILayout.Height (25));
+
+			GUILayout.EndHorizontal ();
+			itemScroll = GUILayout.BeginScrollView (itemScroll,GUILayout.Width (355));
+
+			foreach (GameObject g in id.items) {
+				Item i = g.GetComponent<Item> ();
+
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label (i.itemName, GUILayout.Width (125));
+				if (shopEditing.getItemsISell().Contains (i.itemName) == false) {
+					if (GUILayout.Button ("Set Sell Item", GUILayout.Width (110))) {
+						shopEditing.addItemToShop (i.itemName);
+						EditorUtility.SetDirty (shopEditing);
+						EditorUtility.SetDirty (shopEditing.gameObject);
+					}
+				} else {
+					GUILayout.Label ("Shop Sells", GUILayout.Width (125));
+
+				}
+
+				if (shopEditing.getItemsIBuy().Contains (i.itemName) == false) {
+					if (GUILayout.Button ("Set Buy Item", GUILayout.Width (110))) {
+						shopEditing.addItemICouldBuy (i.itemName);
+						EditorUtility.SetDirty (shopEditing);
+						EditorUtility.SetDirty (shopEditing.gameObject);
+
+					}
+				} else {
+					GUILayout.Label ("Shop Buys", GUILayout.Width (125));
+				}
+				GUILayout.EndHorizontal ();
+			}
+
+
+			GUILayout.Label ("ITEMS SHOP SELLS");
+
+			foreach (string st in shopEditing.itemsICouldSell) {
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label(st,GUILayout.Width (125), GUILayout.Height (25));
+				if(GUILayout.Button("Remove",GUILayout.Width (125), GUILayout.Height (25))){
+					shopEditing.itemsICouldSell.Remove(st);
+					EditorUtility.SetDirty (shopEditing);
+					EditorUtility.SetDirty (shopEditing.gameObject);
+					GUILayout.EndHorizontal ();
+
+					break;
+				}
+				GUILayout.EndHorizontal ();
+			}
+			GUILayout.Label ("ITEMS SHOP BUYS");
+			foreach (string st in shopEditing.itemsIBuy) {
+				GUILayout.BeginHorizontal ();
+				GUILayout.Label(st,GUILayout.Width (125), GUILayout.Height (25));
+				if(GUILayout.Button("Remove",GUILayout.Width (125), GUILayout.Height (25))){
+					shopEditing.itemsIBuy.Remove(st);
+					EditorUtility.SetDirty (shopEditing);
+					EditorUtility.SetDirty (shopEditing.gameObject);
+					GUILayout.EndHorizontal ();
+
+					break;
+				}
+				GUILayout.EndHorizontal ();
+			}
+
+			GUILayout.EndScrollView ();
+		}
+
+		GUILayout.EndHorizontal ();
+	}
+
+    void drawShopHandles()
+    {
+       
+
+        if (shopEditing == null)
+        {
+            return;
+        } 
+        if (npcsInWorld == null||npcsInWorld.Length==0)
+        {
+            npcsInWorld = FindObjectsOfType<NPCController>();
+        }
+        Debug.Log("Drawing shop handles.");
+        foreach (NPCController npc in npcsInWorld)
+        {
+            if (shopEditing.myKeeper == npc.gameObject)
+            {
+                Handles.color = Color.white;
+                if (inworldButton(npc.transform.position))
+                {
+                    shopEditing.myKeeper = null;
+                    EditorUtility.SetDirty(shopEditing);
+                }
+            }
+            else
+            {
+                Handles.color = Color.blue;
+                if (inworldButton(npc.transform.position))
+                {
+                    shopEditing.myKeeper = npc.gameObject;
+                    EditorUtility.SetDirty(shopEditing);
+
+                }
+            }
+        }
+    }
+
+    int teleportDecide = 0;
+    bool rotTeleport = false;
+    GameObject telEdit;
+    Teleport[] teleportsInWorld;
+    AreaTransition[] transitionsInWorld;
+    int teleportType = 0;
+    void drawTeleportHandles()
+    {
+        if (telEdit != null)
+        {
+            if (rotTeleport == true)
+            {/*
+                    EditorGUI.BeginChangeCheck();
+
+                    Vector3 p1 = Handles.PositionHandle(telEdit.transform.position, Quaternion.Euler(0, 0, 0));
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        //Undo.RecordObject (r, "Moved position of " + rs.roomName);
+                        telEdit.transform.position = p1;
+
+                        EditorUtility.SetDirty(telEdit);
+                        //EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+                    }*/
+
+                EditorGUI.BeginChangeCheck();
+                Vector3 scale = Handles.ScaleHandle(telEdit.transform.localScale,telEdit.transform.position, telEdit.transform.rotation, 2.0f);
+              //  Vector3 p1 = Handles.PositionHandle(telEdit.transform.position, Quaternion.Euler(0, 0, 0));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    //Undo.RecordObject (r, "Moved position of " + rs.roomName);
+                    // telEdit.transform.position = p1;
+                    telEdit.transform.localScale = scale;
+                    EditorUtility.SetDirty(telEdit);
+                    //EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+                }
+                
+            }
+            else
+            {
+                EditorGUI.BeginChangeCheck();
+
+                Vector3 p1 = Handles.PositionHandle(telEdit.transform.position, Quaternion.Euler(0, 0, 0));
+                if (EditorGUI.EndChangeCheck())
+                {
+                    //Undo.RecordObject (r, "Moved position of " + rs.roomName);
+                    telEdit.transform.position = p1;
+
+                    EditorUtility.SetDirty(telEdit);
+                    //EditorSceneManager.MarkSceneDirty (EditorSceneManager.GetActiveScene ());
+                }
+                
+            }
+        }
+       if(teleportDecide==1)
+       {
+            if(telEdit==null)
+            {
+                foreach(Teleport t in teleportsInWorld)
+                {
+                    Handles.color = Color.blue;
+                    if (Handles.Button(t.transform.position, Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                    {
+                        telEdit = t.gameObject;
+                        EditorUtility.SetDirty(t);
+                        return;
+                    }
+
+                    Handles.color = Color.red;
+                    if (Handles.Button(t.transform.position+new Vector3(1,0,0), Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                    {
+                        DestroyImmediate(t.gameObject);
+                        teleportsInWorld = FindObjectsOfType<Teleport>();
+
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                foreach (Teleport t in teleportsInWorld)
+                {
+                    if (t == telEdit.GetComponent<Teleport>())
+                    {
+                        
+                      /*  Handles.color = Color.blue;
+                        if (Handles.Button(t.transform.position, Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                        {
+                            telEdit = t.gameObject;
+                            EditorUtility.SetDirty(t);
+                            return;
+                        }*/
+
+                        Handles.color = Color.red;
+                        if (Handles.Button(t.transform.position + new Vector3(1, 0, 0), Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                        {
+                            DestroyImmediate(t.gameObject);
+                            teleportsInWorld = FindObjectsOfType<Teleport>();
+
+                            return;
+                        }
+
+                        if (t.toGoTo == null)
+                        {
+
+                        }
+                        else
+                        {
+                            Handles.color = Color.cyan;
+                            Handles.DrawLine(t.transform.position, t.toGoTo.transform.position);
+                        }
+                    }
+                    else
+                    {
+                        Handles.color = Color.green;
+                        if (Handles.Button(t.transform.position + new Vector3(1, 0, 0), Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                        {
+                            //DestroyImmediate(t.gameObject);
+                            telEdit.GetComponent<Teleport>().toGoTo = t;
+                            t.toGoTo = telEdit.GetComponent<Teleport>();
+                            teleportsInWorld = FindObjectsOfType<Teleport>();
+                            EditorUtility.SetDirty(t);
+                            EditorUtility.SetDirty(telEdit.GetComponent<Teleport>());
+                            return;
+                        }
+
+
+                    }
+                }
+            }
+        }else if(teleportDecide==3)
+        {
+            if(transitionsInWorld==null)
+            {
+                transitionsInWorld = FindObjectsOfType<AreaTransition>();
+            }
+
+            if(telEdit==null)
+            {
+                foreach(AreaTransition a in transitionsInWorld)
+                {
+                    Handles.Label(a.transform.position, a.sceneToGoTo);
+                    Handles.Label(a.transform.position - new Vector3(0, 1, 0), a.startID.ToString());
+                    Handles.Label(a.transform.position - new Vector3(0, 2, 0), a.sceneName);
+
+                    Handles.color = Color.blue;
+                    if (Handles.Button(a.transform.position, Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                    {
+                        telEdit = a.gameObject;
+                        EditorUtility.SetDirty(a);
+                        return;
+                    }
+
+                    Handles.color = Color.red;
+                    if (Handles.Button(a.transform.position + new Vector3(1, 0, 0), Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                    {
+                        DestroyImmediate(a.gameObject);
+                        transitionsInWorld = FindObjectsOfType<AreaTransition>();
+
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                foreach (AreaTransition a in transitionsInWorld)
+                {
+                    Handles.Label(a.transform.position, a.sceneToGoTo);
+                    Handles.Label(a.transform.position - new Vector3(0, 1, 0),a.startID.ToString());
+                    Handles.Label(a.transform.position - new Vector3(0, 2, 0), a.sceneName);
+
+                    Handles.color = Color.cyan;
+                    if (Handles.Button(a.transform.position, Quaternion.Euler(0, 0, 0), 0.5f, 0.5f, Handles.RectangleHandleCap))
+                    {
+                        telEdit = null;
+                        EditorUtility.SetDirty(a);
+                        return;
+                    }
+
+                    
+                }
+            }
+        }
+    }
+
+    void drawTeleportUI()
+    {
+        GUILayout.BeginHorizontal();
+        if(GUILayout.Button("Place Teleports",GUILayout.Width(150),GUILayout.Height(25)))
+        {
+            teleportDecide = 0;
+            telEdit = null;
+        }
+
+        if (GUILayout.Button("Edit Teleports", GUILayout.Width(150), GUILayout.Height(25)))
+        {
+            teleportDecide = 1;
+            telEdit = null;
+            teleportsInWorld = FindObjectsOfType<Teleport>();
+        }
+
+        if (GUILayout.Button("Place Level Transitions", GUILayout.Width(150), GUILayout.Height(25)))
+        {
+            teleportDecide = 2;
+            telEdit = null;
+
+        }
+
+        if (GUILayout.Button("Edit Level Transitions", GUILayout.Width(150), GUILayout.Height(25)))
+        {
+            teleportDecide = 3;
+            telEdit = null;
+
+        }
+
+        if(telEdit!=null)
+        {
+            EditorUtility.SetDirty(telEdit);
+            Debug.Log("Tel edit is not null, marked dirty");
+            if (telEdit.GetComponent<AreaTransition>() != null)
+            {
+                EditorUtility.SetDirty(telEdit.GetComponent<AreaTransition>());
+                Debug.Log("got transition, marked dirty");
+
+            }
+
+            if (telEdit.GetComponent<Teleport>() != null)
+            {
+                EditorUtility.SetDirty(telEdit.GetComponent<Teleport>());
+                Debug.Log("got teleport, marked dirty");
+
+            }
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        }
+
+        
+
+        if (teleportDecide==0)
+        {
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Normal Teleport", GUILayout.Width(150), GUILayout.Height(25)))
+            {
+               teleportType = 0;
+            }
+            if (GUILayout.Button("Sewer Surface", GUILayout.Width(150), GUILayout.Height(25)))
+            {
+                teleportType = 1;
+            }
+            if (GUILayout.Button("Sewer Ladder", GUILayout.Width(150), GUILayout.Height(25)))
+            {
+                teleportType = 2;
+            }
+            GUILayout.EndHorizontal();
+        }
+        else
+        {
+            GUILayout.EndHorizontal();
+            if (teleportDecide == 1)
+            {
+                if(GUILayout.Button("Rot/Move Switch", GUILayout.Width(150)))
+                {
+                    rotTeleport = !rotTeleport;
+                }
+            }else if(teleportDecide==3)
+            {
+                if (telEdit != null)
+                {
+                    AreaTransition at = telEdit.GetComponent<AreaTransition>();
+                    if (GUILayout.Button("Rot/Move Switch", GUILayout.Width(150)))
+                    {
+                        rotTeleport = !rotTeleport;
+                    }
+
+                    string sceneForEdit = getScene(at.sceneToGoTo);
+
+                    if (sceneForEdit != "None")
+                    {
+                       at.sceneToGoTo = sceneForEdit;
+                        EditorUtility.SetDirty(telEdit);
+                        EditorUtility.SetDirty(at);
+
+                    }
+                    int areaToGoTo = at.startID;
+                    at.startID = int.Parse(GUILayout.TextArea(areaToGoTo.ToString(),GUILayout.Width(50)));
+
+                    at.sceneName = GUILayout.TextArea(at.sceneName, GUILayout.Width(150));
+
+                    EditorUtility.SetDirty(telEdit);
+                    EditorUtility.SetDirty(at);
+
+
+                }
+            }
+        }
+
+    }
+    CommonObjectsStore common;
+    void teleportInput()
+    {
+        if(common==null)
+        {
+            common = FindObjectOfType<CommonObjectsStore>();
+        }
+
+        
+
+        if(teleportDecide==0)
+        {
+            Vector3 vector3 = new Vector3(pos.x,pos.y,0);
+            
+            if(teleportType==0)
+            {
+                GameObject teleport = (GameObject)Instantiate(common.teleport, vector3, Quaternion.Euler(0, 0, 0));
+
+            }
+            else if(teleportType==1)
+            {
+                GameObject teleport = (GameObject)Instantiate(common.sewerEntrance, vector3, Quaternion.Euler(0, 0, 0));
+
+            }
+            else if(teleportType==2)
+            {
+                GameObject teleport = (GameObject)Instantiate(common.sewerExit, vector3, Quaternion.Euler(0, 0, 0));
+
+            }
+            teleportsInWorld = FindObjectsOfType<Teleport>();
+        }else if(teleportDecide==1)
+        {
+           
+        }else if(teleportDecide==2)
+        {
+            Vector3 vector3 = new Vector3(pos.x, pos.y, 0);
+
+            GameObject teleport = (GameObject)Instantiate(common.levelTransition, vector3, Quaternion.Euler(0, 0, 0));
+           
+        }
+        else if(teleportDecide==3)
+        {
+            
+        }
+    }
+
+    IngameEventManager ie;
+    IngameEvent eventEditing;
+    IngameEvent[] events;
+    Vector2 eventScroll = Vector2.zero,conditionScroll=Vector2.zero;
+    TimeScript ts;
+    IngameEventCondition conditionEditing;
+    void drawEventUI()
+    {
+        if(ie==null)
+        {
+            ie = FindObjectOfType<IngameEventManager>();
+        }
+
+        if(events==null)
+        {
+            events = FindObjectsOfType<IngameEvent>();
+        }
+
+        if(ts==null)
+        {
+            ts = FindObjectOfType<TimeScript>();
+        }
+
+        if(eventEditing==null)
+        {
+            label("Select an event to edit");
+            eventScroll = GUILayout.BeginScrollView(eventScroll, GUILayout.Width(200), GUILayout.Height(300));
+            foreach(IngameEvent e in events)
+            {
+                GUILayout.BeginHorizontal();
+                if (button(e.eventName, 125, 25))
+                {
+                    eventEditing = e;
+                }
+                if(button("X",35,35))
+                {
+                    foreach(IngameEventCondition cond in e.conditionsToTrigger)
+                    {
+                        DestroyImmediate(cond);
+                    }
+                    DestroyImmediate(e);
+                    events = FindObjectsOfType<IngameEvent>();
+                    return;
+                }
+                GUILayout.EndHorizontal();
+            }
+            if(button("Add New Event",125,25))
+            {
+                eventEditing = ie.gameObject.AddComponent<IngameEvent>();
+                eventEditing.myID = FindObjectOfType<IDManager>().getEventID();
+                EditorUtility.SetDirty(ie);
+                EditorUtility.SetDirty(eventEditing);
+            }
+            GUILayout.EndScrollView();
+        }
+        else
+        {
+            GUILayout.BeginHorizontal();
+            label("Event Name");
+            eventEditing.eventName = textInput(eventEditing.eventName, 200, 30);
+            GUILayout.EndHorizontal();
+
+            if(button("Event repeatable " + eventEditing.Repeatable.ToString(),125,25))
+            {
+                eventEditing.Repeatable = !eventEditing.Repeatable;
+            }
+
+            if(eventEditing.Repeatable)
+            {
+                GUILayout.BeginHorizontal();
+                label("Hours till repeat: ");
+                eventEditing.hoursTillRepeat = numberInput(eventEditing.hoursTillRepeat);
+
+                GUILayout.EndHorizontal();
+            }
+
+            label("Event Conditions");
+            if(eventEditing.conditionsToTrigger==null)
+            {
+                eventEditing.conditionsToTrigger = new List<IngameEventCondition>();
+            }
+            conditionScroll = GUILayout.BeginScrollView(conditionScroll, GUILayout.Width(300), GUILayout.Height(400));
+
+            label("Conditions to trigger:");
+            if(button("Time of day", 125, 25))
+            {
+                IngameEventCondition adding = eventEditing.gameObject.AddComponent<IngameEventCondition_TimeOfDay>();
+                eventEditing.conditionsToTrigger.Add(adding);
+                EditorUtility.SetDirty(eventEditing);
+                EditorUtility.SetDirty(adding);
+
+
+            }
+
+            if (button("Unique NPC Condition", 125, 25))
+            {
+                IngameEventCondition adding = eventEditing.gameObject.AddComponent<IngameEventCondition_UniqueNPCState>();
+
+                eventEditing.conditionsToTrigger.Add(adding);
+                EditorUtility.SetDirty(eventEditing);
+                EditorUtility.SetDirty(adding);
+
+            }
+
+            if(button("Random Chance", 125, 25))
+            {
+                IngameEventCondition adding = eventEditing.gameObject.AddComponent<IngameEventConditionRandomChance>();
+                eventEditing.conditionsToTrigger.Add(adding);
+                EditorUtility.SetDirty(eventEditing);
+                EditorUtility.SetDirty(adding);
+
+            }
+
+            label("Edit condition");
+            foreach (IngameEventCondition cond in eventEditing.conditionsToTrigger)
+            {
+                GUILayout.BeginHorizontal();
+                if (button(cond.GetType().ToString(),225,25)){
+                    conditionEditing = cond;
+                }
+                if(button("X",30,30))
+                {
+                    eventEditing.conditionsToTrigger.Remove(cond);
+                    DestroyImmediate(cond);
+                    EditorUtility.SetDirty(eventEditing);
+                    return;
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
+            if(conditionEditing==null)
+            {
+                if (button("Finished Editing", 125, 25))
+                {
+                    EditorUtility.SetDirty(eventEditing);
+                    eventEditing = null;
+                }
+            }else if(conditionEditing.GetType()==typeof(IngameEventCondition_TimeOfDay))
+            {
+                label("Editing time of day");
+
+                IngameEventCondition_TimeOfDay cond = (IngameEventCondition_TimeOfDay)conditionEditing;
+                GUILayout.BeginHorizontal();
+                label("Start Hour: "+cond.Shour.ToString());
+                cond.Shour = sliderInput(cond.Shour, 0, 23);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                label("Start Min: "+cond.Smin.ToString());
+                cond.Smin = sliderInput(cond.Smin, 0, 59);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                label("End Hour: "+cond.Ehour.ToString());
+                cond.Ehour = sliderInput(cond.Ehour, 0, 23);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                label("End Min: "+cond.Emin.ToString());
+                cond.Emin = sliderInput(cond.Emin, 0, 59);
+                GUILayout.EndHorizontal();
+
+                EditorUtility.SetDirty(cond);
+            }
+            else if(conditionEditing.GetType()==typeof(IngameEventCondition_UniqueNPCState))
+            {
+                label("Editing unique NPC state");
+                IngameEventCondition_UniqueNPCState cond = (IngameEventCondition_UniqueNPCState)conditionEditing;
+
+                label("ID = " + cond.IDToCheck);
+                if(cond.deadState==true)
+                {
+                    if(button("has to be dead to trigger", 150, 25))
+                    {
+                        cond.deadState = !cond.deadState;
+                    }
+                }
+                else
+                {
+                    if (button("has to be alive to trigger", 150, 25))
+                    {
+                        cond.deadState = !cond.deadState;
+                    }
+                }
+
+                displayGlobalNPCData();
+                int id = getUniquieNPCID(cond.IDToCheck);
+                if(id!=-1)
+                {
+                    cond.IDToCheck = id;
+                    EditorUtility.SetDirty(cond);
+                }
+            }else if (conditionEditing.GetType() == typeof(IngameEventConditionRandomChance))
+            {
+                label("Editing random chance");
+
+                label("Max Chance:");
+                IngameEventConditionRandomChance cond = (IngameEventConditionRandomChance)conditionEditing;
+
+                cond.maxValue = sliderInput(cond.maxValue, 0, 1000);
+                label("Threshold (value must be lower to be true)");
+                cond.threshold = sliderInput(cond.threshold, 0, cond.maxValue);
+                EditorUtility.SetDirty(cond);
+
+            }
+
+            if (button("Done Editing Condition", 155, 25))
+            {
+                EditorUtility.SetDirty(conditionEditing);
+                conditionEditing = null;
+            }
+            GUILayout.EndScrollView();
+            EditorUtility.SetDirty(eventEditing);
+
+           
+
+            
+        }
+    }
+
+    int sliderInput(int val,int min,int max)
+    {
+        return(int) GUILayout.HorizontalSlider(val, min, max, GUILayout.Width(200), GUILayout.Height(30));
+    }
+
+    int numberInput(int content)
+    {
+        try
+        {
+            return int.Parse(GUILayout.TextField(content.ToString(), GUILayout.Width(125), GUILayout.Height(30)));
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+    int numberInput(int content,int width,int height)
+    {
+        try
+        {
+            return int.Parse(GUILayout.TextField(content.ToString(), GUILayout.Width(width), GUILayout.Height(height)));
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    string textInput(string content)
+    {
+        return GUILayout.TextField(content, GUILayout.Width(125), GUILayout.Height(30));
+    }
+
+    string textInput(string content, int width, int height)
+    {
+        return GUILayout.TextField(content, GUILayout.Width(width), GUILayout.Height(height));
+    }
+
+    ItemInWorld[] itemInWorlds;
+    NPCController[] npcsInWorld;
+    void drawEventHandles()
+    {
+        if (eventEditing == null)
+        {
+
+        }
+        else
+        {
+            if (eventEditing.objectsToEnable == null)
+            {
+                eventEditing.objectsToEnable = new List<GameObject>();
+            }
+            if(itemInWorlds==null)
+            {
+                itemInWorlds = FindObjectsOfType<ItemInWorld>();
+            }
+
+            if (npcsInWorld == null)
+            {
+                npcsInWorld = FindObjectsOfType<NPCController>();
+            }
+
+            foreach(ItemInWorld i in itemInWorlds)
+            {
+                if(eventEditing.objectsToEnable.Contains(i.gameObject))
+                {
+                    Handles.color = Color.red;
+                    if (inworldButton(i.transform.position))
+                    {
+                        eventEditing.objectsToEnable.Remove(i.gameObject);
+                    }
+                }
+                else
+                {
+                    Handles.color = Color.blue;
+                    if(inworldButton(i.transform.position))
+                    {
+                        eventEditing.objectsToEnable.Add(i.gameObject);
+                    }
+                }
+            }
+
+            foreach (NPCController i in npcsInWorld)
+            {
+                if (eventEditing.objectsToEnable.Contains(i.gameObject))
+                {
+                    Handles.color = Color.red;
+                    if (inworldButton(i.transform.position))
+                    {
+                        eventEditing.objectsToEnable.Remove(i.gameObject);
+                    }
+                }
+                else
+                {
+                    Handles.color = Color.blue;
+                    if (inworldButton(i.transform.position))
+                    {
+                        eventEditing.objectsToEnable.Add(i.gameObject);
+                    }
+                }
+            }
+        }
+    }
+
+    bool inworldButton(Vector3 pos)
+    {
+
+        if (Handles.Button(pos, Quaternion.Euler(0, 0, 0), 1.0f, 1.0f, Handles.RectangleHandleCap))
+        {
+            Handles.BeginGUI();
+            return true;
+        }
+      
+        return false;
+    }
+    public GameObject lorePrefab,loreEditing;
+    public List<GameObject> emailObjects,phoneObjects;
+    Email[] emailsEditing;
+    PhoneMessage[] phoneEditing;
+    Email EmailEditing;
+    PhoneMessage PhoneEditing;
+    bool editingEmail = false;
+    void setBackgroundObjects()
+    {
+        emailObjects = new List<GameObject>();
+        phoneObjects = new List<GameObject>();
+        Email[] emails = FindObjectsOfType<Email>();
+        foreach(Email e in emails)
+        {
+            if (emailObjects.Contains(e.gameObject) == false)
+            {
+                emailObjects.Add(e.gameObject);
+            }
+        }
+
+        PhoneMessage[] phoneMessages = FindObjectsOfType<PhoneMessage>();
+        foreach(PhoneMessage p in phoneMessages)
+        {
+            if (phoneObjects.Contains(p.gameObject) == false)
+            {
+                phoneObjects.Add(p.gameObject);
+            }
+        }
+    }
+
+    void drawBackgroundUI()
+    {
+        if(common==null)
+        {
+            common = FindObjectOfType<CommonObjectsStore>();
+        }
+
+        if (loreEditing == null)
+        {
+            foreach (GameObject g in common.loreItems)
+            {
+                if (button(g.name, 125, 25))
+                {
+                    lorePrefab = g;
+                }
+            }
+        }
+        else
+        {
+            if(editingEmail==true)
+            {
+                if (EmailEditing == null)
+                {
+                    if(button("Add new Email",125,25))
+                    {
+                        loreEditing.AddComponent<Email>();
+                        emailsEditing = loreEditing.GetComponents<Email>();
+                    }
+
+                    foreach (Email e in emailsEditing)
+                    {
+                        if (button("Edit " + e.sender, 125, 25))
+                        {
+                            EmailEditing = e;
+                        }
+                    }
+                }
+                else
+                {
+                    if(button("Done Editing",125,25))
+                    {
+                        EditorUtility.SetDirty(EmailEditing);
+                        EmailEditing = null;
+                        
+                    }
+                    label("Email Contents");
+                    EmailEditing.contents = GUILayout.TextArea(EmailEditing.contents, GUILayout.Width(150), GUILayout.Height(75));
+
+                    label("Email Sender");
+                    EmailEditing.sender = textInput(EmailEditing.sender);
+                    label("Subject");
+                    EmailEditing.subject = textInput(EmailEditing.subject);
+
+                    if (ts==null)
+                    {
+                        ts = FindObjectOfType<TimeScript>();
+                    }
+                    label("Date Sent " + EmailEditing.daySend+"/"+EmailEditing.monthSend+"/"+EmailEditing.yearSend);
+                    EmailEditing.daySend = sliderInput(EmailEditing.daySend, 0, ts.daysInMonth[EmailEditing.monthSend-1]);
+                    EmailEditing.monthSend = sliderInput(EmailEditing.monthSend, 1, 12);
+                    EmailEditing.yearSend = numberInput(EmailEditing.yearSend);
+                }
+            }
+            else
+            {
+                if (PhoneEditing == null)
+                {
+                    if(button("Add new text message", 125, 25))
+                    {
+                        loreEditing.AddComponent<PhoneMessage>();
+                        phoneEditing = loreEditing.GetComponents<PhoneMessage>();
+                    }
+
+                    foreach (PhoneMessage p in phoneEditing)
+                    {
+                        if (button("Edit phone message from " + p.sender, 200, 25))
+                        {
+                            PhoneEditing = p;
+                        }
+
+                    }
+                }
+                else
+                {
+                    if (button("Done Editing", 125, 25))
+                    {
+                        EditorUtility.SetDirty(PhoneEditing);
+                        PhoneEditing = null;
+
+                    }
+                    label("Text Contents");
+                    PhoneEditing.messageText = GUILayout.TextArea(PhoneEditing.messageText, GUILayout.Width(150), GUILayout.Height(75));
+
+                    label("Text Sender");
+                    PhoneEditing.sender = textInput(PhoneEditing.sender);
+                   // label("Subject");
+                   // PhoneEditing.subject = textInput(PhoneEditing.subject);
+
+                    if (ts == null)
+                    {
+                        ts = FindObjectOfType<TimeScript>();
+                    }
+                    label("Date Sent " + PhoneEditing.daySend + "/" + PhoneEditing.monthSend + "/" + PhoneEditing.yearSend);
+                   
+                    PhoneEditing.daySend = sliderInput(PhoneEditing.daySend, 0, ts.daysInMonth[PhoneEditing.monthSend - 1]);
+
+                    PhoneEditing.monthSend = sliderInput(PhoneEditing.monthSend, 1, 12);
+                    PhoneEditing.yearSend = numberInput(PhoneEditing.yearSend);
+                }
+            }
+        }
+    }
+
+    void drawBackgroundHandles()
+    {
+        if(emailObjects==null || phoneObjects==null)
+        {
+            setBackgroundObjects();
+        }
+
+        foreach (GameObject g in emailObjects)
+        {
+            if (loreEditing != g)
+            {
+                Handles.color = Color.blue;
+                if (inworldButton(g.transform.position))
+                {
+                    loreEditing = g;
+                    emailsEditing = g.GetComponents<Email>();
+                    editingEmail = true;
+                }
+            }
+            else
+            {
+                Handles.color = Color.white;
+                if (inworldButton(g.transform.position))
+                {
+                    loreEditing = null;
+
+                }
+
+                Handles.color = Color.red;
+                if (inworldButton(g.transform.position + new Vector3(2, 0, 0)))
+                {
+                    foreach (Email pm in loreEditing.GetComponents<Email>())
+                    {
+                        DestroyImmediate(pm);
+                    }
+
+                    DestroyImmediate(loreEditing);
+                    setBackgroundObjects();
+                    return;
+                }
+            }
+            
+        }
+
+        foreach (GameObject g in phoneObjects)
+        {
+            if (loreEditing != g)
+            {
+                Handles.color = Color.blue;
+                if (inworldButton(g.transform.position))
+                {
+                    loreEditing = g;
+                    phoneEditing = g.GetComponents<PhoneMessage>();
+                    editingEmail = false;
+                }
+            }
+            else
+            {
+                Handles.color = Color.white;
+                if (inworldButton(g.transform.position))
+                {
+                    loreEditing = null;
+
+                }
+
+                Handles.color = Color.red;
+                if (inworldButton(g.transform.position + new Vector3(2, 0, 0)))
+                {
+                    foreach (PhoneMessage pm in loreEditing.GetComponents<PhoneMessage>())
+                    {
+                        DestroyImmediate(pm);
+                    }
+
+                    DestroyImmediate(loreEditing);
+                    setBackgroundObjects();
+                    return;
+                }
+            }
+           
+        }
+
+    }
+
+
+    Vector2 sceneScroll = Vector2.zero;
+    string getScene(string currentScene)
+    {
+        string retVal = currentScene;
+        int numScenes = EditorSceneManager.sceneCountInBuildSettings;
+        sceneScroll = GUILayout.BeginScrollView(sceneScroll, GUILayout.Width(300), GUILayout.Height(200));
+        for (int x = 0; x < numScenes; x++)
+        {
+            string name = System.IO.Path.GetFileNameWithoutExtension(SceneUtility.GetScenePathByBuildIndex(x));
+
+            if (button(name, 200, 30))
+            {
+                retVal = name;
+            }
+        }
+        GUILayout.EndScrollView();
+        return retVal;
+    }
+    Vector2 misScroll = Vector2.zero;
+    bool button(string content, int width, int height)
+    {
+        if (GUILayout.Button(content, GUILayout.Width(width), GUILayout.Height(height)))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    bool isSceneInBuild(string st)
+    {
+        foreach (EditorBuildSettingsScene s in EditorBuildSettings.scenes)
+        {
+            if (s.path.Contains(st))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void label(string content)
+    {
+        GUILayout.Label(content, GUILayout.Width(125), GUILayout.Height(30));
+    }
+    void label(string content, int width, int height)
+    {
+        GUILayout.Label(content, GUILayout.Width(width), GUILayout.Height(height));
+    }
+
+    void inworldLabel(GameObject gameObject, string label)
+    {
+        Handles.EndGUI();
+        // Handles.color = Color.red;
+        Handles.Label(gameObject.transform.position, label);
+
+        Handles.BeginGUI();
+    }
+    void inworldLabel(Vector3 position, string label)
+    {
+        Handles.EndGUI();
+        // Handles.color = Color.red;
+        Handles.Label(position, label);
+        Handles.BeginGUI();
+    }
+
+    List<string> uniquieNPCDataFromFile;
+    void getGlobalNPCData()
+    {
+        string folderPath = Path.Combine(Application.dataPath, "NPCIDData");
+
+        string path = Path.Combine(folderPath, "UniquieNPCData.txt");
+        if (Directory.Exists(folderPath) == false)
+        {
+            Directory.CreateDirectory(folderPath);
+        }
+        if (File.Exists(path) == true)
+        {
+            uniquieNPCDataFromFile = readFile(path);
+            //writeIDToFile(folderPath);
+        }
+    }
+    Vector2 globalVec = Vector2.zero;
+    bool disp = false;
+    void displayGlobalNPCData()
+    {
+        if (uniquieNPCDataFromFile == null || uniquieNPCDataFromFile.Count == 0)
+        {
+            getGlobalNPCData();
+        }
+        if (button("Display Global",125,25))
+        {
+            disp = !disp;
+        }
+        globalVec = GUILayout.BeginScrollView(globalVec);
+        if (disp == true)
+        {
+            foreach (string st in uniquieNPCDataFromFile)
+            {
+                label(st, st.Length * 8, 30);
+            }
+        }
+        GUILayout.EndScrollView();
+    }
+    Vector2 uniqueScroll = Vector2.zero;
+    int getUniquieNPCID(int id)
+    {
+        int retVal = -1;
+        if (uniquieNPCDataFromFile == null || uniquieNPCDataFromFile.Count == 0)
+        {
+            getGlobalNPCData();
+        }
+        uniqueScroll = GUILayout.BeginScrollView(uniqueScroll, GUILayout.Width(200), GUILayout.Height(200));
+
+        foreach (string st in uniquieNPCDataFromFile)
+        {
+            if (button(st, st.Length * 8, 30))
+            {
+                string[] dat = st.Split(';');
+                int val = int.Parse(dat[0]);
+                if (val != id)
+                {
+                    retVal = val;
+                }
+            }
+        }
+
+        GUILayout.EndScrollView();
+        return retVal;
+    }
 }

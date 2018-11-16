@@ -20,7 +20,7 @@ public class PortableContainerItem : Item {
 		//i.addItemToInventory (this);
 		//if (this.gameObject.activeInHierarchy == false) {
 		//	i.equipItem (this, slot);
-		//////Debug.Break();
+		////////Debug.Break();
 			//this.transform.parent.gameObject.GetComponentInChildren<PortableContainerVisual> ().myItem = this;
 		//}
 

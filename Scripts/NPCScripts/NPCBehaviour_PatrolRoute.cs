@@ -21,7 +21,7 @@ public class NPCBehaviour_PatrolRoute : NPCBehaviour {
 		myController.memory.myRoute = myRoute;
 		myType = behaviourType.patrol;
 		myController.pf.getPath (this.gameObject, myRoute.pointsInRoute [counter]);
-		////Debug.LogError ("get path 1");
+		//////Debug.LogError ("get path 1");
 		radioMessageOnStart ();
 		isInitialised = true;
 	}
@@ -41,7 +41,7 @@ public class NPCBehaviour_PatrolRoute : NPCBehaviour {
 	{
 		if (myController.pf.target != myRoute.pointsInRoute [counter]) {
 			myController.pf.getPath (this.gameObject, myRoute.pointsInRoute [counter]);
-			////Debug.LogError ("get path 2");
+			//////Debug.LogError ("get path 2");
 
 		}
 
@@ -49,12 +49,12 @@ public class NPCBehaviour_PatrolRoute : NPCBehaviour {
 			if (counter < myRoute.pointsInRoute.Count - 1) {
 				counter++;
 				myController.pf.getPath (this.gameObject, myRoute.pointsInRoute [counter]);
-				////Debug.LogError ("get path 3");
+				//////Debug.LogError ("get path 3");
 
 			} else if(counter>=myRoute.pointsInRoute.Count-1){
 				counter = 0;
 				myController.pf.getPath (this.gameObject, myRoute.pointsInRoute [counter]);
-				////Debug.LogError ("get path 4");
+				//////Debug.LogError ("get path 4");
 
 			}
 		}
@@ -102,7 +102,7 @@ public class NPCBehaviour_PatrolRoute : NPCBehaviour {
 			}
 
 
-				PhoneTab_RadioHack.me.setNewText ("This is "+this.gameObject.name+ ", returning to patrol",h);
+			PhoneTab_RadioHack.me.setNewText ("This is "+this.gameObject.name+ ", returning to patrol",h);
 
 
 		}

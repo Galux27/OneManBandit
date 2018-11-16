@@ -21,6 +21,7 @@ public class PoliceCarScript : MonoBehaviour {
 	bool setEngine=false;
 
 	Rigidbody2D rid;
+	public LayerMask lm;
 	// Use this for initialization
 	void Start () {
 		rid = this.GetComponent<Rigidbody2D> ();
@@ -126,7 +127,7 @@ public class PoliceCarScript : MonoBehaviour {
 	void spawnCopsAtCar()
 	{		
 		//setNodesNearMeToUnwalkable ();
-		rid.bodyType=RigidbodyType2D.Static;
+		//rid.bodyType=RigidbodyType2D.Static;
 
 		reEnableNodeNearSpawns ();
 		foreach (Transform t in copSpawnPoints) {
@@ -149,8 +150,8 @@ public class PoliceCarScript : MonoBehaviour {
 	{
 		raysHitAnything = false;
 		foreach (GameObject g in pointsToRaycastFrom) {
-			RaycastHit2D ray = Physics2D.Raycast (g.transform.position, g.transform.position - (g.transform.position - transform.up),2.0f);
-			Debug.DrawRay (g.transform.position, g.transform.position - (g.transform.position - transform.up), Color.cyan);
+			RaycastHit2D ray = Physics2D.Raycast (g.transform.position, g.transform.position - (g.transform.position - transform.up),7.0f,lm);
+			//Debug.DrawRay (g.transform.position, g.transform.position - (g.transform.position - transform.up), Color.cyan);
 			if (ray.collider == null) {
 
 			} else {
@@ -178,11 +179,12 @@ public class PoliceCarScript : MonoBehaviour {
 		foreach (Transform t in copSpawnPoints) {
 			WorldTile wt = WorldBuilder.me.getNearest (this.transform.position);
 			if (wt.walkable == false) {
-				//Debug.Log (wt.gameObject.name + " set to unwalkable");
+				////Debug.Log (wt.gameObject.name + " set to unwalkable");
 				wt.GetComponent<SpriteRenderer> ().color = Color.cyan;
-				if (wt.modifier >= 10000) {
-					wt.modifier -= 10000;
-					ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].modifier -=10000;
+				if (wt.modifier >= 100000) {
+					wt.modifier -= 100000;
+					ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].modifier -=100000;
+					ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].walkable=true;
 
 				}
 				//nodesISetToUnwalkable.Add (wt);
@@ -205,11 +207,13 @@ public class PoliceCarScript : MonoBehaviour {
 					WorldTile wt = WorldBuilder.me.worldTiles [pos.gridX + x, pos.gridY + y].GetComponent<WorldTile>();
 
 					if (wt.walkable == true) {
-						//Debug.Log (wt.gameObject.name + " set to unwalkable");
+						////Debug.Log (wt.gameObject.name + " set to unwalkable");
 						wt.GetComponent<SpriteRenderer> ().color = Color.blue;
-						wt.modifier += 10000;
+						wt.modifier += 100000;
 						nodesISetToUnwalkable.Add (wt);
-						ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].modifier +=10000;
+						ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].modifier +=100000;
+						ThreadedPathfindInterface.me.nodes [wt.gridX, wt.gridY].walkable=false;
+
 					}
 				}
 			}

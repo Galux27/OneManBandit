@@ -9,5 +9,5 @@ public class CraftingRecipie : MonoBehaviour {
 
 
 	public string component1="None",component2="None",component3="None",result;
-
+	public List<string> results;
 }

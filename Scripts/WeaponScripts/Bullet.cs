@@ -36,7 +36,7 @@ public class Bullet : MonoBehaviour {
 				} else {
 
 					ds.kickInDoor ();
-					Instantiate (CommonObjectsStore.me.bulletImpact,this.transform.position-(transform.up/4), this.transform.rotation);
+					Instantiate (CommonObjectsStore.me.bulletImpact, this.transform.position - (transform.up / 4), this.transform.rotation);
 					Destroy (this.gameObject);
 				}
 				//if (ds.wayIAmLocked == lockedWith.none || ds.wayIAmLocked == lockedWith.key) {
@@ -52,11 +52,20 @@ public class Bullet : MonoBehaviour {
 					return;
 				}
 
-				WindowNew w2 = col.gameObject.GetComponentInParent<WindowNew>();
+				WindowNew w2 = col.gameObject.GetComponentInParent<WindowNew> ();
 				if (w2 == null) {
 
 				} else {
 					w2.destroyWindow ();
+				}
+			} else if (col.gameObject.GetComponent<PlayerCarController> () == true) {
+				col.gameObject.GetComponent<PlayerCarController> ().dealDamage (damage);
+
+				if (col.gameObject.GetComponent<SpawnCopsOnCall> () == true) {
+					col.gameObject.GetComponent<SpawnCopsOnCall> ().spawnCops ();
+					if (PoliceController.me.copsCalled == false) {
+						PoliceController.me.copsCalled = true;
+					}
 				}
 			}
 

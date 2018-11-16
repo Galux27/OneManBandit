@@ -46,7 +46,7 @@ public class WeaponProjectile : MonoBehaviour {
 
 		} else {
 			stopMovement ();
-			//////Debug.Log ("WEAPON HIT SOMETHING" + col.gameObject.name);
+			////////Debug.Log ("WEAPON HIT SOMETHING" + col.gameObject.name);
 			if (col.gameObject.tag == "Player") {
 				CameraController.me.hitByBullet (new Vector2 (this.transform.position.x, this.transform.position.y));
 			}

@@ -31,7 +31,7 @@ public class PlayerAction_DropBody : PlayerAction {
 				sr = this.gameObject.GetComponent<SpriteRenderer> ();
 			}
 
-			Debug.Log ("Player action drop body root tag is " + this.gameObject.transform.root.tag);
+			//Debug.Log ("Player action drop body root tag is " + this.gameObject.transform.root.tag);
 			if (this.gameObject.transform.root.tag == "Player") {
 				return true;
 			}

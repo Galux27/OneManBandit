@@ -25,7 +25,7 @@ public class DemoLevelMission : MonoBehaviour {
 		if (async == null) {
 
 		} else {
-			Debug.Log ("Async is done = " + async.isDone.ToString ());
+			//Debug.Log ("Async is done = " + async.isDone.ToString ());
 		}
 
 		if (hasCase == true || foundCase == true) {

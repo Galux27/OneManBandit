@@ -22,7 +22,7 @@ public class NPCBehaviour_InvesigateLocation : NPCBehaviour {
 			marker.transform.position = location;
 			pointToInvestigate = marker;
 		}
-		//Debug.Break ();
+		////Debug.Break ();
 		myController.pf.getPath (this.gameObject, marker);
 		radioMessageOnStart ();
 		isInitialised = true;
@@ -55,14 +55,14 @@ public class NPCBehaviour_InvesigateLocation : NPCBehaviour {
 				if (room == null) {
 					
 					myController.npcB.suspisious = false;
-					myController.memory.noiseToInvestigate = Vector3.zero;
-					Destroy (this);
+                    myController.memory.noiseToInvestigate = Vector3.zero;
+                    Destroy(this);
 				} else {
 					if (room.pointsInRoom.Count == 0) {
 						
 						myController.npcB.suspisious = false;
-						myController.memory.noiseToInvestigate = Vector3.zero;
-						Destroy (this);
+                        myController.memory.noiseToInvestigate = Vector3.zero;
+                        Destroy(this);
 					} else {
 						if (pointsGoneTo < 4) {
 							if (pointToInvestigate == null || myController.pf.target != pointToInvestigate) {
@@ -121,12 +121,12 @@ public class NPCBehaviour_InvesigateLocation : NPCBehaviour {
 
 		Vector3 heading = this.transform.position - origin;
 		RaycastHit2D ray = Physics2D.Raycast (origin, heading);
-		Debug.DrawRay (origin, heading,Color.cyan);
+		//Debug.DrawRay (origin, heading,Color.cyan);
 
 		if (ray.collider == null) {
 
 		} else {
-			//			//////Debug.Log ("Ray hit object with tag " + ray.collider.gameObject.tag);
+			//			////////Debug.Log ("Ray hit object with tag " + ray.collider.gameObject.tag);
 			if (ray.collider.gameObject.transform.root == this.transform.root) {
 				return true;
 			}

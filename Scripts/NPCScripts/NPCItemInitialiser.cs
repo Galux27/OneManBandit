@@ -12,14 +12,17 @@ public class NPCItemInitialiser : MonoBehaviour {
 
 	public string weaponToGet;
 	public List<string> itemsToAdd,randomItems;
-
+    public bool loadedIn = false;
 	void Awake()
 	{
 		myController = this.GetComponent<NPCController> ();
 	}
 
 	void Start () {
-		createItems ();
+        if (loadedIn == false)
+        {
+            createItems();
+        }
 	}
 
 

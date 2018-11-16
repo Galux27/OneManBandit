@@ -21,7 +21,7 @@ public class NPCMemory : MonoBehaviour {
 	public Vector3 noiseToInvestigate;
 	public List<GameObject> peopleThatHaveAttackedMe=new List<GameObject>();
 
-	public bool beenAttacked,seenHostage,seenCorpse,seenArmedSuspect,seenSuspect;
+	public bool beenAttacked,seenHostage,seenCorpse,seenArmedSuspect,seenSuspect,seenSuspectsFace;
 
 
 }

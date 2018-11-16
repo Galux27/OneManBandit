@@ -85,7 +85,7 @@ public class Door2 : MonoBehaviour {
 			}
 			key.transform.position = toSpawnIn.gameObject.transform.position;
 			toSpawnIn.addItemToContainer (i);
-			//////Debug.Log ("Spawned key in " + toSpawnIn.gameObject.name);
+			////////Debug.Log ("Spawned key in " + toSpawnIn.gameObject.name);
 			myKey = key;
 			i.itemDescription += myRoomText;
 			this.gameObject.AddComponent<PlayerAction_UnlockWithKey> ();
@@ -110,7 +110,7 @@ public class Door2 : MonoBehaviour {
 			i.securityClearance = securityTier;
 			//i.itemDescription += myRoomText;
 
-			//////Debug.Log ("Spawned keycard in " + toSpawnIn.gameObject.name);
+			////////Debug.Log ("Spawned keycard in " + toSpawnIn.gameObject.name);
 			myKey = key;
 			this.gameObject.AddComponent<PlayerAction_OpenWithKeycard> ();
 			key.transform.position = toSpawnIn.transform.position;
@@ -123,7 +123,7 @@ public class Door2 : MonoBehaviour {
 			}
 
 			//create note for door
-			//////Debug.Log ("Keycode number was " + keycodeNumber);
+			////////Debug.Log ("Keycode number was " + keycodeNumber);
 			this.gameObject.AddComponent<PlayerAction_OpenDoorWithKeycode> ();
 
 			GameObject g = (GameObject)Instantiate (CommonObjectsStore.me.noteBase, Vector3.zero, Quaternion.Euler (0, 0, 0));
@@ -147,7 +147,7 @@ public class Door2 : MonoBehaviour {
 			toSpawnIn.addItemToContainer (i);
 			g.transform.position = toSpawnIn.transform.position;
 
-			//////Debug.Log ("Created note with passcode in " + toSpawnIn.name);
+			////////Debug.Log ("Created note with passcode in " + toSpawnIn.name);
 		}
 		else if(wayIAmLocked == lockedWith.vaultDoor)
 		{
@@ -171,12 +171,12 @@ public class Door2 : MonoBehaviour {
 
 		Vector3 heading = transform.position - CommonObjectsStore.player.transform.position;
 		RaycastHit2D[] rays= Physics2D.RaycastAll ( CommonObjectsStore.player.transform.position, heading,Vector3.Distance(this.transform.position,CommonObjectsStore.player.transform.position));
-		Debug.DrawRay (CommonObjectsStore.player.transform.position, heading,Color.cyan);
+		//Debug.DrawRay (CommonObjectsStore.player.transform.position, heading,Color.cyan);
 		foreach (RaycastHit2D ray in rays) {
 			if (ray.collider == null) {
 				//return true;
 			} else {
-				//////Debug.Log (ray.collider.gameObject);
+				////////Debug.Log (ray.collider.gameObject);
 
 				if (ray.collider.gameObject.tag == "Player") {
 					continue;

@@ -26,7 +26,7 @@ public class ItemMoniter : MonoBehaviour {
 	}
 
 	void Start () {
-		
+		myItemUI = InventoryUI.me.inventoryUis;
 	}
 	
 	// Update is called once per frame

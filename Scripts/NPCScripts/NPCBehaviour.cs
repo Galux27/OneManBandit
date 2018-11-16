@@ -71,5 +71,6 @@ public enum behaviourType{
 	guardEntrance,
 	formUp,
 	evacuate,
-	shopkeeper
+	shopkeeper,
+	investigatePlayer
 }

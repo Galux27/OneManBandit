@@ -4,133 +4,742 @@ using UnityEngine;
 
 public class NPCBehaviourDecider : MonoBehaviour {
 
-	/// <summary>
-	/// Class that decides what the AI should be doing.
-	/// </summary>
+    /// <summary>
+    /// Class that decides what the AI should be doing.
+    /// </summary>
 
 
-	public AIType myType;
-	public NPCController myController;
+    public AIType myType;
+    public NPCController myController;
 
-	//state booleans
-	public bool alarmed = false,combat=false,suspisious=false;
+    //state booleans
+    public bool alarmed = false, combat = false, suspisious = false;
 
-	//world state booleans
-	public static bool globalAlarm=false,copAlarm=false;
-	//guard booleans
-	public bool patrol=false;
+    //world state booleans
+    public static bool globalAlarm = false, copAlarm = false;
+    //guard booleans
+    public bool patrol = false;
 
-	//police booleans
-	public bool attemptToArrest = true;
+    //police booleans
+    public bool attemptToArrest = true;
 
-	public string myID;
-	public List<string> freindlyIDs;
+    public string myID;
+    public List<string> freindlyIDs;
 
-	public bool lostTarget=false;
-	public float loseTargetTimer = 5.0f;
+    public bool lostTarget = false;
+    public float loseTargetTimer = 5.0f;
 
-	public bool attackedRecently = false;
-	public float lastTimeIWasAttacked = 0.0f;
+    public bool attackedRecently = false;
+    public float lastTimeIWasAttacked = 0.0f;
 
-	public bool inLitRoom = true;
+    public bool inLitRoom = true;
 
-	/// <summary>
-	/// Enum to show what behaviour the AI should be doing, used to check if we need to destroy the behaviour and get a new one.
-	/// </summary>
-	public whatAiIsDoing doing = whatAiIsDoing.starting;
+    /// <summary>
+    /// Enum to show what behaviour the AI should be doing, used to check if we need to destroy the behaviour and get a new one.
+    /// </summary>
+    public whatAiIsDoing doing = whatAiIsDoing.starting;
 
-	/// <summary>
-	/// Debug variable to see which decision is made.
-	/// </summary>
-	public int decision=0;
-	void Awake()
+    /// <summary>
+    /// //Debug variable to see which decision is made.
+    /// </summary>
+    public int decision = 0;
+    void Awake()
+    {
+        myController = this.gameObject.GetComponent<NPCController>();
+    }
+
+    // Use this for initialization
+    void Start() {
+        if(myType==AIType.aggressive)
+        {
+            myController.memory.beenAttacked = true;
+            myController.memory.peopleThatHaveAttackedMe = new List<GameObject>();
+            myController.memory.peopleThatHaveAttackedMe.Add(CommonObjectsStore.player);
+            myController.memory.objectThatMadeMeSuspisious=CommonObjectsStore.player;
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (lostTarget == true) {
+            loseTargetTimer -= Time.deltaTime;
+        } else {
+            loseTargetTimer = 5.0f;
+        }
+        decideFOVColor();
+
+    }
+
+
+
+    public void OnUpdate() {
+        if (myController.knockedDown == true || PersonHealth.playerHealth.healthValue <= 0) {
+            return;
+        }
+
+        testForCrimesSeen();
+
+        inLitRoom = LevelTilemapController.me.areWeLit(this.transform.position);
+        if (myType == AIType.guard) {
+            unfreezeNPC();
+            decideViewRadius();
+
+            guardDoBehaviour();
+
+
+            shouldNPCBeArmed();
+        } else if (myType == AIType.cop) {
+            unfreezeNPC();
+
+            decideViewRadius();
+            copDoBehaviour();
+
+            if (PoliceController.me.underSiege == true) {
+                alarmed = true;
+            }
+
+        } else if (myType == AIType.swat) {
+            unfreezeNPC();
+
+            decideViewRadius();
+            shouldNPCBeArmed();
+
+            copDoBehaviour();
+
+            if (PoliceController.me.underSiege == true) {
+                alarmed = true;
+            }
+
+            if (attackedRecently == true) {
+                if (myController.memory.objectThatMadeMeSuspisious == null) {
+                    myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
+                }
+
+                if (Time.time - lastTimeIWasAttacked >= 5.0f && myController.detect.fov.visibleTargts.Contains(myController.memory.objectThatMadeMeSuspisious.transform) == false) {
+                    attackedRecently = false;
+                    alarmed = true;
+                }
+                //return;
+            }
+
+
+            //swatDoBehaviour ();
+            //swatPassive ();
+        } else if (myType == AIType.civilian) {
+            decideViewRadius();
+            unfreezeNPC();
+
+            if (alarmed == false && PoliceController.me.backupHere == false && PoliceController.me.swatHere == false) {
+                civilianPassive();
+            } else {
+                civilianAlarmed();
+            }
+        } else if (myType == AIType.hostage) {
+
+        } else if (myType == AIType.shopkeeper) {
+            unfreezeNPC();
+            decideViewRadius();
+
+            shopkeeperDoBehaviour();
+        } else if (myType == AIType.detective) {
+            unfreezeNPC();
+            decideViewRadius();
+            detectiveDoBehaviour();
+        } else if (myType == AIType.patrolCop) {
+            unfreezeNPC();
+            decideViewRadius();
+
+            if (alarmed == false && PoliceController.me.copsCalled && PoliceController.me.backupCalled == false && PoliceController.me.swatCalled == false) {
+                civilianPassive();
+            } else {
+                copDoBehaviour();
+            }
+        } else if (myType == AIType.uniqueNeutral)
+        {
+            if (originalPosition == Vector3.zero)
+            {
+                originalPosition = this.transform.position;
+                myController.memory.guardPos = this.transform.position;
+                myController.memory.guardRot = this.transform.rotation;
+            }
+            shouldWeSwitchToHostile();
+            uniqueNeutralDoBehaviour();
+        } else if (myType == AIType.uniqueHostile)
+        {
+            if (originalPosition == Vector3.zero)
+            {
+                originalPosition = this.transform.position;
+                myController.memory.guardPos = this.transform.position;
+                myController.memory.guardRot = this.transform.rotation;
+            }
+            uniqueHostileDoBehaviour();
+        }else if(myType==AIType.aggressive)
+        {
+            if (originalPosition == Vector3.zero)
+            {
+                originalPosition = this.transform.position;
+                myController.memory.guardPos = this.transform.position;
+                myController.memory.guardRot = this.transform.rotation;
+            }
+            aggressiveDoBehaviour();
+        }
+    }
+
+    void aggressiveDecideBehaviour()
+    {
+        if (PoliceController.me.copsHere == false && PoliceController.me.backupHere == false && PoliceController.me.swatHere == false)
+        {
+            GameObject nearbyHostile = isHostileTargetNearby();
+            if (nearbyHostile == null || Vector2.Distance(CommonObjectsStore.player.transform.position, this.transform.position) > 10)
+            {
+                if (myController.memory.noiseToInvestigate == Vector3.zero || myController.memory.noiseToInvestigate == originalPosition)
+                {
+                    if (canWeSwitchBehaviour(whatAiIsDoing.starting))
+                    {
+                        doing = whatAiIsDoing.starting;
+                    }
+                }
+                else
+                {
+                    if (canWeSwitchBehaviour(whatAiIsDoing.investigatingLocation))
+                    {
+                        doing = whatAiIsDoing.investigatingLocation;
+                    }
+                }
+            }
+            else
+            {
+                if (canWeSwitchBehaviour(whatAiIsDoing.attacking))
+                {
+                    doing = whatAiIsDoing.attacking;
+                }
+            }
+        }
+        else
+        {
+            doing = whatAiIsDoing.leaving;
+        }
+    }
+    CivilianAction nearestToPlayer;
+    bool resetBehaviour = false;
+    void aggressiveDoBehaviour()
+    {
+        aggressiveDecideBehaviour();
+        if (doing == whatAiIsDoing.starting)
+        {
+            if(nearestToPlayer==null || Vector2.Distance(nearestToPlayer.positionForAction.position,this.transform.position)<5)
+            {
+                nearestToPlayer = LevelController.me.getCivilianAction();
+                resetBehaviour = true;
+            }
+
+            if(Vector2.Distance(nearestToPlayer.positionForAction.position,this.transform.position)<2)
+            {
+                myController.pmc.rotateToFacePosition(CommonObjectsStore.player.transform.position);
+
+            }
+
+            if (myController.currentBehaviour == null)
+            {
+                if (nearestToPlayer != null)
+                {
+                    myController.memory.guardPos = nearestToPlayer.positionForAction.position;
+                    
+                }
+                NPCBehaviour_GuardLocation nb = this.gameObject.AddComponent<NPCBehaviour_GuardLocation>();
+               // nb.passInGameobject(nearestToPlayer.gameObject);
+                myController.currentBehaviour = nb;
+            }
+            else if(myController.currentBehaviour.myType!=behaviourType.guardLoc||resetBehaviour==true)
+            {
+                if (myController.currentBehaviour == null)
+                {
+
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                if (nearestToPlayer != null)
+                {
+                    myController.memory.guardPos = nearestToPlayer.positionForAction.position;
+                }
+                NPCBehaviour_GuardLocation nb = this.gameObject.AddComponent<NPCBehaviour_GuardLocation>();
+                //nb.passInGameobject(nearestToPlayer.gameObject);
+                myController.currentBehaviour = nb;
+                resetBehaviour = false;
+            }
+
+          
+
+        }
+        else if (doing == whatAiIsDoing.investigatingLocation)
+        {
+            if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.investigate)
+            {
+                if (myController.currentBehaviour == null)
+                {
+                    if (myController.memory.noiseToInvestigate == Vector3.zero)
+                    {
+                        doing = whatAiIsDoing.starting;
+                    }
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                NPCBehaviour_InvesigateLocation nb = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation>();
+
+
+                //nb.location = 
+                myController.currentBehaviour = nb;
+            }
+        }
+        else if (doing == whatAiIsDoing.attacking)
+        {
+            //Debug.LogError("2");
+            myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
+            if (myController.currentBehaviour == null)
+            {
+                //Debug.LogError("3");
+                NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget>();
+                nb.passInGameobject(myController.memory.objectThatMadeMeSuspisious);
+                myController.currentBehaviour = nb;
+            }
+            else if (myController.currentBehaviour.myType != behaviourType.attackTarget)
+            {
+                //Debug.LogError("4");
+                if (myController.currentBehaviour == null)
+                {
+
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget>();
+                   nb.passInGameobject(myController.memory.objectThatMadeMeSuspisious);
+                myController.currentBehaviour = nb;
+            }
+        }
+        else if (doing == whatAiIsDoing.leaving)
+        {
+            if (myController.currentBehaviour == null)
+            {
+                myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_ExitLevel>();
+
+            }
+            else if (myController.currentBehaviour.myType != behaviourType.exitLevel)
+            {
+                Destroy(myController.currentBehaviour);
+                myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_ExitLevel>();
+
+            }
+        }
+    }
+
+
+    void shouldWeSwitchToHostile()
+    {
+        if(myController.memory.beenAttacked==true && myController.memory.peopleThatHaveAttackedMe.Contains(CommonObjectsStore.player))
+        {
+            this.GetComponent<NPCID>().madeHostileToPlayer = true;
+            myType = AIType.uniqueHostile;
+        }
+    }
+
+    void uniqueNeutralDecideBehaviour()
+    {
+
+        if (myController.memory.noiseToInvestigate == Vector3.zero || myController.memory.noiseToInvestigate == originalPosition)
+        {
+            if (canWeSwitchBehaviour(whatAiIsDoing.starting))
+            {
+                doing = whatAiIsDoing.starting;
+            }
+        }
+        else
+        {
+            if (canWeSwitchBehaviour(whatAiIsDoing.investigatingLocation))
+            {
+                doing = whatAiIsDoing.investigatingLocation;
+            }
+        }
+
+    }
+    
+    Vector3 originalPosition=Vector3.zero;
+   void uniqueHostileDecideBehaviour()
+   {
+        GameObject nearbyHostile = isHostileTargetNearby();
+        if(nearbyHostile==null)
+        {
+            if(myController.memory.noiseToInvestigate==Vector3.zero || myController.memory.noiseToInvestigate==originalPosition)
+            {
+                if (canWeSwitchBehaviour(whatAiIsDoing.starting))
+                {
+                    doing = whatAiIsDoing.starting;
+                }
+            }
+            else
+            {
+                if (canWeSwitchBehaviour(whatAiIsDoing.investigatingLocation))
+                {
+                    doing = whatAiIsDoing.investigatingLocation;
+                }
+            }
+        }
+        else
+        {
+            if (canWeSwitchBehaviour(whatAiIsDoing.attacking))
+            {
+                doing = whatAiIsDoing.attacking;
+            }
+        }
+   }
+
+    void uniqueNeutralDoBehaviour()
+    {
+        uniqueNeutralDecideBehaviour();
+
+        if (doing == whatAiIsDoing.starting)
+        {
+
+            if (myController.currentBehaviour == null)
+            {
+                NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_GuardLocation>();
+                myController.currentBehaviour = nb;
+            }
+            else if (myController.currentBehaviour.myType != behaviourType.guardLoc)
+            {
+                if (myController.currentBehaviour == null)
+                {
+
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_GuardLocation>();
+                myController.currentBehaviour = nb;
+            }
+
+        }
+        else if (doing == whatAiIsDoing.investigatingLocation)
+        {
+            if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.investigate)
+            {
+                if (myController.currentBehaviour == null)
+                {
+
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                NPCBehaviour_InvesigateLocation nb = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation>();
+
+
+                //nb.location = 
+                myController.currentBehaviour = nb;
+            }
+        }
+        else if (doing == whatAiIsDoing.attacking)
+        {
+
+            if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.attackTarget)
+            {
+                if (myController.currentBehaviour == null)
+                {
+
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget>();
+                nb.passInGameobject(myController.memory.objectThatMadeMeSuspisious);
+                myController.currentBehaviour = nb;
+            }
+        }
+    }
+
+    void uniqueHostileDoBehaviour()
+    {
+        uniqueHostileDecideBehaviour();
+
+        if(doing==whatAiIsDoing.starting)
+        {
+            //Debug.LogError("1");
+            if (myController.currentBehaviour==null)
+            {
+                //Debug.LogError("5");
+                NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_GuardLocation>();
+                myController.currentBehaviour = nb;
+            }
+            else if (myController.currentBehaviour.myType != behaviourType.guardLoc)
+            {
+                //Debug.LogError("6");
+                if (myController.currentBehaviour == null)
+                {
+
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_GuardLocation>();
+                myController.currentBehaviour = nb;
+            }
+
+        }
+        else if (doing == whatAiIsDoing.investigatingLocation)
+        {
+            if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.investigate)
+            {
+                if (myController.currentBehaviour == null)
+                {
+
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                NPCBehaviour_InvesigateLocation nb = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation>();
+
+
+                //nb.location = 
+                myController.currentBehaviour = nb;
+            }
+        }
+        else if (doing == whatAiIsDoing.attacking)
+        {
+            //Debug.LogError("2");
+            if (myController.currentBehaviour==null)
+            {
+                //Debug.LogError("3");
+                NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget>();
+                nb.passInGameobject(myController.memory.objectThatMadeMeSuspisious);
+                myController.currentBehaviour = nb;
+            }
+            else if (myController.currentBehaviour.myType != behaviourType.attackTarget)
+            {
+                //Debug.LogError("4");
+                if (myController.currentBehaviour == null)
+                {
+
+                }
+                else
+                {
+                    Destroy(myController.currentBehaviour);
+                }
+                NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget>();
+                nb.passInGameobject(myController.memory.objectThatMadeMeSuspisious);
+                myController.currentBehaviour = nb;
+            }
+        }
+    }
+
+    void detectiveDoBehaviour()
 	{
-		myController = this.gameObject.GetComponent<NPCController> ();
-	}
+		detectiveDecideBehaviour ();
 
-	// Use this for initialization
-	void Start () {
-	}
-	
-	// Update is called once per frame
-	void Update()
-	{
-		if (lostTarget == true) {
-			loseTargetTimer -= Time.deltaTime;
-		} else {
-			loseTargetTimer = 5.0f;
-		}
-		decideFOVColor ();
+		if (doing == whatAiIsDoing.starting) {
+			if (myController.currentBehaviour == null) {
+				myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_StalkPlayer> ();
 
-	}
-
-
-
-	public void OnUpdate () {
-		if (myController.knockedDown == true || PersonHealth.playerHealth.healthValue<=0) {
-			return;
-		}
-
-
-
-		inLitRoom = LevelTilemapController.me.areWeLit(this.transform.position);
-		if (myType == AIType.guard) {
-			unfreezeNPC ();
-			decideViewRadius ();
-
-			guardDoBehaviour ();
-			 
-
-			shouldNPCBeArmed ();
-		} else if (myType == AIType.cop) {
-			unfreezeNPC ();
-
-			decideViewRadius ();
-			copDoBehaviour ();
-
-			if (PoliceController.me.underSiege == true) {
-				alarmed = true;
+			} else if (myController.currentBehaviour.myType != behaviourType.investigatePlayer) {
+				Destroy (myController.currentBehaviour);
+				myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_StalkPlayer> ();
 			}
+		} else if (doing == whatAiIsDoing.investigatingLocation) {
+			if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.investigate) {
+				if (myController.currentBehaviour == null) {
 
-			shouldNPCBeArmed ();
-		} else if (myType == AIType.swat) {
-			unfreezeNPC ();
+				} else {
+					Destroy (myController.currentBehaviour);
+				}
+				NPCBehaviour_InvesigateLocation nb = this.gameObject.AddComponent<NPCBehaviour_InvesigateLocation> ();
 
-			decideViewRadius ();
 
-			if (PoliceController.me.underSiege == true) {
-				alarmed = true;
+				//nb.location = 
+				myController.currentBehaviour = nb;
 			}
+		} else if (doing == whatAiIsDoing.raisingAlarm) {
+			if (PoliceController.me.copsCalled==false) {
+				//raise alarm (need to both trigger
+				if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
+					Destroy (myController.currentBehaviour);
+					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_CivilianRaiseAlarm> ();
+					myController.currentBehaviour = nb;
+				}
+			}
+		} else if (doing == whatAiIsDoing.attacking) {
+			
+			if (myController.currentBehaviour == null || myController.currentBehaviour.myType != behaviourType.attackTarget) {
+				if (myController.currentBehaviour == null) {
 
-			if (attackedRecently == true) {
+				} else {
+					Destroy (myController.currentBehaviour);
+				}
+				NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
+				nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
+				myController.currentBehaviour = nb;
+			}
+		} else if (doing == whatAiIsDoing.freeingHostage) {
+			if (myController.currentBehaviour == null) {
 				if (myController.memory.objectThatMadeMeSuspisious == null) {
-					myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
-				}
+					if (shouldWeRaiseAlarm()==true) {
+						doing = whatAiIsDoing.raisingAlarm;
+					} else {
+						doing = whatAiIsDoing.starting;
+					}
 
-				if (Time.time - lastTimeIWasAttacked >= 5.0f && myController.detect.fov.visibleTargts.Contains (myController.memory.objectThatMadeMeSuspisious.transform) == false) {
-					attackedRecently = false;
-					alarmed = true;
+				} else {
+					NPCController hostage = myController.memory.objectThatMadeMeSuspisious.GetComponent<NPCController> ();
+					if (hostage == null) {
+						if (shouldWeRaiseAlarm()==true) {
+							doing = whatAiIsDoing.raisingAlarm;
+						} else {
+							doing = whatAiIsDoing.starting;
+						}
+					} else {
+						if (hostage.npcB.myType != AIType.hostage) {
+							if (shouldWeRaiseAlarm()==true) {
+								doing = whatAiIsDoing.raisingAlarm;
+							} else {
+								doing = whatAiIsDoing.starting;
+							}
+
+						}
+					}
 				}
-				//return;
 			}
-			//swatDoBehaviour ();
-			//swatPassive ();
-		} else if (myType == AIType.civilian) {
-			decideViewRadius ();
-			unfreezeNPC ();
 
-			if (alarmed == false && PoliceController.me.backupHere == false && PoliceController.me.swatHere == false) {
-				civilianPassive ();
+			if (myController.currentBehaviour==null|| myController.currentBehaviour.myType != behaviourType.freeHostage) {
+				if (myController.currentBehaviour == null) {
+					if (myController.memory.objectThatMadeMeSuspisious == null) {
+						if (shouldWeRaiseAlarm()==true) {
+							doing = whatAiIsDoing.raisingAlarm;
+						} else {
+							doing = whatAiIsDoing.starting;
+						}
+
+					} else {
+						NPCController hostage = myController.memory.objectThatMadeMeSuspisious.GetComponent<NPCController> ();
+						if (hostage == null) {
+							if (shouldWeRaiseAlarm()==true) {
+								doing = whatAiIsDoing.raisingAlarm;
+							} else {
+								doing = whatAiIsDoing.starting;
+							}
+						} else {
+							if (hostage.npcB.myType != AIType.hostage) {
+								if (shouldWeRaiseAlarm()==true) {
+									doing = whatAiIsDoing.raisingAlarm;
+								} else {
+									doing = whatAiIsDoing.starting;
+								}
+
+							}
+						}
+					}
+				} else {
+					Destroy (myController.currentBehaviour);
+				}
+				NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_FreeHostage> ();
+				myController.currentBehaviour = npcb;
+				//PhoneTab_RadioHack.me.setNewText ("Someone got tied up, freeing them now",radioHackBand.buisness);
+
+			}
+		}
+
+	}
+
+	void detectiveDecideBehaviour()
+	{
+		GameObject nearbyHostile = copIsHostileTargetNearby();
+
+		if (nearbyHostile == null) {
+				if (Vector2.Distance(myController.memory.noiseToInvestigate,Vector3.zero)>1) {
+					if (canWeSwitchBehaviour (whatAiIsDoing.investigatingLocation) == true) {
+						doing = whatAiIsDoing.investigatingLocation;
+					}
+				} else {
+					GameObject nearbyHostage = canSeeHostage ();
+
+					if (nearbyHostage == null) {
+
+						if (shouldWeRaiseAlarm () == true) {
+							doing = whatAiIsDoing.raisingAlarm;
+						} else {
+							if (canWeSwitchBehaviour (whatAiIsDoing.starting) == true) {
+								doing = whatAiIsDoing.starting;
+							}
+						}
+					} else {
+						if (canWeSwitchBehaviour (whatAiIsDoing.freeingHostage) == true) {
+							myController.memory.objectThatMadeMeSuspisious = nearbyHostage;
+							doing = whatAiIsDoing.freeingHostage;
+						}
+					}
+				}
+		} else {
+			if (canWeSwitchBehaviour (whatAiIsDoing.attacking) == true) {
+				myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
+				doing = whatAiIsDoing.attacking;
+			}
+		}
+	}
+
+	void testForCrimesSeen()
+	{
+		if (myController.detect.fov.visibleTargts.Contains (CommonObjectsStore.player.transform)) {
+			if (myController.memory.beenAttacked == true && myController.memory.peopleThatHaveAttackedMe.Contains (CommonObjectsStore.player)) {
+				//assault
+					CrimeRecordScript.me.addCrime (new Crime (crimeTypes.assault, true));
+			}
+
+			if (CommonObjectsStore.pwc.currentWeapon == null) {
+
 			} else {
-				civilianAlarmed ();
+				if (CommonObjectsStore.pwc.currentWeapon.melee == false) {
+					//seen armed with gun
+					CrimeRecordScript.me.addCrime (new Crime (crimeTypes.gun, true));
+
+				} 
+
+				if (CommonObjectsStore.pwc.currentWeapon.melee == true) {
+					//seen armed
+					CrimeRecordScript.me.addCrime (new Crime (crimeTypes.weapon, true));
+
+				}
 			}
-		} else if (myType == AIType.hostage) {
 
-		} else if (myType == AIType.shopkeeper) {
-			unfreezeNPC ();
-			decideViewRadius ();
+			if (myType == AIType.guard || myType == AIType.cop) {
+				if (LevelController.me.roomPlayerIsIn == null) {
 
-			shopkeeperDoBehaviour ();
+				} else {
+					if (LevelController.me.roomPlayerIsIn.traspassingInRoom() == true) {
+						//seen trespassing
+						CrimeRecordScript.me.addCrime (new Crime (crimeTypes.trespass, true));
+
+					}
+				}
+			}
+            
+			/*vandalism,
+			assault,
+			murder,
+			firearmsMurder,
+			theft,
+			trespass,
+			carTheft,
+			illigalItem,
+			weapon,
+			gun,
+			firearmMurder*/
 		}
 	}
 
@@ -141,12 +750,24 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 				if (myController.detect.fov.visibleTargts.Contains (g.transform) == true) {
 					myController.memory.seenCorpse = true;
+					if (myController.detect.fov.visibleTargts.Contains (CommonObjectsStore.player.transform) == false) {
+						CrimeRecordScript.me.addCrime (new Crime (crimeTypes.murder, false));
+					} else {
+						CrimeRecordScript.me.addCrime (new Crime (crimeTypes.murder, true));
+					}
+
 					return g;
 				}
 				else if (Vector3.Distance(this.transform.position,g.transform.position)<myController.detect.fov.viewRadius) {
 					if (myController.detect.isTargetInFrontOfUs (g) == true) {
 						if (myController.detect.lineOfSightToTargetWithNoCollider (g) == true) {
 							myController.memory.seenCorpse = true;
+							if (myController.detect.fov.visibleTargts.Contains (CommonObjectsStore.player.transform) == false) {
+								CrimeRecordScript.me.addCrime (new Crime (crimeTypes.murder, false));
+							} else {
+								CrimeRecordScript.me.addCrime (new Crime (crimeTypes.murder, true));
+							}
+
 							return g;
 						}
 					}
@@ -166,7 +787,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				if (r == null) {
 
 				} else {
-					if (r.traspassing == true) {
+					if (r.traspassingInRoom() == true) {
 						return t.gameObject;
 					}
 				}
@@ -208,6 +829,107 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		return null;
 	}
 
+	public GameObject copIsHostileTargetNearby()
+	{
+		bool isExistingNPCAttacking = false;
+		foreach (NPCController npc in NPCManager.me.npcControllers) {
+			if (npc.currentBehaviour == null) {
+
+			} else {
+				if (npc.currentBehaviour.myType == behaviourType.attackTarget && npc.detect.fov.visibleTargts.Contains (CommonObjectsStore.player.transform)) {
+					isExistingNPCAttacking = true;
+				}
+			}
+		}
+
+		foreach (Transform t in myController.detect.fov.visibleTargts) {
+			if (t == null || t.gameObject.tag == "NPC") {
+				continue;
+			} else {
+				if (t.gameObject.tag == "Player") {
+					bool returnObj = false;
+
+					PersonWeaponController pwc = t.GetComponent<PersonWeaponController> ();
+					if (LevelController.me.suspects.Contains (t.gameObject) || myController.memory.peopleThatHaveAttackedMe.Contains (t.gameObject) || myController.memory.seenSuspect == true || PlayerVisible.me.isPlayersFaceHidden()) {
+
+                        if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                        {
+                            myController.memory.seenSuspectsFace = true;
+                        }
+                        myController.memory.seenSuspect = true;
+						returnObj = true;
+						//return t.gameObject;
+						//Debug.Log ("Hostile 2");
+
+					} 
+
+					if (isExistingNPCAttacking == true) {
+                        if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                        {
+                            myController.memory.seenSuspectsFace = true;
+                        }
+                        myController.memory.seenSuspect = true;
+						returnObj = true;
+					}
+
+					if (pwc == null || pwc.currentWeapon == null) {
+						if (decideHowSuspiciousObjectIs (t.gameObject) >= 7) {
+							//Debug.Log ("Hostile 1");
+                            if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                            {
+                                myController.memory.seenSuspectsFace = true;
+                            }
+                            myController.memory.seenSuspect = true;
+							returnObj = true;
+						}
+					} else {
+						if (pwc.currentWeapon.illigal == true) {
+                            if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                            {
+                                myController.memory.seenSuspectsFace = true;
+                            }
+                            myController.memory.seenSuspect = true;
+							myController.memory.seenArmedSuspect = true;
+							returnObj = true;
+							//Debug.Log ("Hostile 3");
+
+						} else {
+                            if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                            {
+                                myController.memory.seenSuspectsFace = true;
+                            }
+                            myController.memory.seenSuspect = true;
+							myController.memory.seenArmedSuspect = true;
+							returnObj = true;
+							//Debug.Log ("Hostile 4");
+
+						}
+					}
+
+					if (returnObj == true) {
+						//Debug.Log ("returning hostile " + t.gameObject.name);
+						return t.gameObject;
+					}
+				} else if (t.gameObject.tag == "Car") {
+
+					if (PlayerCarController.inCar == false) {
+					} else {
+						PlayerCarController pcc = t.GetComponent<PlayerCarController> ();
+						if (pcc.playerInCar == true && pcc.carHealth>0) {
+							if (LevelController.me.suspects.Contains (t.gameObject) || myController.memory.peopleThatHaveAttackedMe.Contains (t.gameObject) || myController.memory.seenSuspect == true) {
+								myController.memory.seenSuspect = true;
+								return t.gameObject;
+								//return t.gameObject;
+								//Debug.Log ("Hostile 2");
+
+							} 
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 
 	public GameObject isHostileTargetNearby()
 	{
@@ -230,23 +952,37 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					bool returnObj = false;
 
 					PersonWeaponController pwc = t.GetComponent<PersonWeaponController> ();
-					if (LevelController.me.suspects.Contains (t.gameObject) || myController.memory.peopleThatHaveAttackedMe.Contains (t.gameObject) || myController.memory.seenSuspect==true) {
-						myController.memory.seenSuspect = true;
+					if (LevelController.me.suspects.Contains (t.gameObject) || myController.memory.peopleThatHaveAttackedMe.Contains (t.gameObject) || myController.memory.seenSuspect == true || PlayerVisible.me.isPlayersFaceHidden()==true) {
+                        if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                        {
+                            myController.memory.seenSuspectsFace = true;
+                        }
+
+
+                        myController.memory.seenSuspect = true;
 						returnObj = true;
 						//return t.gameObject;
-						Debug.Log ("Hostile 2");
+						//Debug.Log ("Hostile 2");
 
 					} 
 
 					if (isExistingNPCAttacking == true) {
-						myController.memory.seenSuspect = true;
+                        if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                        {
+                            myController.memory.seenSuspectsFace = true;
+                        }
+                        myController.memory.seenSuspect = true;
 						returnObj = true;
 					}
 
 					if (pwc == null || pwc.currentWeapon == null) {
 						if (decideHowSuspiciousObjectIs (t.gameObject) >= 7) {
-							Debug.Log ("Hostile 1");
-							myController.memory.seenSuspect = true;
+							//Debug.Log ("Hostile 1");
+                            if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                            {
+                                myController.memory.seenSuspectsFace = true;
+                            }
+                            myController.memory.seenSuspect = true;
 							returnObj = true;
 						}
 					} else {
@@ -254,21 +990,41 @@ public class NPCBehaviourDecider : MonoBehaviour {
 							myController.memory.seenSuspect = true;
 							myController.memory.seenArmedSuspect = true;
 							returnObj = true;
-							Debug.Log ("Hostile 3");
+                            if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                            {
+                                myController.memory.seenSuspectsFace = true;
+                            }
+                            //Debug.Log ("Hostile 3");
 
 						} else {
 							myController.memory.seenSuspect = true;
 							myController.memory.seenArmedSuspect = true;
 							returnObj = true;
-							Debug.Log ("Hostile 4");
+                            if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                            {
+                                myController.memory.seenSuspectsFace = true;
+                            }
+                            //Debug.Log ("Hostile 4");
 
 						}
 					}
 
 					if (returnObj == true) {
-						Debug.Log ("returning hostile " + t.gameObject.name);
+						//Debug.Log ("returning hostile " + t.gameObject.name);
 						return t.gameObject;
 					}
+				} else if (t.gameObject.layer == 29) {
+					if (LevelController.me.suspects.Contains (t.gameObject) || myController.memory.peopleThatHaveAttackedMe.Contains (t.gameObject) || myController.memory.seenSuspect == true) {
+						myController.memory.seenSuspect = true;
+                        if (PlayerVisible.me.isPlayersFaceHidden() == false)
+                        {
+                            myController.memory.seenSuspectsFace = true;
+                        }
+                        return CommonObjectsStore.player;
+						//return t.gameObject;
+						//Debug.Log ("Hostile 2");
+
+					} 
 				}
 			}
 		}
@@ -377,12 +1133,11 @@ public class NPCBehaviourDecider : MonoBehaviour {
 	/// Have a particular order of detecting things that is done VIA the if statements order is : Hostiles -> Suspicious -> Noise -> Hostage -> Corpse -> Raise Alarm
 	/// </summary>
 	public void cop_decideBehaviour(){
-		if (PoliceController.me.underSiege == false && PoliceController.me.swatCalled==false) {
-			GameObject nearbyHostile = isHostileTargetNearby ();
+		GameObject nearbyHostile = copIsHostileTargetNearby();
 
 			if (nearbyHostile == null) {
 				GameObject nearbySuspicious = suspiciousTarget ();
-				//	//////Debug.LogError ("Trying to find person to search");
+				//	////////Debug.LogError ("Trying to find person to search");
 
 				if (nearbySuspicious == null) {
 					
@@ -398,11 +1153,21 @@ public class NPCBehaviourDecider : MonoBehaviour {
 							GameObject nearbyCorpse = isCorpseNearby ();
 
 							if (nearbyCorpse == null) {
-								if (shouldWeRaiseAlarm()==true){
+								if (shouldWeRaiseAlarm () == true) {
 									doing = whatAiIsDoing.raisingAlarm;
-								} else if (canWeSwitchBehaviour (whatAiIsDoing.starting) == true) {
-									doing = whatAiIsDoing.starting;
+								} else {
+									//if (PoliceController.me.underSiege == false && PoliceController.me.swatCalled == false) {
+										
+										if (canWeSwitchBehaviour (whatAiIsDoing.starting) == true) {
+											doing = whatAiIsDoing.starting;
+										}
+									//} else {
+									//	if (canWeSwitchBehaviour (whatAiIsDoing.guardingEntrance)) {
+										//	doing = whatAiIsDoing.guardingEntrance;
+										//}
+									//}
 								}
+
 							} else {
 								if (shouldWeRaiseAlarm()==false) {
 									if (canWeSwitchBehaviour (whatAiIsDoing.guardingCorpse) == true) {
@@ -415,7 +1180,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 							}
 
 						} else {
-							//////Debug.LogError (this.gameObject.name + " found hostage " + nearbyHostage);
+							////////Debug.LogError (this.gameObject.name + " found hostage " + nearbyHostage);
 							if (canWeSwitchBehaviour (whatAiIsDoing.freeingHostage) == true) {
 								myController.memory.objectThatMadeMeSuspisious = nearbyHostage;
 								doing = whatAiIsDoing.freeingHostage;
@@ -430,20 +1195,18 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				}
 
 			} else {
-				if (attemptToArrest == true) {
-					if (canWeSwitchBehaviour (whatAiIsDoing.arresting) == true) {
-						myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
-						doing = whatAiIsDoing.arresting;
-					}
-				} else {
-					if (canWeSwitchBehaviour (whatAiIsDoing.attacking) == true) {
-						myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
-						doing = whatAiIsDoing.attacking;
-					}
+				if (canWeSwitchBehaviour (whatAiIsDoing.attacking) == true) {
+					myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
+					doing = whatAiIsDoing.attacking;
 				}
 			}
-		} else {
+		/* else {
 			GameObject nearbyHostile = isHostileTargetNearby ();
+
+			if (nearbyHostile == null) {
+				nearbyHostile = suspiciousTarget ();
+
+			}
 
 			if (nearbyHostile == null) {
 				if (canWeSwitchBehaviour (whatAiIsDoing.guardingEntrance)) {
@@ -451,19 +1214,14 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				}
 			} else {
 				myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
-				if (attemptToArrest == true) {
-					if (canWeSwitchBehaviour (whatAiIsDoing.arresting) == true) {
-						myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
-						doing = whatAiIsDoing.arresting;
-					}
-				} else {
-					if (canWeSwitchBehaviour (whatAiIsDoing.attacking) == true) {
-						myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
-						doing = whatAiIsDoing.attacking;
-					}
+			
+				if (canWeSwitchBehaviour (whatAiIsDoing.attacking) == true) {
+					myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
+					doing = whatAiIsDoing.attacking;
 				}
+
 			}
-		}
+		}*/
 	}
 
 	/// <summary>
@@ -471,7 +1229,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 	/// </summary>
 	void copDoBehaviour()
 	{
-		//////Debug.Log (this.gameObject.name + " Is doing " + doing.ToString ());
+		////////Debug.Log (this.gameObject.name + " Is doing " + doing.ToString ());
 		cop_decideBehaviour ();
 
 		if (doing == whatAiIsDoing.searchingPerson) {
@@ -581,7 +1339,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			if (alarmed == false) {
 				suspisious = true;
 			}
-			//////Debug.Log ("Cop is raising alarm, alarm is " + NPCBehaviourDecider.copAlarm);
+			////////Debug.Log ("Cop is raising alarm, alarm is " + NPCBehaviourDecider.copAlarm);
 			//if (NPCBehaviourDecider.copAlarm == true) {
 			//	doing = whatAiIsDoing.starting;
 			//}
@@ -661,7 +1419,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			}
 
 		} else if (doing == whatAiIsDoing.confiscating) {
-			//////Debug.Break ();
+			////////Debug.Break ();
 			if (alarmed == false) {
 				suspisious = true;
 			}
@@ -685,7 +1443,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				//PhoneTab_RadioHack.me.setNewText ("Seen something odd, going to check it out",radioHackBand.buisness);
 			}
 		} else if (doing == whatAiIsDoing.searchingPerson) {
-			//////Debug.LogError ("Wanting to search person");//need to fix the deciding whether object is suspicious or not
+			////////Debug.LogError ("Wanting to search person");//need to fix the deciding whether object is suspicious or not
 			SearchedMarker suspisiousOf = null;
 			if (alarmed == false) {
 				suspisious = true;
@@ -705,7 +1463,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 				} else if (suspisiousOf.searchedBy.Contains (this.gameObject) == false) {
 					if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-						//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
+						////////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
 						if (myController.currentBehaviour == null) {
 
 						} else {
@@ -775,7 +1533,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				}
 			}
 		
-			if (myController.currentBehaviour.myType != behaviourType.freeHostage) {
+			if (myController.currentBehaviour==null|| myController.currentBehaviour.myType != behaviourType.freeHostage) {
 				if (myController.currentBehaviour == null) {
 					if (myController.memory.objectThatMadeMeSuspisious == null) {
 						if (shouldWeRaiseAlarm()==true) {
@@ -812,7 +1570,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 			}
 		} else if (doing == whatAiIsDoing.guardingCorpse) {
-			if (myController.currentBehaviour.myType != behaviourType.guardCorpse) {
+			if (myController.currentBehaviour==null|| myController.currentBehaviour.myType != behaviourType.guardCorpse) {
 				if (myController.currentBehaviour == null) {
 
 				} else {
@@ -850,7 +1608,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			if (nearbyHostile == null) {
 				decision++;
 				GameObject nearbySuspicious = null;// suspiciousTarget ();
-				////////Debug.LogError ("Trying to find person to search");
+				//////////Debug.LogError ("Trying to find person to search");
 
 				if (nearbySuspicious == null) {
 					decision++;
@@ -886,7 +1644,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 											if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm)) {
 												doing = whatAiIsDoing.raisingAlarm;
 											}
-											////Debug.Log ("Setting alarm 1");
+											//////Debug.Log ("Setting alarm 1");
 										} else {
 											if (canWeSwitchBehaviour (whatAiIsDoing.starting)) {
 												doing = whatAiIsDoing.starting;
@@ -903,7 +1661,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 								} else {
 									if (shouldWeRaiseAlarm () == true) {
 										doing = whatAiIsDoing.raisingAlarm;
-										////Debug.Log ("setting alarm 2");
+										//////Debug.Log ("setting alarm 2");
 										myController.memory.objectThatMadeMeSuspisious = nearbyCorpse;
 
 									} else {
@@ -911,7 +1669,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 									}
 								}
 							} else {
-								//////Debug.LogError (this.gameObject.name + " found a hostage, attempting to free");
+								////////Debug.LogError (this.gameObject.name + " found a hostage, attempting to free");
 								if (canWeSwitchBehaviour (whatAiIsDoing.freeingHostage) == true) {
 									doing = whatAiIsDoing.freeingHostage;
 									myController.memory.objectThatMadeMeSuspisious = nearbyHostage;
@@ -925,7 +1683,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 						}
 					}
 				} else {
-					//////Debug.LogError ("Found person to search");
+					////////Debug.LogError ("Found person to search");
 
 					if (canWeSwitchBehaviour (whatAiIsDoing.searchingPerson)) {
 						doing = whatAiIsDoing.searchingPerson;
@@ -952,7 +1710,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 	public bool raiseAlarmOnSearch = false;
 	void guardDoBehaviour()
 	{
-//		//////Debug.Log (this.gameObject.name + " Is doing " + doing.ToString ());
+//		////////Debug.Log (this.gameObject.name + " Is doing " + doing.ToString ());
 
 		guard_decideBehaviour ();
 		if (myController.currentBehaviour == null) {
@@ -988,7 +1746,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					doing = whatAiIsDoing.raisingAlarm;
 				} else {
 					doing = whatAiIsDoing.starting;
-					////Debug.Log ("Setting alarm 3");
+					//////Debug.Log ("Setting alarm 3");
 				}
 			}
 		} else if (doing == whatAiIsDoing.attacking) {
@@ -1022,7 +1780,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					} else {
 						Destroy (myController.currentBehaviour);
 					}
-					//////Debug.Log ("Adding attack 2");
+					////////Debug.Log ("Adding attack 2");
 
 					NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
 					nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1036,7 +1794,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 				if (loseTargetTimer <= 0) {
 					doing = whatAiIsDoing.raisingAlarm;
-					////Debug.Log ("Setting alarm 4");
+					//////Debug.Log ("Setting alarm 4");
 					myController.memory.noiseToInvestigate = Vector3.zero;
 					loseTargetTimer = 5.0f;
 				} else {
@@ -1070,7 +1828,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 							} else {
 								Destroy (myController.currentBehaviour);
 							}
-							//////Debug.Log ("Adding attack 1");
+							////////Debug.Log ("Adding attack 1");
 							NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
 							nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
 							myController.currentBehaviour = nb;
@@ -1085,7 +1843,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					doing = whatAiIsDoing.starting;
 				} else {
 					doing = whatAiIsDoing.raisingAlarm;
-					////Debug.Log ("Setting alarm 5");
+					//////Debug.Log ("Setting alarm 5");
 				}
 			}*/
 		} else if (doing == whatAiIsDoing.raisingAlarm) {
@@ -1147,7 +1905,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					doing = whatAiIsDoing.starting;
 				} else {
 					doing = whatAiIsDoing.raisingAlarm;
-					////Debug.Log ("Setting alarm 6");
+					//////Debug.Log ("Setting alarm 6");
 					raiseAlarmOnSearch = false;
 				}
 			}
@@ -1172,7 +1930,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			}
 
 		} else if (doing == whatAiIsDoing.confiscating) {
-			//////Debug.Break ();
+			////////Debug.Break ();
 			if (alarmed == false) {
 				suspisious = true;
 			}
@@ -1196,7 +1954,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				//PhoneTab_RadioHack.me.setNewText ("Seen something odd, going to check it out",radioHackBand.buisness);
 			}
 		} else if (doing == whatAiIsDoing.searchingPerson) {
-			//////Debug.LogError ("Wanting to search person");//need to fix the deciding whether object is suspicious or not
+			////////Debug.LogError ("Wanting to search person");//need to fix the deciding whether object is suspicious or not
 			SearchedMarker suspisiousOf = null;
 			if (alarmed == false) {
 				suspisious = true;
@@ -1221,7 +1979,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 				} else if (suspisiousOf.searchedBy.Contains (this.gameObject) == false) {
 					if (myController.currentBehaviour.myType != behaviourType.searchPerson) {
-						//////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
+						////////Debug.Log ("Wanting to search person " + myController.memory.objectThatMadeMeSuspisious.name);
 						if (myController.currentBehaviour == null) {
 
 						} else {
@@ -1249,7 +2007,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				if (myController.memory.objectThatMadeMeSuspisious == null) {
 					if (shouldWeRaiseAlarm () == true) {
 						doing = whatAiIsDoing.raisingAlarm;
-						////Debug.Log ("Setting alarm 7");
+						//////Debug.Log ("Setting alarm 7");
 					} else {
 						doing = whatAiIsDoing.starting;
 					}
@@ -1259,7 +2017,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					if (hostage == null) {
 						if (shouldWeRaiseAlarm () == true) {
 							doing = whatAiIsDoing.raisingAlarm;
-							////Debug.Log ("Setting alarm 8");
+							//////Debug.Log ("Setting alarm 8");
 						} else {
 							doing = whatAiIsDoing.starting;
 						}
@@ -1267,7 +2025,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 						if (hostage.npcB.myType != AIType.hostage) {
 							if (shouldWeRaiseAlarm () == true) {
 								doing = whatAiIsDoing.raisingAlarm;
-								////Debug.Log ("Setting alarm 9");
+								//////Debug.Log ("Setting alarm 9");
 							} else {
 								doing = whatAiIsDoing.starting;
 							}
@@ -1285,7 +2043,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					if (myController.memory.objectThatMadeMeSuspisious == null) {
 						if (shouldWeRaiseAlarm () == true) {
 							doing = whatAiIsDoing.raisingAlarm;
-							////Debug.Log ("Setting alarm 10");
+							//////Debug.Log ("Setting alarm 10");
 						} else {
 							doing = whatAiIsDoing.starting;
 						}
@@ -1295,14 +2053,14 @@ public class NPCBehaviourDecider : MonoBehaviour {
 						if (hostage == null) {
 							if (shouldWeRaiseAlarm () == true) {
 								doing = whatAiIsDoing.raisingAlarm;
-								////Debug.Log ("Setting alarm 11");
+								//////Debug.Log ("Setting alarm 11");
 							} else {
 								doing = whatAiIsDoing.starting;
 							}
 						} else {
 							if (shouldWeRaiseAlarm () == true) {
 								doing = whatAiIsDoing.raisingAlarm;
-								////Debug.Log ("Setting alarm 12");
+								//////Debug.Log ("Setting alarm 12");
 							} else {
 								doing = whatAiIsDoing.starting;
 
@@ -1338,7 +2096,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					} else {
 						Destroy (myController.currentBehaviour);
 					}
-					//////Debug.Log ("Adding attack 2");
+					////////Debug.Log ("Adding attack 2");
 
 					NPCBehaviour_AttackTarget nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
 					nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
@@ -1446,6 +2204,15 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			}
 		}
 
+		if (doing == whatAiIsDoing.guardingCorpse ) {
+			if (toSwitchTo == whatAiIsDoing.attacking  || toSwitchTo == whatAiIsDoing.raisingAlarm || toSwitchTo == whatAiIsDoing.arresting) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+
 		if (doing == whatAiIsDoing.starting) {
 			return true;
 		}
@@ -1469,15 +2236,15 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				if (LevelController.me.suspects.Contains (CommonObjectsStore.player)) {
 					//myController.detect.fov.shaderMaterial = CommonObjectsStore.me.aggressive;
 				}
-			} else if (suspisious == true|| globalAlarm==true) {
+			} else if (suspisious == true || globalAlarm == true) {
 				if (myController.detect.fov.viewRadius <= myController.detect.fov.startingViewRadius + 3) {
 					myController.detect.fov.viewRadius = myController.detect.fov.startingViewRadius + 3;
-				//	myController.detect.fov.shaderMaterial = CommonObjectsStore.me.suspicious;
+					//	myController.detect.fov.shaderMaterial = CommonObjectsStore.me.suspicious;
 				}
 			} else {
 				if (myController.detect.fov.viewRadius <= myController.detect.fov.startingViewRadius) {
 					myController.detect.fov.viewRadius = myController.detect.fov.startingViewRadius;
-				//	myController.detect.fov.shaderMaterial = CommonObjectsStore.me.passive;
+					//	myController.detect.fov.shaderMaterial = CommonObjectsStore.me.passive;
 				}
 			}
 		} else if (myType == AIType.cop) {
@@ -1489,7 +2256,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				if (LevelController.me.suspects.Contains (CommonObjectsStore.player)) {
 					//myController.detect.fov.shaderMaterial = CommonObjectsStore.me.aggressive;
 				}
-			} else if (suspisious == true|| copAlarm==true) {
+			} else if (suspisious == true || copAlarm == true) {
 				if (myController.detect.fov.viewRadius <= myController.detect.fov.startingViewRadius + 3) {
 					myController.detect.fov.viewRadius = myController.detect.fov.startingViewRadius + 3;
 					//myController.detect.fov.shaderMaterial = CommonObjectsStore.me.suspicious;
@@ -1501,7 +2268,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				}
 			}
 		} else if (myType == AIType.swat) {
-			if (alarmed == true ) {
+			if (alarmed == true) {
 				if (myController.detect.fov.viewRadius <= myController.detect.fov.startingViewRadius + 5) {
 					myController.detect.fov.viewRadius = myController.detect.fov.startingViewRadius + 5;
 				}
@@ -1509,7 +2276,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				if (LevelController.me.suspects.Contains (CommonObjectsStore.player)) {
 					//myController.detect.fov.shaderMaterial = CommonObjectsStore.me.aggressive;
 				}
-			} else{
+			} else {
 				if (myController.detect.fov.viewRadius <= myController.detect.fov.startingViewRadius + 3) {
 					myController.detect.fov.viewRadius = myController.detect.fov.startingViewRadius + 3;
 					//myController.detect.fov.shaderMaterial = CommonObjectsStore.me.suspicious;
@@ -1521,6 +2288,9 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				myController.detect.fov.viewRadius = myController.detect.fov.startingViewRadius;
 				//myController.detect.fov.shaderMaterial = CommonObjectsStore.me.passive;
 			}
+		} else if (myType == AIType.detective) {
+			myController.detect.fov.viewRadius = myController.detect.fov.startingViewRadius + 5;
+
 		}
 	}
 
@@ -1549,7 +2319,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		//Vector3 s = new Vector3 (c1.r, c1.g, c1.b);
 		//Vector3 f = new Vector3 (c2.r, c2.g, c2.b);
 		//Vector3 col = Vector3.Slerp (s, f, t);
-		//Debug.Log("Sun Color Slerp is " + col.ToString());
+		////Debug.Log("Sun Color Slerp is " + col.ToString());
 		return Color.Lerp(c1,c2,t);
 	}
 
@@ -1572,7 +2342,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		RoomScript r = LevelController.me.getRoomPosIsIn (CommonObjectsStore.player.transform.position);
 		if (r == null) {
 
-		} else if (r.traspassing == true) {
+		} else if (r.traspassingInRoom() == true) {
 			retVal = true;
 		}
 
@@ -1646,11 +2416,11 @@ public class NPCBehaviourDecider : MonoBehaviour {
 					RoomScript npcRoom = LevelController.me.getRoomObjectIsIn (npc.gameObject);
 
 					float suspision = decideHowSuspiciousObjectIs (npc.gameObject);
-					//			//////Debug.Log ("Suspision of player = " + suspision);
+					//			////////Debug.Log ("Suspision of player = " + suspision);
 					if (suspision < 1.0f) {
 						//everything good
 						if (myType == AIType.guard) {
-							if (npcRoom.traspassing == true) {
+							if (npcRoom.traspassingInRoom() == true) {
 								suspisious = true;
 								myController.memory.objectThatMadeMeSuspisious = npc.gameObject;
 							}
@@ -1681,11 +2451,11 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				float suspision = decideHowSuspiciousObjectIs (CommonObjectsStore.player);
 				RoomScript npcRoom = LevelController.me.getRoomObjectIsIn (CommonObjectsStore.player);
 
-				//			//////Debug.Log ("Suspision of player = " + suspision);
+				//			////////Debug.Log ("Suspision of player = " + suspision);
 				if (suspision < 1.0f) {
 					//everything good
 					if (myType == AIType.guard) {
-						if (npcRoom==null || npcRoom.traspassing == true) {
+						if (npcRoom==null || npcRoom.traspassingInRoom() == true) {
 							suspisious = true;
 							myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
 						}
@@ -1694,7 +2464,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				} else if (suspision < 7.0f) {
 					if (myType == AIType.guard) {
 
-						if (npcRoom==null || npcRoom.traspassing == true) {
+						if (npcRoom==null || npcRoom.traspassingInRoom() == true) {
 							suspisious = true;
 							myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
 						}
@@ -1715,12 +2485,12 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				} else {
 					//order surrender/attack
 					alarmed = true;
-					Debug.Log ("Set default alarmed");
+					//Debug.Log ("Set default alarmed");
 					myController.memory.objectThatMadeMeSuspisious = CommonObjectsStore.player;
 
 				}
 
-				//////Debug.Log (this.gameObject.name + " is looking at the player " + suspision.ToString ());
+				////////Debug.Log (this.gameObject.name + " is looking at the player " + suspision.ToString ());
 					
 			}
 		}
@@ -1742,7 +2512,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 					} else {
 						alarmed = true;
-						Debug.Log ("Set alarmed by NPC");
+						//Debug.Log ("Set alarmed by NPC");
 					}
 
 
@@ -1754,12 +2524,12 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 				} else {
 					alarmed = true;
-					Debug.Log ("Alarmed cause player had a weapon");
+					//Debug.Log ("Alarmed cause player had a weapon");
 				}
 
 				if (PlayerAction.currentAction == null) {
 				} else if (PlayerAction.currentAction.illigal == true) {
-					Debug.Log ("Civilian " + this.gameObject.name + " was alarmed by " + PlayerAction.currentAction.getType () + " the action was " + PlayerAction.currentAction.illigal);
+					//Debug.Log ("Civilian " + this.gameObject.name + " was alarmed by " + PlayerAction.currentAction.getType () + " the action was " + PlayerAction.currentAction.illigal);
 					alarmed = true;
 				}
 
@@ -1768,10 +2538,31 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 		foreach (GameObject g in NPCManager.me.corpsesInWorld) { //should probbably find a way for corpses to be detected by the FOV
 			if (g.tag != "Dead/Guarded") {
-				if (Vector3.Distance(this.transform.position,g.transform.position)<myController.detect.fov.viewRadius) {
+				if (Vector3.Distance (this.transform.position, g.transform.position) < myController.detect.fov.viewRadius) {
+					//Debug.Log ("corpse was near");
 					if (myController.detect.isTargetInFrontOfUs (g) == true) {
+						//Debug.Log ("corpse was infront");
 						if (myController.detect.lineOfSightToTargetWithNoCollider (g) == true) {
-							Debug.Log ("Set alarmed by corpse");
+							//Debug.Log ("Set alarmed by corpse");
+							myController.memory.objectThatMadeMeSuspisious = g;
+							alarmed = true;
+							myController.memory.suspisious = true;
+						}
+					}
+				}
+			} 
+		}
+
+		foreach (GameObject g in NPCManager.me.npcsInWorld) {
+			if (g.tag == "Dead/Knocked") {
+				if (Vector3.Distance (this.transform.position, g.transform.position) < myController.detect.fov.viewRadius) {
+					//Debug.Log ("corpse was near");
+
+					if (myController.detect.isTargetInFrontOfUs (g) == true) {
+						//Debug.Log ("corpse was infront");
+
+						if (myController.detect.lineOfSightToTargetWithNoCollider (g) == true) {
+							//Debug.Log ("Set alarmed by corpse");
 							myController.memory.objectThatMadeMeSuspisious = g;
 							alarmed = true;
 							myController.memory.suspisious = true;
@@ -1799,7 +2590,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 						if (myController.detect.areWeNearTarget (i.gameObject)) {
 							if (myController.detect.isTargetInFrontOfUs (i.gameObject)) {
 								if (myController.detect.lineOfSightToTargetWithNoCollider (i.gameObject)) {
-									////////Debug.Log ("Item " + i.itemName + " was detected");
+									//////////Debug.Log ("Item " + i.itemName + " was detected");
 									myController.memory.objectThatMadeMeSuspisious = i.gameObject;
 									suspisious = true;
 									myController.memory.suspisious = true;
@@ -1942,7 +2733,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			if (r == null) {
 				//player probs outside
 			} else {
-				if (r.traspassing == true) {
+				if (r.traspassingInRoom() == true) {
 					retVal += 5.0f;
 				}
 			}
@@ -1955,7 +2746,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 				retVal += 1;
 			}
 		}
-		Debug.Log ("Players suspicion was " + retVal);
+		//Debug.Log ("Players suspicion was " + retVal);
 		return retVal;
 	}
 
@@ -2130,12 +2921,14 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		if (myController.currentBehaviour == null) {
 			int r = Random.Range (0, 100);
 
-			if (r < 90) {
+			if (r < 90 || myType==AIType.patrolCop) {
 
 				NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_DoCivilianAction> ();
 				myController.currentBehaviour = nb;
 			} else {
-				//////Debug.Log ("Civilian exiting level");
+				////////Debug.Log ("Civilian exiting level");
+							//Debug.LogError ("ADDING CIVILIAN EXIT 3");
+
 				NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
 				myController.currentBehaviour = nb;
 			}
@@ -2147,6 +2940,8 @@ public class NPCBehaviourDecider : MonoBehaviour {
 	void civilianAlarmed()
 	{
 		if (myController.currentBehaviour == null) {
+			//Debug.LogError ("ADDING CIVILIAN EXIT 1");
+
 			NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
 			myController.currentBehaviour = nb;
 		}
@@ -2161,6 +2956,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 		} else {
 			//leave map
 			if (myController.currentBehaviour.myType != behaviourType.exitLevel) {
+				//Debug.LogError ("ADDING CIVILIAN EXIT 2");
 				Destroy (myController.currentBehaviour);
 				NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
 				myController.currentBehaviour = nb;
@@ -2176,18 +2972,18 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			setAllSwatToAttack ();
 		}
 		else{
-			////////Debug.Log ("Hostage release");
+			//////////Debug.Log ("Hostage release");
 			if (myController.currentBehaviour.myType != behaviourType.attackTarget) {
 				Destroy (myController.currentBehaviour);
 				NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_AttackTarget> ();
 				myController.currentBehaviour = nb;
 				nb.passInGameobject (myController.memory.objectThatMadeMeSuspisious);
 				//PhoneTab_RadioHack.me.setNewText ("Target is hostile, taking him down.",radioHackBand.cop);
-				////////Debug.Log("Adding attack target");
+				//////////Debug.Log("Adding attack target");
 			}
 			return;
 			//alarmed = true;
-			//////Debug.Break();
+			////////Debug.Break();
 		}
 	}
 
@@ -2221,7 +3017,7 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			if (nearbyHostile == null) {
 				decision++;
 				GameObject nearbySuspicious = null;// suspiciousTarget ();
-				////////Debug.LogError ("Trying to find person to search");
+				//////////Debug.LogError ("Trying to find person to search");
 
 				if (nearbySuspicious == null) {
 					decision++;
@@ -2246,33 +3042,32 @@ public class NPCBehaviourDecider : MonoBehaviour {
 
 								if (nearbyCorpse == null) {
 									decision++;
-
-									GameObject nearbyItem = null;
-
-									if (nearbyItem == null) {
+									if (shouldWeRaiseAlarm () == true) {
 										decision++;
-
-										if (shouldWeRaiseAlarm () == true) {
-											decision++;
-											if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm)) {
-												doing = whatAiIsDoing.raisingAlarm;
-											}
-											////Debug.Log ("Setting alarm 1");
+										if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm)) {
+										//Debug.LogError ("Alarm set 1");
+											doing = whatAiIsDoing.raisingAlarm;
 										}
-									}
+										//////Debug.Log ("Setting alarm 1");
+									} 
+										
+
 
 								} else {
 									if (shouldWeRaiseAlarm () == true) {
-										doing = whatAiIsDoing.raisingAlarm;
-										////Debug.Log ("setting alarm 2");
-										myController.memory.objectThatMadeMeSuspisious = nearbyCorpse;
+										if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm) == true) {
+										//Debug.LogError ("Alarm set 2");
 
+											doing = whatAiIsDoing.raisingAlarm;
+											//////Debug.Log ("setting alarm 2");
+											myController.memory.objectThatMadeMeSuspisious = nearbyCorpse;
+										}
 									} else {
 										doing = whatAiIsDoing.leaving;
 									}
 								}
 							} else {
-								//////Debug.LogError (this.gameObject.name + " found a hostage, attempting to free");
+								////////Debug.LogError (this.gameObject.name + " found a hostage, attempting to free");
 								if (canWeSwitchBehaviour (whatAiIsDoing.freeingHostage) == true) {
 									doing = whatAiIsDoing.freeingHostage;
 									myController.memory.objectThatMadeMeSuspisious = nearbyHostage;
@@ -2281,25 +3076,27 @@ public class NPCBehaviourDecider : MonoBehaviour {
 						}
 					} else {
 						if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm) == true) {
+						//Debug.LogError ("Alarm set 3");
+
 							doing = whatAiIsDoing.raisingAlarm;
 							myController.memory.objectThatMadeMeSuspisious = traspasser;
 						}
 					}
 				} else {
-					//////Debug.LogError ("Found person to search");
-
 					if (canWeSwitchBehaviour (whatAiIsDoing.searchingPerson)) {
 						doing = whatAiIsDoing.searchingPerson;
 						myController.memory.objectThatMadeMeSuspisious = nearbySuspicious;
 					}
 				}
 			} else {
+			//Debug.LogError ("Alarm set 4");
+
 				doing = whatAiIsDoing.raisingAlarm;
 				myController.memory.objectThatMadeMeSuspisious = nearbyHostile;
 			}
 
 
-		if (PoliceController.me.buildingUnderSiege == null) {
+		/*if (PoliceController.me.buildingUnderSiege == null) {
 			if (myController.memory.beenAttacked == true || myController.memory.peopleThatHaveAttackedMe.Contains (CommonObjectsStore.player) || alarmed == true) {
 				if (canWeSwitchBehaviour (whatAiIsDoing.raisingAlarm)) {
 					doing = whatAiIsDoing.raisingAlarm;
@@ -2311,35 +3108,57 @@ public class NPCBehaviourDecider : MonoBehaviour {
 			if (PoliceController.me.buildingUnderSiege.isPosInRoom (this.transform.position) == true) {
 				doing = whatAiIsDoing.leaving;
 			}
-		}
+		}*/
 	}
 
 	void shopkeeperDoBehaviour()
 	{
-		Debug.Log ("Shopkeeper is doing " + doing.ToString ());
+		//Debug.Log ("Shopkeeper is doing " + doing.ToString ());
 		shopkeeperDecideBehaviour ();
 		if (doing == whatAiIsDoing.shopkeep||doing==whatAiIsDoing.starting) {
 			if (myController.currentBehaviour == null) {
-
+				myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_Shopkeeper> ();
 			} else if (myController.currentBehaviour.myType != behaviourType.shopkeeper) {
 				Destroy (myController.currentBehaviour);
-			}
-			myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_Shopkeeper> ();
-		} else if (doing == whatAiIsDoing.raisingAlarm) {
-			if (myController.currentBehaviour == null) {
 
-			} else if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
-				Destroy (myController.currentBehaviour);
+				myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_Shopkeeper> ();
 			}
-			NPCBehaviour npcb = this.gameObject.AddComponent<NPCBehaviour_CivilianRaiseAlarm> ();
-			myController.currentBehaviour = npcb;
+		} else if (doing == whatAiIsDoing.raisingAlarm) {
+			if (PoliceController.me.copsCalled==false) {
+				//raise alarm (need to both trigger
+                if(myController.currentBehaviour==null)
+                {
+                    NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_CivilianRaiseAlarm>();
+                    myController.currentBehaviour = nb;
+                }
+				else if (myController.currentBehaviour.myType != behaviourType.raiseAlarm) {
+					Destroy (myController.currentBehaviour);
+					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_CivilianRaiseAlarm> ();
+					myController.currentBehaviour = nb;
+				}
+			} else {
+				//leave map
+                if(myController.currentBehaviour==null)
+                {
+                    NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_ExitLevel>();
+                    myController.currentBehaviour = nb;
+                }
+				else if (myController.currentBehaviour.myType != behaviourType.exitLevel) {
+					Destroy (myController.currentBehaviour);
+					NPCBehaviour nb = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
+					myController.currentBehaviour = nb;
+				}
+			}
+		
 		} else if (doing == whatAiIsDoing.leaving) {
 			if (myController.currentBehaviour == null) {
+				myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
 
 			} else if (myController.currentBehaviour.myType != behaviourType.exitLevel) {
 				Destroy (myController.currentBehaviour);
+				myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
+
 			}
-			myController.currentBehaviour = this.gameObject.AddComponent<NPCBehaviour_ExitLevel> ();
 		}
 	}
 

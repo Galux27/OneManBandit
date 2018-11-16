@@ -60,6 +60,8 @@ public class NewPlayerActionUI : MonoBehaviour {
 	void decideDisplay()
 	{
 		if (hidden == false) {
+
+
 			if (myActions.Count == 0) {
 				description.enabled = false;
 				action.enabled = false;
@@ -83,6 +85,11 @@ public class NewPlayerActionUI : MonoBehaviour {
 			if (index > myActions.Count - 1) {
 				index = myActions.Count - 1;
 			}
+
+            if(index<0)
+            {
+                index = 0;
+            }
 
 			count.text = (index + 1).ToString () + "/" + myActions.Count;
 
@@ -188,7 +195,7 @@ public class NewPlayerActionUI : MonoBehaviour {
 		} else {
 
 			if (Vector2.Distance (ray.point, CommonObjectsStore.player.transform.position) < 5) {
-				//Debug.Log (ray.collider.gameObject.name);
+				////Debug.Log (ray.collider.gameObject.name);
 			}
 
 			if (ray.collider.gameObject.tag == "Player") {

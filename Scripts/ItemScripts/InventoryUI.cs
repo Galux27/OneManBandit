@@ -4,20 +4,22 @@ using UnityEngine;
 using UnityEngine.UI;
 public class InventoryUI : MonoBehaviour {
 	public static InventoryUI me;
-	public List<ItemUI> myUIs;
+	public List<ItemUI> myUIs,inventoryUis;
 	public List<Text> invText,nearText;
 	public GearSlotUI head, torso, leftArm, rightArm, leftLeg, rightLeg, backpack;
 	int startIndex = 0;
 	public Text weightText,containerName,containerWeight;
-
+	public Button nearUp,nearDown,invUp,invDown;
 	void Awake()
 	{
 		me = this;
+		this.gameObject.SetActive (false);
 	}
 
 	void Update()
 	{
 		drawItemUI ();
+        playerInput();
 	}
 
 	void drawItemUI()
@@ -51,6 +53,12 @@ public class InventoryUI : MonoBehaviour {
 		} else {
 			containerWeight.gameObject.SetActive (false);
 		}
+
+		nearUp.gameObject.SetActive (displayNearbyUp ());
+		nearDown.gameObject.SetActive (displayNearbyDown ());
+		invUp.gameObject.SetActive (displayMyItemsUp ());
+		invDown.gameObject.SetActive (displayMyItemsDown ());
+
 	}
 
 	public bool isItemEquiped(Item i)
@@ -102,6 +110,45 @@ public class InventoryUI : MonoBehaviour {
 
 	}
 
+    void playerInput()
+    {
+        Vector2 input = Input.mouseScrollDelta;
+        if(input.y>0)
+        {
+            if (scrollingPlayerItems() == true)
+            {
+                decreaseIndex();
+            }
+            else
+            {
+                ItemMoniter.me.decrementCounter();
+            }
+        }
+        else if(input.y<0)
+        {
+            if (scrollingPlayerItems() == true)
+            {
+                increaseIndex();
+            }
+            else
+            {
+                ItemMoniter.me.incrementCounter();
+            }
+        }
+    }
+
+    bool scrollingPlayerItems()
+    {
+       if(Input.mousePosition.x>Screen.width/3)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
 	public void decreaseIndex()
 	{
 		if (startIndex > 0) {
@@ -113,5 +160,38 @@ public class InventoryUI : MonoBehaviour {
 		if (startIndex < Inventory.playerInventory.inventoryItems.Count) {
 			startIndex++;
 		}
+	}
+
+	bool displayMyItemsUp()
+	{
+		if (startIndex > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	bool displayMyItemsDown()
+	{
+		if (startIndex < Inventory.playerInventory.inventoryItems.Count-8 && Inventory.playerInventory.inventoryItems.Count>8) {
+			return true;
+		}
+		return false;
+	}
+
+	bool displayNearbyUp()
+	{
+
+		if (ItemMoniter.me.nearIndex > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	bool displayNearbyDown()
+	{
+		if (ItemMoniter.me.nearIndex < ItemMoniter.me.nearbyItems.Count-8 && ItemMoniter.me.nearbyItems.Count > 8) {
+			return true;
+		}
+		return false;
 	}
 }

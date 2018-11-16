@@ -18,12 +18,24 @@ public class NPCBehaviour_CopRaiseAlarm : NPCBehaviour {
 		}
 	}
 
+    GameObject raiseAlarmLoc;
+
 	public override void Initialise ()
 	{
-		myType = behaviourType.raiseAlarm;
+        if (LevelController.me.copRaiseAlarmLoc == null)
+        {
+            raiseAlarmLoc = LevelController.me.raiseAlarmLoc.gameObject;
+        }
+        else
+        {
+            raiseAlarmLoc = LevelController.me.copRaiseAlarmLoc.gameObject;
+
+        }
+
+        myType = behaviourType.raiseAlarm;
 		myController = this.gameObject.GetComponent<NPCController> ();
-		myController.pf.getPath (this.gameObject, LevelController.me.copRaiseAlarmLoc.gameObject);
-//		//////Debug.Log ("Cop trying to raise alarm due to " + myController.memory.objectThatMadeMeSuspisious);
+		myController.pf.getPath (this.gameObject,raiseAlarmLoc);
+//		////////Debug.Log ("Cop trying to raise alarm due to " + myController.memory.objectThatMadeMeSuspisious);
 		myController.myText.setText ("Better call for backup");
 
 		if (myController.memory.objectThatMadeMeSuspisious == null) {
@@ -32,7 +44,7 @@ public class NPCBehaviour_CopRaiseAlarm : NPCBehaviour {
 				NPCController npc = myController.memory.objectThatMadeMeSuspisious.GetComponent<NPCController> ();
 				if (myController.npcB.freindlyIDs.Contains (npc.npcB.myID) == true || myController.npcB.myID != npc.npcB.myID) {
 					myController.npcB.suspisious = false;
-					//////Debug.LogError ("NPC " + this.gameObject.name + " wanted to set alert on freindly npc " + myController.memory.objectThatMadeMeSuspisious);
+					////////Debug.LogError ("NPC " + this.gameObject.name + " wanted to set alert on freindly npc " + myController.memory.objectThatMadeMeSuspisious);
 
 					myController.memory.objectThatMadeMeSuspisious = null;
 					Destroy (this);
@@ -45,7 +57,7 @@ public class NPCBehaviour_CopRaiseAlarm : NPCBehaviour {
 
 	bool isNearLoc()
 	{
-		if (Vector3.Distance (this.transform.position, LevelController.me.copRaiseAlarmLoc.position) < 1.5f) {
+		if (Vector3.Distance (this.transform.position,raiseAlarmLoc.transform.position) < 1.5f) {
 			return true;
 		} else {
 			return false;
@@ -66,7 +78,7 @@ public class NPCBehaviour_CopRaiseAlarm : NPCBehaviour {
 			radioMessageOnFinish ();
 		} else {
 			LevelController.me.alertLevel = 2;
-			if (myController.memory.objectThatMadeMeSuspisious.tag == "Player" || myController.memory.objectThatMadeMeSuspisious.tag == "NPC") {
+			if (myController.memory.objectThatMadeMeSuspisious.tag == "Player" && myController.memory.seenSuspectsFace==true || myController.memory.objectThatMadeMeSuspisious.tag == "NPC") {
 				LevelController.me.suspects.Add (myController.memory.objectThatMadeMeSuspisious);
 			}
 			NPCBehaviourDecider.copAlarm = true;
